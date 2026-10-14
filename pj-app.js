@@ -1,15 +1,19 @@
 /* ============================================================
    FEROCIA PLAYER PORTAL — el arranque, las rutas y lo común
    Hito 2 (14 de octubre) — decisiones §42–§45
+   Hitos 3 y 4 (14 de octubre) — decisiones §46–§49
 
    · Crea la conexión con Supabase (la misma base que el panel; la
      clave es la PÚBLICA, como en el sitio: lo que protege los datos
-     son las reglas de la base, no esta clave).
-   · Enseña UNA pantalla según la dirección: #/sign-in, #/create,
-     #/check, #/settings. Las de dentro sólo con sesión; las de fuera
-     sólo sin ella.
-   · La sesión se guarda en ESTE dominio (players.ferociasports.com):
-     no se comparte con el panel ni con el sitio.
+     son las reglas y las funciones de la base, no esta clave).
+   · Enseña UNA pantalla según la dirección (#/home, #/profile…).
+   · Con sesión, pregunta a la base EN QUÉ PUNTO está la persona
+     (portal_estado) y sólo deja ver las pantallas de ese punto:
+       sin_ficha            → "A little about you" (y Help)
+       en_revision/rechazado → la pantalla de espera (y Help)
+       vinculado            → Home, My profile, Edit, Settings, Help
+     Así nadie se queda en una pantalla sin salida.
+   · La sesión se guarda en ESTE dominio: no se comparte con el panel.
 
    Otros archivos registran lo que hacen al entrar en su pantalla con
    FerociaPortal.alEntrar('nombre', fn).
@@ -24,19 +28,19 @@
     return;
   }
 
-  /* ── Un enlace del correo que ya no vale vuelve con el error en la
-     dirección (#error=…&error_code=otp_expired…). Se lee ANTES de que
-     las rutas lo pisen, y se le explica. ── */
-  function errorDelEnlace() {
+  /* ── Lo que el enlace de un correo deja en la dirección ──
+     · Un enlace que ya no vale: #error=…&error_code=otp_expired…
+     · Cambio de correo con dos confirmaciones: el primer enlace vuelve
+       con #message=… ("falta confirmar el otro"). Se leen ANTES de que
+       supabase-js o las rutas los borren. */
+  function leerDireccion() {
     const h = location.hash || '';
-    if (!/(^#|&)error(_code)?=/.test(h)) return null;
-    const p = new URLSearchParams(h.slice(1));
-    return p.get('error_code') || p.get('error') || 'error';
+    const p = new URLSearchParams(h.replace(/^#\/?/, ''));
+    const error = /(^#|&)error(_code)?=/.test(h) ? (p.get('error_code') || p.get('error') || 'error') : null;
+    const mensaje = /(^#|&)message=/.test(h) ? 'mensaje' : null;
+    return { error, mensaje };
   }
-
-  /* Se lee ya, antes de crear la conexión: supabase-js también mira la
-     dirección al arrancar. */
-  const ERROR_ENLACE = errorDelEnlace();
+  const DIRECCION = leerDireccion();
 
   /* Dónde guarda supabase-js la sesión en este navegador. */
   const CLAVE_SESION = 'ferocia-players-auth';
@@ -57,10 +61,16 @@
   });
 
   const PUBLICAS = ['sign-in', 'create', 'check'];
-  const PRIVADAS = ['settings'];
-  const INICIO_PRIVADO = 'settings';     // hito 3: será el Home
+  const POR_ESTADO = {
+    sin_ficha:   { inicio: 'about',  rutas: ['about', 'help'] },
+    en_revision: { inicio: 'review', rutas: ['review', 'help'] },
+    rechazado:   { inicio: 'review', rutas: ['review', 'help'] },
+    vinculado:   { inicio: 'home',   rutas: ['home', 'profile', 'edit', 'settings', 'help', 'welcome'] },
+  };
 
   let sesion = null;
+  let estado = null;          // lo que contestó portal_estado
+  let estadoFallo = false;    // no se pudo leer (sin internet…)
   let listo = false;
   const entradas = {};
 
@@ -83,6 +93,107 @@
     }, 6000);
   }
 
+  /* ── Pequeñas herramientas comunes ── */
+
+  /* Crea un elemento con su texto como TEXTO (nunca HTML): así ningún
+     nombre o mensaje puede colar código en la página. */
+  function h(tag, props, ...hijos) {
+    const el = document.createElement(tag);
+    if (props) {
+      for (const [k, v] of Object.entries(props)) {
+        if (v == null || v === false) continue;
+        if (k === 'class') el.className = v;
+        else if (k === 'text') el.textContent = v;
+        else el.setAttribute(k, v === true ? '' : String(v));
+      }
+    }
+    for (const c of hijos.flat()) {
+      if (c == null || c === false) continue;
+      el.append(c instanceof Node ? c : document.createTextNode(String(c)));
+    }
+    return el;
+  }
+
+  const MESES = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+    'August', 'September', 'October', 'November', 'December'];
+  /* Las fechas de la base llegan como "2026-10-07": se leen tal cual,
+     sin pasar por zonas horarias (que las moverían un día). */
+  function partes(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''));
+    return m ? { y: +m[1], m: +m[2], d: +m[3] } : null;
+  }
+  const fmt = {
+    largo(iso) { const p = partes(iso); return p ? `${MESES[p.m - 1]} ${p.d}, ${p.y}` : ''; },
+    corto(iso) { const p = partes(iso); return p ? `${MESES[p.m - 1].slice(0, 3)} ${p.d}` : ''; },
+    mesAnio(iso) { const p = partes(iso); return p ? `${MESES[p.m - 1]} ${p.y}` : ''; },
+    mes3(iso) { const p = partes(iso); return p ? MESES[p.m - 1].slice(0, 3).toUpperCase() : ''; },
+    dia(iso) { const p = partes(iso); return p ? String(p.d) : ''; },
+    mmddyyyy(iso) { const p = partes(iso); return p ? `${String(p.m).padStart(2, '0')}/${String(p.d).padStart(2, '0')}/${p.y}` : ''; },
+    telefono(t) {
+      const d = String(t || '').replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '');
+      return d.length === 10 ? `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}` : String(t || '');
+    },
+    hora(hhmm) {
+      const m = /^(\d{1,2}):(\d{2})/.exec(String(hhmm || ''));
+      if (!m) return '';
+      const hh = +m[1];
+      return `${((hh + 11) % 12) + 1}:${m[2]} ${hh < 12 ? 'AM' : 'PM'}`;
+    },
+    iniciales(nombre, apellido, email) {
+      const ini = ((nombre || '').trim().charAt(0) + (apellido || '').trim().charAt(0)) || (email || '?').charAt(0);
+      return ini.toUpperCase();
+    },
+  };
+
+  /* El teléfono mientras se escribe: (561) 555-1234. */
+  function mascaraTelefono(input) {
+    input.addEventListener('input', () => {
+      const d = input.value.replace(/\D/g, '').replace(/^1(?=\d{10})/, '').slice(0, 10);
+      let v = d;
+      if (d.length > 6) v = `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+      else if (d.length > 3) v = `(${d.slice(0, 3)}) ${d.slice(3)}`;
+      else if (d.length) v = `(${d}`;
+      input.value = v;
+    });
+  }
+
+  /* Los errores de la base, en palabras. */
+  function errorTexto(err, propios) {
+    const m = String((err && (err.message || err.msg)) || err || '');
+    if (propios) for (const [clave, texto] of Object.entries(propios)) if (m.includes(clave)) return texto;
+    if (err instanceof TypeError || /fetch|network|failed to|load failed/i.test(m)) {
+      return "We couldn't connect. Check your internet connection and try again.";
+    }
+    if (/not_authenticated|JWT|jwt/.test(m)) return 'Your session ended. Please sign in again.';
+    return 'Something went wrong. Please try again in a moment.';
+  }
+
+  /* ── Lo que la base sabe de la persona ── */
+  async function cargarEstado() {
+    const { data, error } = await sb.rpc('portal_estado');
+    if (error) throw error;
+    estado = data || null;
+    estadoFallo = false;
+    pintarCabecera();
+    return estado;
+  }
+
+  /* Los datos de Home / My profile / Edit: una sola lectura, guardada
+     un minuto (cambiar de pantalla no vuelve a pedirlos). */
+  let datosPromesa = null;
+  let datosHora = 0;
+  function datos(forzar) {
+    if (forzar || !datosPromesa || Date.now() - datosHora > 60000) {
+      datosHora = Date.now();
+      datosPromesa = sb.rpc('portal_mis_datos').then(({ data, error }) => {
+        if (error) { datosPromesa = null; throw error; }
+        return data;
+      });
+    }
+    return datosPromesa;
+  }
+  function olvidarDatos() { datosPromesa = null; }
+
   /* ── Rutas ── */
   const rutaActual = () => {
     const m = /^#\/([a-z-]+)/.exec(location.hash || '');
@@ -94,16 +205,54 @@
     else location.hash = '#/' + nombre;
   }
 
+  function permitidas() {
+    if (!sesion) return { inicio: 'sign-in', rutas: PUBLICAS };
+    if (estadoFallo) return { inicio: 'oops', rutas: ['oops'] };
+    if (!estado) return { inicio: 'loading', rutas: ['loading'] };
+    return POR_ESTADO[estado.estado] || { inicio: 'oops', rutas: ['oops'] };
+  }
+
+  function pintarCabecera() {
+    const e = estado || {};
+    const ini = document.getElementById('pj-me-ini');
+    const nom = document.getElementById('pj-me-name');
+    if (ini) ini.textContent = fmt.iniciales(e.first_name, e.last_name, e.email);
+    if (nom) nom.textContent = [e.first_name, e.last_name].filter(Boolean).join(' ') || e.email || '';
+  }
+
+  function pintarMarco(nueva, nombre) {
+    const conApp = !!(nueva && nueva.dataset.chrome === 'app');
+    const unido = !!(estado && estado.estado === 'vinculado');
+    const appbar = document.getElementById('pj-appbar');
+    const simple = document.getElementById('pj-simplebar');
+    const tabbar = document.getElementById('pj-tabbar');
+    const pie = document.getElementById('pj-footer');
+    if (appbar) appbar.hidden = !(conApp && unido);
+    if (tabbar) tabbar.hidden = !(conApp && unido);
+    if (simple) simple.hidden = !(conApp && !unido);
+    if (pie) pie.hidden = !conApp;
+    document.body.classList.toggle('pj-con-barra', conApp && unido);
+    document.body.dataset.pantalla = nombre;
+    document.querySelectorAll('[data-nav]').forEach((a) => {
+      const activo = a.dataset.nav === nombre || (nombre === 'edit' && a.dataset.nav === 'profile');
+      if (activo) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
+    const atras = document.getElementById('pj-simple-back');
+    if (atras) atras.setAttribute('href', '#/' + permitidas().inicio);
+  }
+
+  let pintadaAntes = false;
+  let pantallaAnterior = '';
   function pintar() {
     if (!listo) return;
+    const { inicio, rutas } = permitidas();
     let nombre = rutaActual();
-    if (sesion) {
-      if (!PRIVADAS.includes(nombre)) nombre = INICIO_PRIVADO;
-    } else if (!PUBLICAS.includes(nombre)) {
-      nombre = 'sign-in';
-    }
-    if ('#/' + nombre !== location.hash) {
-      history.replaceState(null, '', '#/' + nombre);
+    if (!rutas.includes(nombre)) nombre = inicio;
+    if (PUBLICAS.includes(nombre) || sesion) {
+      if ('#/' + nombre !== location.hash && nombre !== 'loading' && nombre !== 'oops') {
+        history.replaceState(null, '', '#/' + nombre);
+      }
     }
     let nueva = null;
     document.querySelectorAll('.pj-screen').forEach((s) => {
@@ -111,9 +260,15 @@
       s.classList.toggle('is-active', es);
       if (es) nueva = s;
     });
-    window.scrollTo(0, 0);
+    pintarMarco(nueva, nombre);
+    if (pantallaAnterior !== nombre) window.scrollTo(0, 0);
     const fn = entradas[nombre];
-    if (fn) { try { fn(); } catch (e) { console.error('[portal]', nombre, e); } }
+    if (fn) {
+      try {
+        const r = fn();
+        if (r && typeof r.catch === 'function') r.catch((e) => console.error('[portal]', nombre, e));
+      } catch (e) { console.error('[portal]', nombre, e); }
+    }
     /* Al cambiar de pantalla, el foco va a su título: quien navega con
        el teclado o con lector de pantalla sabe dónde está. (No en la
        primera pantalla al abrir la página.) */
@@ -124,11 +279,21 @@
     pintadaAntes = true;
     pantallaAnterior = nombre;
   }
-  let pintadaAntes = false;
-  let pantallaAnterior = '';
+
+  /* Vuelve a preguntar a la base en qué punto está y repinta. */
+  async function refrescar() {
+    if (!sesion) { estado = null; pintar(); return; }
+    try {
+      await cargarEstado();
+    } catch (e) {
+      console.warn('[portal] No se pudo leer el estado:', e);
+      estado = null;
+      estadoFallo = true;
+    }
+    pintar();
+  }
 
   async function arrancar() {
-    const errEnlace = ERROR_ENLACE;
     try {
       const { data } = await sb.auth.getSession();
       sesion = data ? data.session : null;
@@ -137,13 +302,17 @@
       sesion = null;
     }
     listo = true;
-    if (errEnlace && !sesion) {
+    if (DIRECCION.error && !sesion) {
       history.replaceState(null, '', '#/sign-in');
       pintar();
       aviso('That sign-in link has expired or was already used. Enter your email to get a new one.', true);
       return;
     }
-    pintar();
+    if (sesion) { pintar(); await refrescar(); }
+    else pintar();
+    if (DIRECCION.mensaje && sesion) {
+      aviso('Almost done: we also sent a link to your other email address. Open it to finish the change.');
+    }
   }
 
   /* supabase-js avisa "SIGNED_IN" también cada vez que la pestaña vuelve
@@ -154,8 +323,18 @@
     sesion = nueva || null;
     const ahora = sesion && sesion.user ? sesion.user.id : null;
     if (!listo) return;
-    if (evento === 'SIGNED_OUT' || (evento === 'SIGNED_IN' && antes !== ahora)) pintar();
+    if (evento === 'SIGNED_OUT') {
+      estado = null; estadoFallo = false; olvidarDatos(); pintar();
+    } else if (evento === 'SIGNED_IN' && antes !== ahora) {
+      estado = null; estadoFallo = false; olvidarDatos(); pintar(); refrescar();
+    } else if (evento === 'USER_UPDATED') {
+      /* Cambió el correo: la base lo copia a su ficha al preguntar. */
+      olvidarDatos();
+      setTimeout(() => { refrescar(); }, 0);
+    }
   });
+
+  window.addEventListener('hashchange', pintar);
 
   /* Salir aunque el servidor no conteste: se borra la sesión guardada en
      ESTE navegador y se recarga la página, ya sin sesión. */
@@ -165,13 +344,22 @@
     location.reload();
   }
 
-  window.addEventListener('hashchange', pintar);
+  const reintentar = document.getElementById('op-retry');
+  if (reintentar) reintentar.addEventListener('click', () => { estadoFallo = false; pintar(); refrescar(); });
 
   window.FerociaPortal = {
     sb,
     ir,
     aviso,
+    h,
+    fmt,
+    mascaraTelefono,
+    errorTexto,
     sesion: () => sesion,
+    estado: () => estado,
+    refrescar,
+    datos,
+    olvidarDatos,
     alEntrar: (nombre, fn) => { entradas[nombre] = fn; },
     olvidarSesionAqui,
     /* Adónde vuelve el enlace del correo: esta misma página. */

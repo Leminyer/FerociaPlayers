@@ -9,9 +9,11 @@
 <link rel="icon" href="assets/ferocia-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="design-tokens.css?v=20261014b">
-<link rel="stylesheet" href="pj-base.css?v=20261014b">
-<link rel="stylesheet" href="pj-auth.css?v=20261014b">
+<link rel="stylesheet" href="design-tokens.css?v=20261014c">
+<link rel="stylesheet" href="pj-base.css?v=20261014c">
+<link rel="stylesheet" href="pj-auth.css?v=20261014c">
+<link rel="stylesheet" href="pj-layout.css?v=20261014c">
+<link rel="stylesheet" href="pj-pages.css?v=20261014c">
 </head>
 <body>
 
@@ -20,6 +22,8 @@
      Una sola página: cada pantalla es una <section class="pj-screen">
      y pj-app.js enseña la que toca según la dirección (#/sign-in…).
      Hito 2: entrar, crear cuenta, código por correo, salir.
+     Hitos 3 y 4: completar el perfil y unir la ficha, Home, perfil,
+     editar, ajustes de la cuenta y ayuda.
      ============================================================ -->
 
 <!-- Mientras se comprueba si ya hay sesión (un instante). -->
@@ -168,16 +172,289 @@
   </main>
 </section>
 
-<!-- ── CUENTA (por ahora: la pantalla de ajustes) ─────────── -->
-<section class="pj-screen" data-screen="settings" aria-labelledby="st-title">
-  <header class="pj-topbar">
-    <div class="pj-topbar-in">
-      <img class="pj-logo" src="assets/ferocia-logo.png" alt="FEROCIA">
-      <nav class="pj-nav" aria-label="Main"></nav>
-      <span class="pj-me"><span class="pj-avatar" id="me-initials" aria-hidden="true"></span><span class="pj-me-name" id="me-name"></span></span>
+<!-- ============================================================
+     DESDE AQUÍ: CON SESIÓN (hitos 3 y 4)
+     La cabecera, la barra de abajo (teléfono) y el pie son comunes:
+     pj-app.js los enseña cuando la pantalla los pide (data-chrome).
+     ============================================================ -->
+
+<!-- La cabecera de la app (ya unido a su ficha). -->
+<header class="pj-appbar" id="pj-appbar" hidden>
+  <div class="pj-appbar-in">
+    <a class="pj-appbar-logo" href="#/home"><img src="assets/ferocia-logo.png" alt="FEROCIA — Home"></a>
+    <nav class="pj-nav" aria-label="Main">
+      <a href="#/home" data-nav="home">Home</a>
+      <a href="#/profile" data-nav="profile">My profile</a>
+      <a href="#/help" data-nav="help">Help</a>
+    </nav>
+    <a class="pj-me" href="#/settings" data-nav="settings" aria-label="Account settings">
+      <span class="pj-avatar" id="pj-me-ini" aria-hidden="true"></span><span class="pj-me-name" id="pj-me-name"></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </a>
+  </div>
+</header>
+
+<!-- La cabecera sencilla (todavía sin ficha unida): logo y salir. -->
+<header class="pj-simplebar" id="pj-simplebar" hidden>
+  <div class="pj-appbar-in">
+    <img class="pj-appbar-img" src="assets/ferocia-logo.png" alt="FEROCIA">
+    <span class="pj-simplebar-links">
+      <a class="pj-simplebar-back" id="pj-simple-back" href="#/">← Back</a>
+      <button type="button" class="pj-band-btn" data-action="sign-out">Sign out</button>
+    </span>
+  </div>
+</header>
+
+<!-- ── 4 · A LITTLE ABOUT YOU ─────────────────────────────── -->
+<section class="pj-screen" data-screen="about" aria-labelledby="ab-title">
+  <div class="pj-band">
+    <div class="pj-band-in">
+      <img class="pj-band-logo" src="assets/ferocia-logo.png" alt="FEROCIA">
+      <button type="button" class="pj-band-btn" data-action="sign-out">Sign out</button>
     </div>
-  </header>
-  <main class="pj-page">
+  </div>
+  <main class="pj-card-wrap pj-card-wrap-md">
+    <div class="pj-card">
+      <ol class="pj-steps" aria-label="Progress">
+        <li class="is-done">1 · Your details</li>
+        <li class="is-done">2 · Confirm email</li>
+        <li class="is-done" aria-current="step">3 · About you</li>
+      </ol>
+      <div class="pj-card-head">
+        <h1 class="pj-title" id="ab-title" tabindex="-1" data-focus-title>A little about you</h1>
+        <p class="pj-lead">We use this to find your FEROCIA history. The portal is for players 18 and older.</p>
+      </div>
+      <form class="pj-form pj-form-roomy" id="ab-form" novalidate>
+        <div class="pj-alert pj-alert-error" id="ab-error" role="alert" hidden></div>
+        <div class="pj-grid-2">
+          <div class="pj-field">
+            <label class="pj-label" for="ab-first">First name</label>
+            <input class="pj-input" id="ab-first" type="text" autocomplete="given-name" maxlength="60">
+          </div>
+          <div class="pj-field">
+            <label class="pj-label" for="ab-last">Last name</label>
+            <input class="pj-input" id="ab-last" type="text" autocomplete="family-name" maxlength="60">
+          </div>
+          <div class="pj-field">
+            <label class="pj-label" for="ab-dob">Date of birth</label>
+            <input class="pj-input" id="ab-dob" type="text" inputmode="numeric" autocomplete="bday" placeholder="MM / DD / YYYY" maxlength="14">
+          </div>
+          <div class="pj-field">
+            <label class="pj-label" for="ab-phone">Mobile phone</label>
+            <div class="pj-phone"><span class="pj-phone-cc" aria-hidden="true">+1</span><input class="pj-phone-in" id="ab-phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(561) 000-0000" maxlength="16"></div>
+          </div>
+        </div>
+        <fieldset class="pj-fieldset" id="ab-gender">
+          <legend class="pj-label">Gender</legend>
+          <div class="pj-choices">
+          <label class="pj-choice"><input type="radio" name="ab-gender" value="Female">Female</label>
+          <label class="pj-choice"><input type="radio" name="ab-gender" value="Male">Male</label>
+          </div>
+        </fieldset>
+        <fieldset class="pj-fieldset" id="ab-level">
+          <legend class="pj-label">Playing level</legend>
+          <div class="pj-levels">
+          <label class="pj-level"><input class="pj-sr" type="radio" name="ab-level" value="Beginner"><span class="pj-level-name">Beginner</span><span class="pj-level-desc">Learning the rules and the basic shots.</span></label>
+          <label class="pj-level"><input class="pj-sr" type="radio" name="ab-level" value="Intermediate"><span class="pj-level-name">Intermediate</span><span class="pj-level-desc">Steady rallies, working on the kitchen game.</span></label>
+          <label class="pj-level"><input class="pj-sr" type="radio" name="ab-level" value="Advanced"><span class="pj-level-name">Advanced</span><span class="pj-level-desc">Competitive, tournament-level play.</span></label>
+          </div>
+        </fieldset>
+        <button class="pj-btn pj-btn-primary pj-btn-block" type="submit" id="ab-submit">Finish <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
+        <p class="pj-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#24BC96" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Your details are private. Other players never see them.</p>
+        <p class="pj-small-center">Something not working? <a href="#/help">Send us a message</a></p>
+      </form>
+    </div>
+  </main>
+</section>
+
+<!-- ── 5a · EN REVISIÓN (o no se pudo confirmar) ──────────── -->
+<section class="pj-screen" data-screen="review" aria-labelledby="rv-title">
+  <div class="pj-band">
+    <div class="pj-band-in">
+      <img class="pj-band-logo" src="assets/ferocia-logo.png" alt="FEROCIA">
+      <button type="button" class="pj-band-btn" data-action="sign-out">Sign out</button>
+    </div>
+  </div>
+  <main class="pj-card-wrap pj-card-wrap-lg">
+    <div class="pj-card pj-review">
+      <div class="pj-review-main">
+        <div class="pj-review-ico" id="rv-ico"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <div class="pj-review-eyebrow" id="rv-eyebrow">Almost there</div>
+        <h1 class="pj-review-title" id="rv-title" tabindex="-1" data-focus-title>We're connecting your FEROCIA history</h1>
+        <p class="pj-review-lead" id="rv-lead"></p>
+        <div class="pj-review-links">
+          <a class="pj-link-strong" href="#/help">Questions? Send us a message →</a>
+          <button type="button" class="pj-link-btn" id="rv-refresh">Check again</button>
+        </div>
+      </div>
+      <ol class="pj-progress" aria-label="Your account">
+        <li class="is-done"><span class="pj-progress-dot" aria-hidden="true"></span>Account created</li>
+        <li class="is-done"><span class="pj-progress-dot" aria-hidden="true"></span>Email confirmed</li>
+        <li class="is-now" id="rv-now"><span class="pj-progress-dot" aria-hidden="true"></span><span id="rv-now-txt">Player history — in review</span></li>
+        <li><span class="pj-progress-dot" aria-hidden="true"></span>Your portal is ready</li>
+      </ol>
+    </div>
+    <div class="pj-wait" id="rv-wait" hidden>
+      <h2 class="pj-section-label">While you wait</h2>
+      <div class="pj-wait-grid" id="rv-wait-grid"></div>
+    </div>
+  </main>
+</section>
+
+<!-- ── 5b · BIENVENIDA (recién unido) ─────────────────────── -->
+<section class="pj-screen pj-welcome" data-screen="welcome" aria-labelledby="wb-title">
+  <div class="pj-welcome-court" aria-hidden="true"></div>
+  <div class="pj-welcome-line" aria-hidden="true"></div>
+  <div class="pj-welcome-top"><img src="assets/ferocia-logo.png" alt="FEROCIA"></div>
+  <main class="pj-welcome-main">
+    <div class="pj-welcome-check"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+    <div class="pj-welcome-eyebrow">You're all set</div>
+    <h1 class="pj-welcome-title" id="wb-title" tabindex="-1" data-focus-title></h1>
+    <p class="pj-welcome-lead" id="wb-lead"></p>
+    <div class="pj-welcome-stats" id="wb-stats" hidden></div>
+    <a class="pj-btn pj-btn-lime" href="#/home" id="wb-go">Go to my FEROCIA <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+  </main>
+</section>
+
+<!-- ── 6 · HOME ───────────────────────────────────────────── -->
+<section class="pj-screen" data-screen="home" data-chrome="app" aria-labelledby="hm-name">
+  <section class="pj-hero">
+    <div class="pj-hero-court" aria-hidden="true"></div>
+    <div class="pj-hero-line" aria-hidden="true"></div>
+    <div class="pj-hero-in">
+      <div class="pj-hero-who">
+        <div class="pj-hero-eyebrow" id="hm-greeting"></div>
+        <h1 class="pj-hero-name" id="hm-name" tabindex="-1" data-focus-title></h1>
+        <div class="pj-chips" id="hm-chips"></div>
+      </div>
+      <div class="pj-hero-side" id="hm-rank"></div>
+    </div>
+  </section>
+  <main class="pj-wrap" id="hm-main" aria-busy="true">
+    <div class="pj-alert pj-alert-error" id="hm-error" role="alert" hidden></div>
+    <div class="pj-stats" id="hm-stats"></div>
+    <div class="pj-cols">
+      <section class="pj-panel pj-col-main" aria-labelledby="hm-results-t">
+        <div class="pj-panel-head"><h2 class="pj-panel-title" id="hm-results-t">Recent results</h2></div>
+        <div id="hm-results"></div>
+      </section>
+      <div class="pj-col-side">
+        <section class="pj-panel" aria-labelledby="hm-ladders-t">
+          <h2 class="pj-panel-title" id="hm-ladders-t">My ladders</h2>
+          <div id="hm-ladders"></div>
+        </section>
+        <section class="pj-panel" aria-labelledby="hm-tourn-t">
+          <h2 class="pj-panel-title" id="hm-tourn-t">Tournaments</h2>
+          <div id="hm-tournaments"></div>
+        </section>
+      </div>
+    </div>
+    <div class="pj-cols pj-cols-stretch">
+      <section class="pj-col-main pj-upcoming" aria-labelledby="hm-events-t">
+        <div class="pj-panel-head">
+          <h2 class="pj-panel-title" id="hm-events-t">Coming up at FEROCIA</h2>
+          <a class="pj-panel-link" href="https://ferociasports.com/#events" target="_blank" rel="noopener">All events ↗</a>
+        </div>
+        <div class="pj-events" id="hm-events"></div>
+      </section>
+      <div class="pj-col-side" id="hm-video"></div>
+    </div>
+  </main>
+</section>
+
+<!-- ── 7 · MY PROFILE ─────────────────────────────────────── -->
+<section class="pj-screen" data-screen="profile" data-chrome="app" aria-labelledby="pf-title">
+  <main class="pj-wrap">
+    <div class="pj-page-head">
+      <div>
+        <div class="pj-eyebrow">Player profile</div>
+        <h1 class="pj-h1" id="pf-title" tabindex="-1" data-focus-title>My profile</h1>
+      </div>
+      <a class="pj-btn pj-btn-primary pj-btn-md" href="#/edit"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Edit profile</a>
+    </div>
+    <div class="pj-alert pj-alert-error" id="pf-error" role="alert" hidden></div>
+    <div class="pj-profile">
+      <aside class="pj-idcard" aria-label="Summary">
+        <div class="pj-idcard-line" aria-hidden="true"></div>
+        <div class="pj-idcard-avatar" id="pf-ini" aria-hidden="true"></div>
+        <div class="pj-idcard-name" id="pf-name"></div>
+        <div class="pj-chips pj-chips-center" id="pf-chips"></div>
+        <dl class="pj-idcard-stats" id="pf-stats"></dl>
+      </aside>
+      <div class="pj-profile-main">
+        <section class="pj-panel" aria-labelledby="pf-personal-t">
+          <h2 class="pj-panel-title" id="pf-personal-t">Personal information</h2>
+          <dl class="pj-dl" id="pf-personal"></dl>
+        </section>
+        <section class="pj-panel" aria-labelledby="pf-pb-t">
+          <h2 class="pj-panel-title" id="pf-pb-t">Pickleball</h2>
+          <dl class="pj-dl" id="pf-pickleball"></dl>
+        </section>
+        <section class="pj-panel" aria-labelledby="pf-acc-t">
+          <h2 class="pj-panel-title" id="pf-acc-t">Your account</h2>
+          <div class="pj-facts" id="pf-account"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+</section>
+
+<!-- ── 8 · EDIT PROFILE ───────────────────────────────────── -->
+<section class="pj-screen" data-screen="edit" data-chrome="app" aria-labelledby="ed-title">
+  <main class="pj-wrap pj-wrap-md">
+    <div class="pj-page-head pj-page-head-col">
+      <a class="pj-back" href="#/profile">← My profile</a>
+      <h1 class="pj-h1" id="ed-title" tabindex="-1" data-focus-title>Edit profile</h1>
+    </div>
+    <div class="pj-edit">
+      <form class="pj-panel pj-edit-form" id="ed-form" novalidate>
+        <h2 class="pj-panel-title">Your details</h2>
+        <div class="pj-alert pj-alert-error" id="ed-error" role="alert" hidden></div>
+        <div class="pj-field pj-field-narrow">
+          <label class="pj-label" for="ed-phone">Mobile phone</label>
+          <div class="pj-phone"><span class="pj-phone-cc" aria-hidden="true">+1</span><input class="pj-phone-in" id="ed-phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(561) 000-0000" maxlength="16"></div>
+        </div>
+        <fieldset class="pj-fieldset" id="ed-gender">
+          <legend class="pj-label">Gender</legend>
+          <div class="pj-choices pj-choices-narrow">
+          <label class="pj-choice"><input type="radio" name="ed-gender" value="Female">Female</label>
+          <label class="pj-choice"><input type="radio" name="ed-gender" value="Male">Male</label>
+          </div>
+        </fieldset>
+        <fieldset class="pj-fieldset" id="ed-level">
+          <legend class="pj-label">Playing level</legend>
+          <div class="pj-levels">
+          <label class="pj-level"><input class="pj-sr" type="radio" name="ed-level" value="Beginner"><span class="pj-level-name">Beginner</span><span class="pj-level-desc">Learning the rules and the basic shots.</span></label>
+          <label class="pj-level"><input class="pj-sr" type="radio" name="ed-level" value="Intermediate"><span class="pj-level-name">Intermediate</span><span class="pj-level-desc">Steady rallies, working on the kitchen game.</span></label>
+          <label class="pj-level"><input class="pj-sr" type="radio" name="ed-level" value="Advanced"><span class="pj-level-name">Advanced</span><span class="pj-level-desc">Competitive, tournament-level play.</span></label>
+          </div>
+        </fieldset>
+        <div class="pj-form-actions">
+          <button class="pj-btn pj-btn-primary pj-btn-md" type="submit" id="ed-submit">Save changes</button>
+          <a class="pj-btn pj-btn-quiet pj-btn-md" href="#/profile">Cancel</a>
+        </div>
+      </form>
+      <aside class="pj-edit-side">
+        <section class="pj-panel pj-panel-tight">
+          <div class="pj-locked-head">
+            <h2 class="pj-panel-title pj-panel-title-sm">Name &amp; date of birth</h2>
+            <span class="pj-locked"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Locked</span>
+          </div>
+          <div class="pj-locked-who"><span class="pj-locked-name" id="ed-name"></span><span class="pj-locked-dob" id="ed-dob"></span></div>
+          <p class="pj-small">They connect you to your ladders and tournaments, so our team reviews any change.</p>
+          <button type="button" class="pj-btn pj-btn-quiet pj-btn-sm pj-self-start" id="ed-request">Request a change</button>
+        </section>
+        <section class="pj-panel pj-panel-tint">
+          <h2 class="pj-panel-title pj-panel-title-sm">Changing your email?</h2>
+          <p class="pj-small pj-small-dark">Do it in <a class="pj-link-strong" href="#/settings">Account settings</a> — we'll confirm the new address with a link. Your new phone and email also update the FEROCIA mailing list.</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+</section>
+
+<!-- ── 9 · ACCOUNT SETTINGS ───────────────────────────────── -->
+<section class="pj-screen" data-screen="settings" data-chrome="app" aria-labelledby="st-title">
+  <main class="pj-wrap pj-wrap-sm">
     <div>
       <div class="pj-eyebrow">Your account</div>
       <h1 class="pj-h1" id="st-title" tabindex="-1" data-focus-title>Account settings</h1>
@@ -189,6 +466,20 @@
         <span class="pj-row-value"><span id="st-email"></span> <span class="pj-pill-ok">Verified</span></span>
         <span class="pj-row-help">Your sign-in links arrive here.</span>
       </div>
+      <button type="button" class="pj-btn pj-btn-outline pj-btn-sm" id="st-change" aria-expanded="false" aria-controls="st-change-form">Change email</button>
+      <form class="pj-change" id="st-change-form" novalidate hidden>
+        <div class="pj-field">
+          <label class="pj-label" for="st-new-email">New email</label>
+          <input class="pj-input" id="st-new-email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com">
+        </div>
+        <div class="pj-alert pj-alert-error" id="st-change-error" role="alert" hidden></div>
+        <div class="pj-alert pj-alert-info" id="st-change-ok" role="status" hidden></div>
+        <div class="pj-form-actions">
+          <button type="submit" class="pj-btn pj-btn-primary pj-btn-sm" id="st-change-send">Send confirmation link</button>
+          <button type="button" class="pj-btn pj-btn-quiet pj-btn-sm" id="st-change-cancel">Cancel</button>
+        </div>
+        <p class="pj-small">We'll send a link to the new address — and, for your security, one to your current address too. The change happens when you confirm.</p>
+      </form>
     </section>
     <section class="pj-row-card">
       <span class="pj-row-ico pj-row-ico-green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
@@ -199,21 +490,104 @@
       </div>
       <button type="button" class="pj-btn pj-btn-quiet pj-btn-sm" id="st-out-all">Sign out of all devices</button>
     </section>
+    <section class="pj-row-card">
+      <span class="pj-row-ico pj-row-ico-gray"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v12H7l-3 3z"/></svg></span>
+      <div class="pj-row-txt">
+        <h2 class="pj-row-label">Club emails</h2>
+        <span class="pj-row-value" id="st-club-title">FEROCIA Monthly + event news</span>
+        <span class="pj-row-help" id="st-club-help"></span>
+      </div>
+      <span class="pj-pill" id="st-club"></span>
+    </section>
     <div>
-      <button type="button" class="pj-btn pj-btn-quiet" id="st-out">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-        Sign out
-      </button>
+      <button type="button" class="pj-btn pj-btn-quiet" id="st-out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</button>
     </div>
   </main>
 </section>
 
+<!-- ── 10 · NEED HELP? ────────────────────────────────────── -->
+<section class="pj-screen" data-screen="help" data-chrome="app" aria-labelledby="hp-title">
+  <main class="pj-wrap pj-wrap-md">
+    <div class="pj-help">
+      <div class="pj-help-intro">
+        <div class="pj-eyebrow">We're here to help</div>
+        <h1 class="pj-h1" id="hp-title" tabindex="-1" data-focus-title>How can we help?</h1>
+        <p class="pj-lead pj-lead-dark">Send us a message and the FEROCIA team will reply by email, usually within one business day.</p>
+        <div class="pj-faq">
+          <span class="pj-row-label">Quick answers</span>
+          <details><summary>I didn't get my sign-in link</summary><p>Check spam or promotions, and wait a minute before asking for a new one. You can also type the 6-digit code from the same email.</p></details>
+          <details><summary>My ladder or results don't show</summary><p>Your account may still be in review. If it isn't, send us a message and tell us which ladder you played.</p></details>
+          <details><summary>How do I change my name or date of birth?</summary><p>Choose “My details” below and tell us what to change. They connect you to your history, so our team updates them for you.</p></details>
+        </div>
+      </div>
+      <div class="pj-panel pj-help-panel">
+        <form class="pj-help-form" id="hp-form" novalidate>
+          <fieldset class="pj-fieldset">
+            <legend class="pj-label">What's it about?</legend>
+            <div class="pj-topics">
+              <label class="pj-topic"><input class="pj-sr" type="radio" name="hp-topic" value="signing_in">Signing in</label>
+              <label class="pj-topic"><input class="pj-sr" type="radio" name="hp-topic" value="player_history">My player history</label>
+              <label class="pj-topic"><input class="pj-sr" type="radio" name="hp-topic" value="my_details">My details</label>
+              <label class="pj-topic"><input class="pj-sr" type="radio" name="hp-topic" value="other">Something else</label>
+            </div>
+          </fieldset>
+          <div class="pj-field">
+            <label class="pj-label" for="hp-msg">Message</label>
+            <textarea class="pj-textarea" id="hp-msg" rows="7" maxlength="1000" placeholder="For example: I played the Tuesday ladder last year but my history doesn't show up."></textarea>
+            <div class="pj-help-meta"><span id="hp-reply"></span><span id="hp-count" aria-live="polite">0 / 1000</span></div>
+          </div>
+          <div class="pj-alert pj-alert-error" id="hp-error" role="alert" hidden></div>
+          <button type="submit" class="pj-btn pj-btn-primary pj-btn-md pj-self-start" id="hp-send">Send message</button>
+        </form>
+        <div class="pj-sent" id="hp-sent" hidden>
+          <div class="pj-sent-ico"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+          <h2 class="pj-panel-title" id="hp-sent-t" tabindex="-1">Message sent</h2>
+          <p class="pj-lead" id="hp-sent-lead"></p>
+          <button type="button" class="pj-btn pj-btn-quiet pj-btn-sm" id="hp-again">Send another message</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</section>
+
+<!-- No se pudo leer la cuenta (sin internet, por ejemplo). -->
+<section class="pj-screen pj-oops" data-screen="oops" aria-labelledby="op-title">
+  <div class="pj-oops-box">
+    <img src="assets/ferocia-logo.png" alt="FEROCIA">
+    <h1 id="op-title" tabindex="-1" data-focus-title>We couldn't load your account</h1>
+    <p>Check your internet connection and try again.</p>
+    <div class="pj-form-actions pj-center">
+      <button type="button" class="pj-btn pj-btn-lime pj-btn-md" id="op-retry">Try again</button>
+      <button type="button" class="pj-band-btn" data-action="sign-out">Sign out</button>
+    </div>
+  </div>
+</section>
+
+<!-- La barra de abajo, en el teléfono (ya unido a su ficha). -->
+<nav class="pj-tabbar" id="pj-tabbar" aria-label="Main" hidden>
+  <a href="#/home" data-nav="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></a>
+  <a href="#/profile" data-nav="profile"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profile</span></a>
+  <a href="#/help" data-nav="help"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5h.01"/></svg><span>Help</span></a>
+  <a href="#/settings" data-nav="settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Account</span></a>
+</nav>
+
+<footer class="pj-footer" id="pj-footer" hidden>
+  <div class="pj-footer-in">
+    <span>FEROCIA Sports Center · Boca Raton, FL</span>
+    <span class="pj-footer-links"><a href="https://ferociasports.com" target="_blank" rel="noopener">ferociasports.com</a><a href="#/help">Help</a><a href="https://ferociasports.com/privacy.html" target="_blank" rel="noopener">Privacy</a></span>
+  </div>
+</footer>
+
 <div class="pj-toast" id="pj-toast" role="status" aria-live="polite"></div>
 
-<script src="config.js?v=20261014b"></script>
+<script src="config.js?v=20261014c"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="pj-app.js?v=20261014b"></script>
-<script src="pj-auth.js?v=20261014b"></script>
-<script src="pj-account.js?v=20261014b"></script>
+<script src="pj-app.js?v=20261014c"></script>
+<script src="pj-auth.js?v=20261014c"></script>
+<script src="pj-onboarding.js?v=20261014c"></script>
+<script src="pj-home.js?v=20261014c"></script>
+<script src="pj-profile.js?v=20261014c"></script>
+<script src="pj-account.js?v=20261014c"></script>
+<script src="pj-help.js?v=20261014c"></script>
 </body>
 </html>
