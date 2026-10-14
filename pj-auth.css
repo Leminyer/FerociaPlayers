@@ -1,0 +1,117 @@
+/* ============================================================
+   FEROCIA PLAYER PORTAL — entrar, crear cuenta, revisar el correo
+   Hito 2 (14 de octubre) — pantallas 1, 2 y 3 del diseño aprobado
+   ============================================================ */
+
+/* ── 1 · Entrar: mitad marca, mitad formulario ── */
+.pj-split { flex-wrap: wrap; }
+.pj-brand {
+  flex: 1 1 520px; position: relative; overflow: hidden;
+  background: var(--pj-night);
+  padding: 56px clamp(28px, 6vw, 88px);
+  display: flex; flex-direction: column; justify-content: space-between; gap: 48px;
+  min-height: 420px;
+}
+/* Las líneas de una cancha, de adorno. */
+.pj-court { position: absolute; border-color: rgba(198, 242, 33, .18); pointer-events: none; }
+.pj-court-box { right: -120px; bottom: -80px; width: 520px; height: 640px; border: 2px solid; border-color: inherit; border-radius: 6px; }
+.pj-court-mid { right: -120px; bottom: 240px; width: 520px; border-top: 2px solid; border-color: inherit; }
+.pj-court-cen { right: 140px; bottom: -80px; height: 320px; border-left: 2px solid; border-color: inherit; }
+.pj-brand > :not(.pj-court) { position: relative; }
+.pj-brand-logo { width: 170px; height: auto; display: block; }
+.pj-brand-copy { display: flex; flex-direction: column; gap: 22px; max-width: 520px; }
+.pj-brand-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--pj-lime); }
+.pj-brand-title {
+  margin: 0; font-size: clamp(40px, 5vw, 64px); line-height: 1.02; font-weight: 900;
+  letter-spacing: -1.5px; color: #fff; text-transform: uppercase;
+}
+.pj-brand-title span { color: var(--pj-lime); }
+.pj-brand-lead { margin: 0; font-size: 17px; line-height: 1.6; font-weight: 500; color: rgba(255, 255, 255, .72); }
+.pj-brand-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.pj-brand-list li { display: flex; align-items: center; gap: 14px; font-size: 15px; font-weight: 600; color: #fff; }
+.pj-brand-ico {
+  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+  background: rgba(198, 242, 33, .12); color: var(--pj-lime);
+  display: flex; align-items: center; justify-content: center;
+}
+.pj-brand-foot { font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, .5); }
+
+.pj-side { flex: 1 1 460px; display: flex; align-items: center; justify-content: center; padding: 56px 24px; }
+.pj-side-form { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 20px; }
+.pj-h2 { margin: 0; font-size: 32px; font-weight: 900; letter-spacing: -.6px; color: var(--pj-navy); }
+.pj-lead { margin: 0; font-size: 15px; line-height: 1.6; font-weight: 500; color: var(--pj-muted); }
+.pj-or {
+  display: flex; align-items: center; gap: 14px; margin-top: 8px;
+  color: #9CA3AF; font-size: 13px; font-weight: 600;
+}
+.pj-or::before, .pj-or::after { content: ''; flex: 1; height: 1px; background: var(--pj-line); }
+.pj-small-center { margin: 6px 0 0; text-align: center; font-size: 13px; font-weight: 600; color: var(--pj-muted); }
+.pj-small-center a { font-weight: 800; text-decoration: none; }
+
+/* ── 2 y 3 · La tarjeta sobre la franja oscura ── */
+.pj-band { background: var(--pj-night); height: 260px; border-bottom: 3px solid var(--pj-lime); }
+.pj-band-in {
+  max-width: 1120px; margin: 0 auto; padding: 0 24px; height: 76px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+}
+.pj-band-logo { width: 140px; height: auto; display: block; }
+.pj-band-link { font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, .7); }
+.pj-band-link a { color: var(--pj-lime); font-weight: 800; text-decoration: none; }
+.pj-card-wrap { max-width: 600px; margin: -160px auto 0; padding: 0 20px 64px; }
+.pj-card {
+  background: #fff; border: 1px solid var(--pj-line); border-radius: var(--pj-radius-lg);
+  box-shadow: var(--pj-shadow-lg); padding: clamp(24px, 5vw, 44px);
+  display: flex; flex-direction: column; gap: 26px;
+}
+.pj-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.pj-steps li { display: flex; flex-direction: column; gap: 8px; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #9CA3AF; }
+.pj-steps li::before { content: ''; height: 4px; border-radius: 99px; background: var(--pj-line); }
+.pj-steps li.is-done { color: var(--pj-blue); }
+.pj-steps li.is-done::before { background: var(--pj-blue); }
+.pj-card-head { display: flex; flex-direction: column; gap: 8px; }
+.pj-title { margin: 0; font-size: 30px; font-weight: 900; letter-spacing: -.6px; color: var(--pj-navy); }
+.pj-form { display: flex; flex-direction: column; gap: 16px; }
+.pj-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.pj-note {
+  margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 13px; font-weight: 600; color: var(--pj-muted); text-align: center;
+}
+
+/* ── 3 · Revisa tu correo ── */
+.pj-check-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding-top: 6px; }
+.pj-mail-ico {
+  position: relative; width: 92px; height: 92px; border-radius: 50%;
+  background: rgba(23, 76, 204, .08); color: var(--pj-blue);
+  display: flex; align-items: center; justify-content: center;
+}
+.pj-mail-dot {
+  position: absolute; top: 4px; right: 2px; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--pj-lime); border: 3px solid #fff;
+}
+.pj-check-lead { margin: 0; max-width: 420px; font-size: 15px; line-height: 1.65; font-weight: 500; color: var(--pj-muted); }
+.pj-check-lead strong { color: var(--pj-ink); font-weight: 700; overflow-wrap: anywhere; }
+.pj-code-form { display: flex; flex-direction: column; gap: 16px; align-items: center; }
+.pj-code-form fieldset { border: none; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; }
+.pj-code-form legend { padding: 0; margin: 0 auto 12px; font-size: 14px; font-weight: 600; color: #374151; text-align: center; }
+.pj-code { display: grid; grid-template-columns: repeat(6, minmax(0, 52px)); gap: 8px; justify-content: center; width: 100%; }
+.pj-code input {
+  height: 60px; width: 100%; min-width: 0;
+  border: 1px solid var(--pj-field); border-radius: var(--pj-radius);
+  text-align: center; font: 800 24px 'Inter', sans-serif; color: var(--pj-navy); background: #fff;
+}
+.pj-code input:focus { outline: none; border: 2px solid var(--pj-blue); box-shadow: 0 0 0 4px rgba(23, 76, 204, .12); }
+.pj-code input[aria-invalid="true"] { border-color: var(--pj-red); }
+.pj-check-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 24px; font-size: 13px; font-weight: 600; color: var(--pj-muted); }
+.pj-tip { margin: 0; padding: 14px 16px; border-radius: var(--pj-radius); background: var(--pj-bg); font-size: 13px; line-height: 1.55; font-weight: 500; color: var(--pj-muted); text-align: center; }
+
+@media (max-width: 600px) {
+  .pj-brand { padding: 36px 24px; gap: 32px; min-height: 0; }
+  .pj-brand-list { display: none; }
+  .pj-side { padding: 32px 16px 48px; align-items: flex-start; }
+  .pj-h2, .pj-title { font-size: 26px; }
+  .pj-band { height: 220px; }
+  .pj-card-wrap { margin-top: -140px; padding: 0 12px 48px; }
+  .pj-steps li { font-size: 9.5px; letter-spacing: .5px; }
+  .pj-code { gap: 6px; }
+  .pj-code input { height: 54px; font-size: 22px; }
+}
