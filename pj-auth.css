@@ -20,7 +20,7 @@
 .pj-brand > :not(.pj-court) { position: relative; }
 .pj-brand-logo { width: 170px; height: auto; display: block; }
 .pj-brand-copy { display: flex; flex-direction: column; gap: 22px; max-width: 520px; }
-.pj-brand-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--pj-lime); }
+.pj-brand-eyebrow { font-size: 15px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--pj-lime); }
 .pj-brand-title {
   margin: 0; font-size: clamp(40px, 5vw, 64px); line-height: 1.02; font-weight: 900;
   letter-spacing: -1.5px; color: #fff; text-transform: uppercase;

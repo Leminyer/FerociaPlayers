@@ -8,9 +8,13 @@
      · un código de 6 dígitos — por si abre el correo en otro aparato.
    Las dos valen una vez y caducan en 1 hora (lo pone Supabase).
 
-   NO SE DICE SI UNA CUENTA EXISTE: "Entrar" con un correo que no tiene
-   cuenta enseña lo mismo que con uno que sí ("si hay una cuenta, te
-   mandamos el enlace"). Así nadie puede averiguar quién es jugador.
+   CORREO SIN CUENTA (decidido por ella, 14 de octubre, §48): si en
+   "Entrar" escribe un correo que todavía no tiene cuenta en el portal,
+   no se le deja esperando un correo que nunca llega: pasa a "Crear
+   cuenta" con su correo ya escrito y un aviso que lo explica. Supabase
+   lo dice al contestar (otp_disabled), sin tocar la base de datos.
+   (Se acepta que así se puede saber si un correo tiene cuenta; el
+   captcha del hito 5 impide probar miles de correos.)
 
    El nombre que escribe al crear la cuenta se guarda en la cuenta sólo
    como dato de partida (hito 3 lo usa para buscar su ficha, en el
@@ -104,6 +108,8 @@
 
   /* ── 1 · ENTRAR ── */
   let enviando = false;
+  /* El correo que "Entrar" no encontró, para escribirlo en "Crear cuenta". */
+  let correoSinCuenta = null;
   $('si-form').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     if (enviando) return;
@@ -123,12 +129,16 @@
       const error = await pedirCorreo(email, 'sign-in');
       if (error) {
         const e = explicar(error);
-        /* Sin cuenta: se contesta igual que con cuenta (no se revela).
-           "Espera un minuto" tampoco se dice aquí: Supabase sólo lo
-           contesta a correos CON cuenta, así que lo delataría. Se pasa a
-           "Revisa tu correo" (el correo anterior sigue valiendo) y allí
-           la cuenta atrás ya pide esperar antes de reenviar. */
-        if (e.tipo !== 'sin_registro' && e.tipo !== 'espera') { mostrarError('si-error', e.texto); return; }
+        /* Sin cuenta: a "Crear cuenta", con su correo ya escrito. */
+        if (e.tipo === 'sin_registro') {
+          correoSinCuenta = email;
+          P.ir('create');
+          return;
+        }
+        /* "Espera un minuto": la cuenta existe y el correo anterior sigue
+           valiendo. Se pasa a "Revisa tu correo", donde la cuenta atrás
+           ya pide esperar antes de reenviar. */
+        if (e.tipo !== 'espera') { mostrarError('si-error', e.texto); return; }
       }
       guardarPendiente(email, 'sign-in');
       P.ir('check');
@@ -320,13 +330,9 @@
     const boton = document.createElement('strong');
     boton.textContent = 'Sign in to FEROCIA';
     lead.replaceChildren(
-      document.createTextNode(p.modo === 'create'
-        ? 'We sent a sign-in link to '
-        : "If there's a portal account for "),
+      document.createTextNode('We sent a sign-in link to '),
       correo,
-      document.createTextNode(p.modo === 'create'
-        ? '. Tap '
-        : ', we just sent it a sign-in link. Tap '),
+      document.createTextNode('. Tap '),
       boton,
       document.createTextNode(" in that email and you're in."));
     /* Los pasos sólo tienen sentido al crear la cuenta. */
@@ -338,7 +344,20 @@
   });
 
   P.alEntrar('sign-in', () => { mostrarError('si-error', ''); });
-  P.alEntrar('create', () => { mostrarError('ca-error', ''); });
+  P.alEntrar('create', () => {
+    mostrarError('ca-error', '');
+    const info = $('ca-info');
+    if (correoSinCuenta) {
+      $('ca-email').value = correoSinCuenta;
+      marcar($('ca-email'), false);
+      info.textContent = "We couldn't find a portal account for this email. Create yours below — it takes a minute, and if you've played at FEROCIA we'll bring in your history.";
+      info.hidden = false;
+      correoSinCuenta = null;
+    } else {
+      info.textContent = '';
+      info.hidden = true;
+    }
+  });
 
   /* Al entrar de verdad, lo pendiente ya no sirve. */
   sb.auth.onAuthStateChange((evento) => { if (evento === 'SIGNED_IN') borrarPendiente(); });
