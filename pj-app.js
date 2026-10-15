@@ -5,6 +5,7 @@
    FEROCIA Identity I-1 (15 de octubre): ciudad y estado (§57)
    Player DNA, etapa DNA-1 (15 de octubre): My DNA y su paso (§62, §63)
    Matchmaking M-1 (15 de octubre): Play y la tarjeta del jugador (§70, §71)
+   Matchmaking M-2a (15 de octubre): los juegos, la campanita y Player Safety (§74)
 
    · Crea la conexión con Supabase (la misma base que el panel; la
      clave es la PÚBLICA, como en el sitio: lo que protege los datos
@@ -70,7 +71,7 @@
     sin_ficha:   { inicio: 'about',  rutas: ['about', 'help'] },
     en_revision: { inicio: 'review', rutas: ['review', 'help'] },
     rechazado:   { inicio: 'review', rutas: ['review', 'help'] },
-    vinculado:   { inicio: 'home',   rutas: ['home', 'profile', 'dna', 'dna-edit', 'play', 'player', 'edit', 'settings', 'help', 'welcome'] },
+    vinculado:   { inicio: 'home',   rutas: ['home', 'profile', 'dna', 'dna-edit', 'play', 'player', 'game', 'game-form', 'edit', 'settings', 'help', 'welcome'] },
   };
   /* Unido pero sin su Player DNA: primero el DNA. (Sólo si la base lo
      dice claramente: si el SQL 92 todavía no está, no se pide.) */
@@ -293,7 +294,8 @@
     document.body.dataset.pantalla = nombre;
     document.querySelectorAll('[data-nav]').forEach((a) => {
       const activo = a.dataset.nav === nombre || (nombre === 'edit' && a.dataset.nav === 'profile')
-        || (nombre === 'dna-edit' && a.dataset.nav === 'dna') || (nombre === 'player' && a.dataset.nav === 'play');
+        || (nombre === 'dna-edit' && a.dataset.nav === 'dna')
+        || (['player', 'game', 'game-form'].includes(nombre) && a.dataset.nav === 'play');
       if (activo) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
@@ -324,13 +326,14 @@
     pintarMarco(nueva, nombre);
     if (pantallaAnterior !== nombre || direccionAnterior !== location.hash) window.scrollTo(0, 0);
     direccionAnterior = location.hash;
-    const fn = entradas[nombre];
-    if (fn) {
+    /* Una pantalla puede tener más de un archivo que la pinta (Play: la
+       lista de jugadores y, desde M-2a, los juegos). */
+    (entradas[nombre] || []).forEach((fn) => {
       try {
         const r = fn();
         if (r && typeof r.catch === 'function') r.catch((e) => console.error('[portal]', nombre, e));
       } catch (e) { console.error('[portal]', nombre, e); }
-    }
+    });
     /* Al cambiar de pantalla, el foco va a su título: quien navega con
        el teclado o con lector de pantalla sabe dónde está. (No en la
        primera pantalla al abrir la página.) */
@@ -425,7 +428,8 @@
     refrescar,
     datos,
     olvidarDatos,
-    alEntrar: (nombre, fn) => { entradas[nombre] = fn; },
+    alEntrar: (nombre, fn) => { (entradas[nombre] = entradas[nombre] || []).push(fn); },
+
     rutaParam,
     olvidarSesionAqui,
     /* Adónde vuelve el enlace del correo: esta misma página. */

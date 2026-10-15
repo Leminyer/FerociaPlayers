@@ -1,6 +1,7 @@
 /* ============================================================
    FEROCIA PLAYER PORTAL — Play (Matchmaking Engine™, etapa M-1 · Discover)
    15 de octubre — diseño aprobado (§70, §71)
+   M-2a (§74): los juegos, invitar, reportar y bloquear los pinta pj-games.js.
 
    Responde de un vistazo: "Who would I enjoy sharing the court with?"
    Regla de oro del capítulo 8: ninguna recomendación es al azar; cada
@@ -91,6 +92,11 @@
   }
 
   const ETIQUETA = { great: 'Great match', good: 'Good match' };
+  /* Las razones y las etiquetas también las usan los juegos (pj-games.js:
+     las solicitudes que recibe el anfitrión). */
+  P.razonesLista = (titulo, lista, max) => listaRazones(titulo, lista, max);
+  P.etiquetaMatch = ETIQUETA;
+
   const verTarjeta = (p) => `#/player/${encodeURIComponent(String(p.player_id))}`;
   const reconocimientos = (p, n) => (p.social || []).slice(0, n)
     .map((s) => `${D.etiqueta(D.RECONOCIMIENTOS, s.recognition)} ×${s.count}`).join(' · ');
@@ -170,7 +176,9 @@
       return;
     }
     if (mia !== vez) return;
-    $('pl-locked').hidden = !d.locked;
+    /* Suspendido del matchmaking (Player Safety, M-2a): su propio aviso. */
+    $('pl-locked').hidden = !d.locked || !!d.suspended;
+    $('gm-suspended').hidden = !d.suspended;
     if (d.locked) {
       ['pl-now-sec', 'pl-recs-sec', 'pl-new-sec', 'pl-opp-sec', 'pl-ret-sec', 'pl-empty', 'pl-hidden', 'pl-me'].forEach((id) => { $(id).hidden = true; });
       $('pl-main').setAttribute('aria-busy', 'false');
@@ -232,12 +240,14 @@
       $('pc-error').textContent = P.errorTexto(err, {
         not_available: "This player card isn't available.",
         members_only: 'Play is for FEROCIA members.',
+        suspended: 'Your access to Play and games is paused.',
         hidden_caller: "Your privacy is Private, so you can't see other players' cards. Switch to Limited in My Identity (Who can find you).",
       });
       $('pc-error').hidden = false;
       $('pc-error').focus();
       $('pc-card').hidden = true;
       $('pc-preview').hidden = true;
+      document.dispatchEvent(new CustomEvent('ferocia:tarjeta', { detail: null }));
       return;
     }
     if (mia !== vezTarjeta) return;
@@ -309,5 +319,7 @@
     }
     $('pc-acts').hidden = !!p.preview;
     $('pc-card').setAttribute('aria-busy', 'false');
+    /* Invitar, reportar y bloquear los pinta pj-games.js (M-2a). */
+    document.dispatchEvent(new CustomEvent('ferocia:tarjeta', { detail: p }));
   });
 })();

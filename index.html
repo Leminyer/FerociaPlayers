@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="pj-identity.css?v=20261015a">
 <link rel="stylesheet" href="pj-dna.css?v=20261015e">
 <link rel="stylesheet" href="pj-play.css?v=20261015g">
+<link rel="stylesheet" href="pj-games.css?v=20261015a">
 </head>
 <body>
 
@@ -194,9 +195,19 @@
       <a href="#/play" data-nav="play">Play</a>
       <a href="#/help" data-nav="help">Help</a>
     </nav>
-    <a class="pj-me" href="#/settings" data-nav="settings" aria-label="Account settings">
-      <span class="pj-avatar" id="pj-me-ini" aria-hidden="true"></span><span class="pj-me-name" id="pj-me-name"></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-    </a>
+    <span class="gm-bar">
+      <!-- Matchmaking M-2a: la campanita con los avisos de juegos. -->
+      <span class="gm-bell-wrap" hidden>
+        <button type="button" class="gm-bell" id="gm-bell" aria-expanded="false" aria-controls="gm-notes" aria-label="Notifications"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="gm-bell-n" id="gm-bell-n" hidden></span></button>
+        <div class="gm-notes" id="gm-notes" role="region" aria-label="Notifications" hidden>
+          <div class="gm-notes-h"><b>Notifications</b><button type="button" class="gm-link" id="gm-notes-read">Mark all as read</button></div>
+          <div class="gm-notes-list" id="gm-notes-list"></div>
+        </div>
+      </span>
+      <a class="pj-me" href="#/settings" data-nav="settings" aria-label="Account settings">
+        <span class="pj-avatar" id="pj-me-ini" aria-hidden="true"></span><span class="pj-me-name" id="pj-me-name"></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </a>
+    </span>
   </div>
 </header>
 
@@ -642,11 +653,14 @@
         <h1 class="pl-title" id="pl-title" tabindex="-1" data-focus-title>Players you'd <em>enjoy</em> sharing the court with.</h1>
         <p class="pl-lead">Every suggestion comes with the reasons behind it — your DNA, your level, when you play and the games you've shared. Never random.</p>
       </div>
-      <div class="pl-me" id="pl-me" hidden>
-        <div class="pl-me-k">How others find you</div>
-        <div class="pl-me-n"><span class="pl-dot" aria-hidden="true"></span><span id="pl-me-n"></span></div>
-        <div class="pl-me-s" id="pl-me-s"></div>
-        <a href="#/player/me" id="pl-me-go">See your player card →</a>
+      <div class="gm-hero-side">
+        <a class="gm-btn-lime gm-create" href="#/game-form" id="gm-create" hidden>+ Create a game</a>
+        <div class="pl-me" id="pl-me" hidden>
+          <div class="pl-me-k">How others find you</div>
+          <div class="pl-me-n"><span class="pl-dot" aria-hidden="true"></span><span id="pl-me-n"></span></div>
+          <div class="pl-me-s" id="pl-me-s"></div>
+          <a href="#/player/me" id="pl-me-go">See your player card →</a>
+        </div>
       </div>
     </div>
   </section>
@@ -656,6 +670,21 @@
       <h2 class="pj-panel-title">Play is for FEROCIA members</h2>
       <p class="pj-small">Become a member to discover players you'd enjoy sharing the court with.</p>
     </section>
+    <section class="pj-panel pl-locked" id="gm-suspended" hidden>
+      <h2 class="pj-panel-title">Your access to Play and games is paused</h2>
+      <p class="pj-small">After reviewing reports, the FEROCIA team paused your access to Play and player games. Your ladders, tournaments and events are not affected. Questions? <a class="pj-link-strong" href="#/help">Contact us</a>.</p>
+    </section>
+    <!-- Matchmaking M-2a: tus juegos y los juegos abiertos para ti. -->
+    <section class="pl-sec" id="gm-mine-sec" aria-labelledby="gm-mine-t" hidden>
+      <div class="pl-sec-h"><h2 class="pl-sec-t" id="gm-mine-t">Your games</h2><p class="pl-sec-s">One game hosted at a time · up to 3 requests at a time.</p></div>
+      <div class="gm-mine" id="gm-mine"></div>
+    </section>
+    <section class="pl-sec" id="gm-open-sec" aria-labelledby="gm-open-t" hidden>
+      <div class="pl-sec-h"><h2 class="pl-sec-t" id="gm-open-t">Open games for you</h2><p class="pl-sec-s">Games at your level, from compatible players.</p></div>
+      <div class="gm-open" id="gm-open"></div>
+      <p class="gm-empty" id="gm-open-empty" hidden>No open games at your level right now. <a class="pj-link-strong" href="#/game-form">Create one</a> and compatible players will see it.</p>
+    </section>
+    <div class="pj-alert pj-alert-error" id="gm-error" role="alert" hidden></div>
     <section class="pl-sec" id="pl-now-sec" aria-labelledby="pl-now-t" hidden>
       <div class="pl-sec-h"><h2 class="pl-sec-t" id="pl-now-t"><span class="pl-live" aria-hidden="true"></span>Looking to play right now</h2><p class="pl-sec-s">Compatible players with an active "Right now".</p></div>
       <div class="pl-now" id="pl-now"></div>
@@ -677,7 +706,7 @@
       <h2 class="pj-panel-title">Your matches are on their way</h2>
       <p class="pj-small">As more players join the Player Portal and complete their Player DNA, the players you'd enjoy sharing the court with will show up here.</p>
     </section>
-    <p class="id-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v5h1"/></svg>There is no open player directory: you only see compatible players, and only players with Limited or Public privacy. Inviting players to games comes next.</p>
+    <p class="id-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v5h1"/></svg>There is no open player directory: you only see compatible players, and only players with Limited or Public privacy. </p>
   </main>
 </section>
 
@@ -703,9 +732,87 @@
           <dl class="pc-stats" id="pc-stats" hidden></dl>
           <div class="pc-recent" id="pc-recent" hidden></div>
           <div class="pc-hidden" id="pc-hidden" hidden></div>
-          <div class="pc-acts" id="pc-acts"><button class="pl-btn" type="button" disabled>Invite to play</button><span class="pl-soon">Inviting players to games comes in the next step.</span></div>
+          <div class="pc-acts" id="pc-acts">
+            <span class="pc-invite" id="pc-invite"></span>
+            <span class="pc-safety"><button type="button" class="gm-link" id="pc-report">Report</button><button type="button" class="gm-link" id="pc-block">Block</button></span>
+          </div>
         </div>
       </article>
+    </div>
+  </main>
+</section>
+
+<!-- ── 7g · CREAR / EDITAR UN JUEGO (Matchmaking M-2a) ─────── -->
+<section class="pj-screen" data-screen="game-form" data-chrome="app" aria-labelledby="gf-title">
+  <main class="pj-wrap pj-wrap-md">
+    <div class="pj-page-head pj-page-head-col"><a class="pj-back" href="#/play" id="gf-back">← Play</a><h1 class="pj-h1" id="gf-title" tabindex="-1" data-focus-title>Create a game</h1></div>
+    <div class="pj-alert pj-alert-error" id="gf-error" role="alert" tabindex="-1" hidden></div>
+    <form class="pj-panel gm-form" id="gf-form" novalidate>
+      <fieldset class="dn-q" id="gf-q-kind">
+        <legend class="dn-q-h"><span class="dn-q-tl"><span class="dn-q-t">Type</span></span><span class="dn-q-n">Choose one</span></legend>
+        <div class="dn-opts">
+          <label class="dn-opt"><input class="pj-sr" type="radio" name="gf-kind" value="singles">Singles</label>
+          <label class="dn-opt"><input class="pj-sr" type="radio" name="gf-kind" value="doubles">Doubles</label>
+          <label class="dn-opt"><input class="pj-sr" type="radio" name="gf-kind" value="mixed">Mixed doubles</label>
+          <label class="dn-opt"><input class="pj-sr" type="radio" name="gf-kind" value="drill">Drill / practice</label>
+        </div>
+      </fieldset>
+      <div class="gm-row2">
+        <label class="gm-field" for="gf-day"><span class="dn-q-t">Day</span><input class="gm-input" id="gf-day" type="date" required></label>
+        <label class="gm-field" for="gf-time"><span class="dn-q-t">Time</span><input class="gm-input" id="gf-time" type="time" step="900" required></label>
+      </div>
+      <p class="gm-small gm-tight" id="gf-when-help">Within the next 14 days, Boca Raton time.</p>
+      <label class="gm-field" for="gf-place"><span class="dn-q-t">Where</span><input class="gm-input" id="gf-place" type="text" maxlength="80" autocomplete="off" placeholder="Park or club, and courts" required><span class="gm-small">The park or club and courts. No links or phone numbers.</span></label>
+      <fieldset class="dn-q" id="gf-q-needed">
+        <legend class="dn-q-h"><span class="dn-q-tl"><span class="dn-q-t">How many players do you need?</span></span><span class="dn-q-n">Besides you</span></legend>
+        <div class="dn-opts">
+          <label class="dn-opt"><input class="pj-sr" type="radio" name="gf-needed" value="1">1</label>
+          <label class="dn-opt"><input class="pj-sr" type="radio" name="gf-needed" value="2">2</label>
+          <label class="dn-opt"><input class="pj-sr" type="radio" name="gf-needed" value="3">3</label>
+        </div>
+      </fieldset>
+      <fieldset class="dn-q" id="gf-q-levels">
+        <legend class="dn-q-h"><span class="dn-q-tl"><span class="dn-q-t">Level</span></span><span class="dn-q-n">Choose all that fit</span></legend>
+        <div class="dn-opts">
+          <label class="dn-opt"><input class="pj-sr" type="checkbox" name="gf-levels" value="Beginner">Beginner</label>
+          <label class="dn-opt"><input class="pj-sr" type="checkbox" name="gf-levels" value="Intermediate">Intermediate</label>
+          <label class="dn-opt"><input class="pj-sr" type="checkbox" name="gf-levels" value="Advanced">Advanced</label>
+        </div>
+      </fieldset>
+      <fieldset class="dn-q" id="gf-q-vis">
+        <legend class="dn-q-h"><span class="dn-q-tl"><span class="dn-q-t">Who can see it</span></span></legend>
+        <div class="gm-vis">
+          <label class="gm-vis-o"><input class="pj-sr" type="radio" name="gf-vis" value="open"><b>Open to compatible players</b><span>It shows in Play for players at your level. You still approve each one.</span></label>
+          <label class="gm-vis-o"><input class="pj-sr" type="radio" name="gf-vis" value="invite"><b>Invite only</b><span>Only the players you invite (up to 8) can see it and join.</span></label>
+        </div>
+      </fieldset>
+      <label class="gm-field" for="gf-notes"><span class="dn-q-t">Notes (optional)</span><textarea class="gm-textarea" id="gf-notes" maxlength="280" rows="3"></textarea><span class="gm-small"><span id="gf-notes-n">280</span> characters left. No phone numbers, emails or links — you'll meet at the court.</span></label>
+      <label class="gm-check" for="gf-reminder"><input class="pj-sr" type="checkbox" id="gf-reminder"><span class="gm-box" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Send everyone a reminder 24 hours before<small>By email and in the portal.</small></span></label>
+      <button class="pj-btn pj-btn-primary pj-btn-block" type="submit" id="gf-send">Create game</button>
+      <p class="pj-note gm-center">FEROCIA doesn't book courts or handle court fees — arrange those yourself.</p>
+    </form>
+  </main>
+</section>
+
+<!-- ── 7h · UN JUEGO (Matchmaking M-2a) ───────────────────── -->
+<section class="pj-screen" data-screen="game" data-chrome="app" aria-labelledby="gp-title">
+  <section class="gm-hero">
+    <div class="gm-hero-in">
+      <div>
+        <a class="gm-hero-back" href="#/play">← Play</a>
+        <div class="gm-k" id="gp-k"></div>
+        <h1 class="gm-title" id="gp-title" tabindex="-1" data-focus-title></h1>
+        <div class="gm-sub" id="gp-sub"></div>
+      </div>
+      <div class="gm-acts" id="gp-acts"></div>
+    </div>
+  </section>
+  <main class="pj-wrap" id="gp-main" aria-busy="true">
+    <div class="pj-alert pj-alert-error" id="gp-error" role="alert" tabindex="-1" hidden></div>
+    <div class="pj-alert pj-alert-info" id="gp-state" role="status" hidden></div>
+    <div class="gm-grid" id="gp-grid" hidden>
+      <div class="dn-col" id="gp-left"></div>
+      <div class="dn-col" id="gp-right"></div>
     </div>
   </main>
 </section>
@@ -766,6 +873,25 @@
       </div>
       <a class="pj-btn pj-btn-outline pj-btn-sm" href="#/help" id="st-help">Get help</a>
     </section>
+    <!-- Matchmaking M-2a: los correos de juegos y los jugadores bloqueados. -->
+    <section class="pj-row-card" id="st-games" hidden>
+      <span class="pj-row-ico pj-row-ico-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
+      <div class="pj-row-txt">
+        <h2 class="pj-row-label" id="st-games-l">Game emails</h2>
+        <span class="pj-row-value">Requests, invitations, changes and reminders</span>
+        <span class="pj-row-help">You'll always see them in the portal (the bell). Notices about your account always arrive by email.</span>
+      </div>
+      <button type="button" class="dn-sw" role="switch" id="st-games-sw" aria-checked="true" aria-labelledby="st-games-l"></button>
+    </section>
+    <section class="pj-row-card" id="st-blocked" hidden>
+      <span class="pj-row-ico pj-row-ico-gray"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg></span>
+      <div class="pj-row-txt">
+        <h2 class="pj-row-label">Blocked players</h2>
+        <span class="pj-row-help">You don't see each other in Play or in games. They aren't told.</span>
+        <ul class="gm-blocked" id="st-blocked-list"></ul>
+      </div>
+    </section>
+
     <div>
       <button type="button" class="pj-btn pj-btn-quiet" id="st-out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</button>
     </div>
@@ -852,7 +978,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- Hito 5: el captcha de Cloudflare para pedir el correo de entrada. -->
 <script src="ferocia-captcha.js?v=20261014e"></script>
-<script src="pj-app.js?v=20261015g"></script>
+<script src="pj-app.js?v=20261015h"></script>
 <script src="pj-auth.js?v=20261014e"></script>
 <!-- FEROCIA Identity: ciudad y estado (el mismo archivo que el formulario de suscripción). -->
 <script src="location-fields.js?v=20261015a"></script>
@@ -861,7 +987,9 @@
 <script src="pj-profile.js?v=20261015b"></script>
 <script src="pj-identity.js?v=20261015b"></script>
 <script src="pj-dna.js?v=20261015g"></script>
-<script src="pj-play.js?v=20261015h"></script>
+<script src="pj-play.js?v=20261015i"></script>
+<!-- Matchmaking M-2a: los juegos, la campanita y Player Safety. -->
+<script src="pj-games.js?v=20261015a"></script>
 <script src="pj-account.js?v=20261014e"></script>
 <script src="pj-help.js?v=20261014e"></script>
 </body>
