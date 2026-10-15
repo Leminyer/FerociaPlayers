@@ -1,0 +1,111 @@
+/* ============================================================
+   FEROCIA PLAYER PORTAL — Play (Matchmaking Engine™, etapa M-1 · Discover)
+   15 de octubre — diseño aprobado (§71)
+   Responde: "Who would I enjoy sharing the court with?"
+   Play (recomendados con sus razones, quién busca jugar ahora, nuevos,
+   rivales frecuentes, los que vuelven) y la tarjeta del jugador.
+   ============================================================ */
+
+/* ── Cabecera ── */
+.pl-hero { background: var(--pj-night); border-bottom: 4px solid var(--pj-lime); color: #fff; }
+.pl-hero-in { max-width: 1200px; margin: 0 auto; padding: 40px 24px 36px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 360px); gap: 24px 48px; align-items: end; }
+.pl-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--pj-lime); }
+.pl-title { margin: 10px 0 0; font-size: 42px; line-height: 1.06; font-weight: 900; letter-spacing: -1.2px; }
+.pl-title em { font-style: normal; color: var(--pj-lime); }
+.pl-lead { margin: 12px 0 0; max-width: 620px; font-size: 16px; line-height: 1.55; font-weight: 500; color: rgba(255, 255, 255, .78); }
+.pl-me { border-radius: 18px; padding: 18px 20px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .12); display: flex; flex-direction: column; gap: 8px; }
+.pl-me-k { font-size: 11px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase; color: rgba(255, 255, 255, .6); }
+.pl-me-n { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.pl-me-n .pl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pj-lime); }
+.pl-me-s { font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, .7); line-height: 1.45; }
+.pl-me a { align-self: flex-start; color: var(--pj-lime); font-size: 13px; font-weight: 800; padding: 10px 0; margin: -8px 0; }
+
+/* ── Secciones ── */
+.pl-sec { display: flex; flex-direction: column; gap: 14px; }
+.pl-sec-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.pl-sec-t { margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -.4px; color: var(--pj-navy); display: flex; align-items: center; gap: 10px; }
+.pl-sec-s { margin: 0; font-size: 13.5px; font-weight: 500; color: var(--pj-muted); }
+.pl-live { width: 10px; height: 10px; border-radius: 50%; background: #22C55E; box-shadow: 0 0 0 5px rgba(34, 197, 94, .18); }
+
+/* Buscan jugar ahora: tarjetas compactas en fila */
+.pl-now { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.pl-now-c { border-radius: 16px; padding: 16px; background: #fff; border: 1px solid var(--pj-line); display: flex; gap: 12px; align-items: center; }
+.pl-now-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.pl-now-n { font-size: 15px; font-weight: 800; color: var(--pj-ink); }
+.pl-now-i { font-size: 13px; font-weight: 800; color: var(--pj-blue); }
+.pl-now-s { font-size: 12px; font-weight: 600; color: var(--pj-muted); }
+
+/* Recomendados: la tarjeta grande */
+.pl-recs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.pl-card { border-radius: 20px; background: #fff; border: 1px solid var(--pj-line); padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+.pl-card-top { display: flex; gap: 14px; align-items: center; }
+.pl-av { flex: 0 0 auto; width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: var(--pj-navy); color: #fff; font-size: 18px; font-weight: 900; }
+.pl-av-sm { width: 42px; height: 42px; font-size: 14px; }
+.pl-av-lime { background: var(--pj-lime); color: var(--pj-night); }
+.pl-who { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.pl-name { font-size: 19px; font-weight: 900; color: var(--pj-ink); letter-spacing: -.3px; }
+.pl-meta { font-size: 13px; font-weight: 600; color: var(--pj-muted); }
+.pl-match { flex: 0 0 auto; padding: 6px 11px; border-radius: 99px; background: var(--pj-green-bg); color: var(--pj-green-tx); font-size: 12px; font-weight: 900; }
+.pl-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.pl-tag { padding: 6px 11px; border-radius: 10px; background: var(--pj-bg); border: 1px solid var(--pj-line); font-size: 12.5px; font-weight: 700; color: var(--pj-navy); }
+.pl-why { margin: 0; padding: 14px 16px; list-style: none; border-radius: 14px; background: rgba(23, 76, 204, .05); display: flex; flex-direction: column; gap: 8px; }
+.pl-why-k { font-size: 11px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--pj-blue); }
+.pl-why li { display: flex; gap: 9px; align-items: flex-start; font-size: 14px; font-weight: 600; color: var(--pj-ink); line-height: 1.4; }
+.pl-why svg { flex: 0 0 auto; margin-top: 2px; color: var(--pj-blue); }
+.pl-card-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pl-recog { font-size: 12.5px; font-weight: 700; color: #9A6200; display: inline-flex; align-items: center; gap: 6px; }
+.pl-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 9px 16px; cursor: pointer; border-radius: 99px; border: 1.5px solid var(--pj-navy); background: #fff; color: var(--pj-navy); font: 800 13px 'Inter', sans-serif; text-decoration: none; }
+.pl-soon { font-size: 12px; font-weight: 700; color: var(--pj-soft); }
+
+/* Listas cortas (nuevos, rivales, vuelven) */
+.pl-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.pl-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.pl-list li { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--pj-line); }
+.pl-list li:first-child { border-top: 0; padding-top: 4px; }
+.pl-list-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.pl-list-n { font-size: 14.5px; font-weight: 800; color: var(--pj-ink); }
+.pl-list-s { font-size: 12.5px; font-weight: 600; color: var(--pj-muted); }
+
+/* ── La tarjeta del jugador (lo que ven los demás) ── */
+.pc-wrap { max-width: 760px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.pc-card { border-radius: 24px; overflow: hidden; background: #fff; border: 1px solid var(--pj-line); }
+.pc-top { background: var(--pj-night); color: #fff; padding: 28px; display: flex; gap: 18px; align-items: center; border-bottom: 4px solid var(--pj-lime); }
+.pc-top .pl-av { width: 76px; height: 76px; font-size: 26px; }
+.pc-name { margin: 0; font-size: 30px; font-weight: 900; letter-spacing: -.8px; }
+.pc-meta { font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, .72); margin-top: 4px; }
+.pc-line { margin-top: 8px; font-size: 15px; font-weight: 600; color: rgba(255, 255, 255, .9); }
+.pc-line em { font-style: normal; color: var(--pj-lime); font-weight: 800; }
+.pc-body { padding: 24px 28px 28px; display: flex; flex-direction: column; gap: 18px; }
+.pc-hidden { display: flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 600; color: var(--pj-soft); }
+.pc-acts { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding-top: 6px; border-top: 1px solid var(--pj-line); }
+.pc-preview { display: flex; gap: 10px; align-items: center; padding: 12px 16px; border-radius: 14px; background: #FFF6D6; color: #7A4D00; font-size: 13.5px; font-weight: 700; }
+
+/* Extras de la página real */
+.pl-btn[disabled] { opacity: .45; cursor: default; }
+.pl-btn:focus-visible { outline: 3px solid rgba(23, 76, 204, .35); outline-offset: 2px; }
+.pl-name, .pl-now-n, .pl-list-n, .pc-name { overflow-wrap: anywhere; }
+.pl-why li > span { min-width: 0; }
+.pc-top-t { min-width: 0; }
+.pc-preview a { color: inherit; font-weight: 800; }
+.pc-stats { margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.pc-stats > div { padding: 12px; border-radius: 12px; background: var(--pj-bg); display: flex; flex-direction: column-reverse; gap: 2px; }
+.pc-stats dt { font-size: 10.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: var(--pj-muted); }
+.pc-stats dd { margin: 0; font-size: 20px; font-weight: 900; color: var(--pj-navy); }
+.pc-recent { display: flex; flex-direction: column; gap: 6px; }
+.pc-recent-h { margin: 0; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--pj-muted); }
+.pc-res { display: flex; justify-content: space-between; gap: 10px; padding: 9px 12px; border-radius: 10px; background: var(--pj-bg); font-size: 13.5px; font-weight: 700; color: var(--pj-ink); }
+.pc-res-w { color: var(--pj-green-tx); }
+.pc-res-l { color: var(--pj-soft); }
+
+@media (max-width: 900px) {
+  .pl-hero-in { grid-template-columns: 1fr; padding: 28px 20px; }
+  .pl-recs, .pl-3, .pl-now { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .pl-title { font-size: 30px; letter-spacing: -.6px; }
+  .pc-top { padding: 22px 18px; }
+  .pc-name { font-size: 24px; }
+  .pc-body { padding: 20px 18px 22px; }
+  .pc-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pl-card-foot .pl-btn { width: 100%; }
+}

@@ -4,6 +4,7 @@
    Hitos 3 y 4 (14 de octubre) — decisiones §46–§49
    FEROCIA Identity I-1 (15 de octubre): ciudad y estado (§57)
    Player DNA, etapa DNA-1 (15 de octubre): My DNA y su paso (§62, §63)
+   Matchmaking M-1 (15 de octubre): Play y la tarjeta del jugador (§70, §71)
 
    · Crea la conexión con Supabase (la misma base que el panel; la
      clave es la PÚBLICA, como en el sitio: lo que protege los datos
@@ -69,7 +70,7 @@
     sin_ficha:   { inicio: 'about',  rutas: ['about', 'help'] },
     en_revision: { inicio: 'review', rutas: ['review', 'help'] },
     rechazado:   { inicio: 'review', rutas: ['review', 'help'] },
-    vinculado:   { inicio: 'home',   rutas: ['home', 'profile', 'dna', 'dna-edit', 'edit', 'settings', 'help', 'welcome'] },
+    vinculado:   { inicio: 'home',   rutas: ['home', 'profile', 'dna', 'dna-edit', 'play', 'player', 'edit', 'settings', 'help', 'welcome'] },
   };
   /* Unido pero sin su Player DNA: primero el DNA. (Sólo si la base lo
      dice claramente: si el SQL 92 todavía no está, no se pide.) */
@@ -249,6 +250,12 @@
     const m = /^#\/([a-z-]+)/.exec(location.hash || '');
     return m ? m[1] : '';
   };
+  /* Lo que va después del nombre de la pantalla: #/player/123 → "123". */
+  /* (Tal cual: cada pantalla comprueba si le sirve.) */
+  const rutaParam = () => {
+    const m = /^#\/[a-z-]+\/(.+)$/.exec(location.hash || '');
+    return m ? m[1] : '';
+  };
 
   function ir(nombre) {
     if (rutaActual() === nombre) pintar();
@@ -286,7 +293,7 @@
     document.body.dataset.pantalla = nombre;
     document.querySelectorAll('[data-nav]').forEach((a) => {
       const activo = a.dataset.nav === nombre || (nombre === 'edit' && a.dataset.nav === 'profile')
-        || (nombre === 'dna-edit' && a.dataset.nav === 'dna');
+        || (nombre === 'dna-edit' && a.dataset.nav === 'dna') || (nombre === 'player' && a.dataset.nav === 'play');
       if (activo) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
@@ -296,14 +303,16 @@
 
   let pintadaAntes = false;
   let pantallaAnterior = '';
+  let direccionAnterior = '';
   function pintar() {
     if (!listo) return;
     const { inicio, rutas } = permitidas();
     let nombre = rutaActual();
     if (!rutas.includes(nombre)) nombre = inicio;
     if (PUBLICAS.includes(nombre) || sesion) {
-      if ('#/' + nombre !== location.hash && nombre !== 'loading' && nombre !== 'oops') {
-        history.replaceState(null, '', '#/' + nombre);
+      const conParam = nombre === rutaActual() && rutaParam() ? `#/${nombre}/${rutaParam()}` : '#/' + nombre;
+      if (conParam !== location.hash && nombre !== 'loading' && nombre !== 'oops') {
+        history.replaceState(null, '', conParam);
       }
     }
     let nueva = null;
@@ -313,7 +322,8 @@
       if (es) nueva = s;
     });
     pintarMarco(nueva, nombre);
-    if (pantallaAnterior !== nombre) window.scrollTo(0, 0);
+    if (pantallaAnterior !== nombre || direccionAnterior !== location.hash) window.scrollTo(0, 0);
+    direccionAnterior = location.hash;
     const fn = entradas[nombre];
     if (fn) {
       try {
@@ -416,6 +426,7 @@
     datos,
     olvidarDatos,
     alEntrar: (nombre, fn) => { entradas[nombre] = fn; },
+    rutaParam,
     olvidarSesionAqui,
     /* Adónde vuelve el enlace del correo: esta misma página. */
     vuelta: () => location.origin + location.pathname,

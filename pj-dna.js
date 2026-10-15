@@ -710,4 +710,9 @@
     $('dn-main').setAttribute('aria-busy', 'false');
   }
   P.alEntrar('dna', cargar);
+
+  /* Las listas y textos del DNA, para otras pantallas (Play, la tarjeta
+     del jugador — Matchmaking M-1). Sólo lectura. */
+  P.dnaTextos = Object.freeze({ ESTILOS, LADOS, FORMATOS, COMPETICION, MOMENTOS, EXTRAS, INTENCIONES, RECONOCIMIENTOS,
+    etiqueta, enOrden, ADJETIVO, COLA, formatoEnFrase, hastaTexto });
 })();

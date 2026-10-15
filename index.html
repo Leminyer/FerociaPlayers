@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="pj-pages.css?v=20261015a">
 <link rel="stylesheet" href="pj-identity.css?v=20261015a">
 <link rel="stylesheet" href="pj-dna.css?v=20261015e">
+<link rel="stylesheet" href="pj-play.css?v=20261015g">
 </head>
 <body>
 
@@ -190,6 +191,7 @@
       <a href="#/home" data-nav="home">Home</a>
       <a href="#/profile" data-nav="profile">My Identity</a>
       <a href="#/dna" data-nav="dna">My DNA</a>
+      <a href="#/play" data-nav="play">Play</a>
       <a href="#/help" data-nav="help">Help</a>
     </nav>
     <a class="pj-me" href="#/settings" data-nav="settings" aria-label="Account settings">
@@ -631,6 +633,83 @@
   </main>
 </section>
 
+<!-- ── 7e · PLAY (Matchmaking M-1 · Discover) ─────────────── -->
+<section class="pj-screen" data-screen="play" data-chrome="app" aria-labelledby="pl-title">
+  <section class="pl-hero">
+    <div class="pl-hero-in">
+      <div>
+        <div class="pl-eyebrow">Play · FEROCIA Matchmaking</div>
+        <h1 class="pl-title" id="pl-title" tabindex="-1" data-focus-title>Players you'd <em>enjoy</em> sharing the court with.</h1>
+        <p class="pl-lead">Every suggestion comes with the reasons behind it — your DNA, your level, when you play and the games you've shared. Never random.</p>
+      </div>
+      <div class="pl-me" id="pl-me" hidden>
+        <div class="pl-me-k">How others find you</div>
+        <div class="pl-me-n"><span class="pl-dot" aria-hidden="true"></span><span id="pl-me-n"></span></div>
+        <div class="pl-me-s" id="pl-me-s"></div>
+        <a href="#/player/me" id="pl-me-go">See your player card →</a>
+      </div>
+    </div>
+  </section>
+  <main class="pj-wrap" id="pl-main" aria-busy="true">
+    <div class="pj-alert pj-alert-error" id="pl-error" role="alert" hidden></div>
+    <section class="pj-panel pl-locked" id="pl-locked" hidden>
+      <h2 class="pj-panel-title">Play is for FEROCIA members</h2>
+      <p class="pj-small">Become a member to discover players you'd enjoy sharing the court with.</p>
+    </section>
+    <section class="pl-sec" id="pl-now-sec" aria-labelledby="pl-now-t" hidden>
+      <div class="pl-sec-h"><h2 class="pl-sec-t" id="pl-now-t"><span class="pl-live" aria-hidden="true"></span>Looking to play right now</h2><p class="pl-sec-s">Compatible players with an active "Right now".</p></div>
+      <div class="pl-now" id="pl-now"></div>
+    </section>
+    <section class="pl-sec" id="pl-recs-sec" aria-labelledby="pl-recs-t" hidden>
+      <div class="pl-sec-h"><h2 class="pl-sec-t" id="pl-recs-t">Recommended for you</h2><p class="pl-sec-s">The best matches first.</p></div>
+      <div class="pl-recs" id="pl-recs"></div>
+    </section>
+    <div class="pl-3" id="pl-3">
+      <section class="pj-panel pl-sec" id="pl-new-sec" aria-labelledby="pl-new-t" hidden><h2 class="pj-panel-title" id="pl-new-t">New players you may enjoy meeting</h2><p class="pl-sec-s">Joined FEROCIA recently, at your level.</p><ul class="pl-list" id="pl-new"></ul></section>
+      <section class="pj-panel pl-sec" id="pl-opp-sec" aria-labelledby="pl-opp-t" hidden><h2 class="pj-panel-title" id="pl-opp-t">Frequent opponents</h2><p class="pl-sec-s">The players you face the most.</p><ul class="pl-list" id="pl-opp"></ul></section>
+      <section class="pj-panel pl-sec" id="pl-ret-sec" aria-labelledby="pl-ret-t" hidden><h2 class="pj-panel-title" id="pl-ret-t">Returning this week</h2><p class="pl-sec-s">Back on court after a break.</p><ul class="pl-list" id="pl-ret"></ul></section>
+    </div>
+    <section class="pj-panel pl-empty" id="pl-hidden" hidden>
+      <h2 class="pj-panel-title">You're hidden right now</h2>
+      <p class="pj-small">Your privacy is Private, so you don't appear in Play — and you don't see other players either. Switch to Limited in <a class="pj-link-strong" href="#/profile">My Identity</a> (Who can find you) to see and be seen.</p>
+    </section>
+    <section class="pj-panel pl-empty" id="pl-empty" hidden>
+      <h2 class="pj-panel-title">Your matches are on their way</h2>
+      <p class="pj-small">As more players join the Player Portal and complete their Player DNA, the players you'd enjoy sharing the court with will show up here.</p>
+    </section>
+    <p class="id-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v5h1"/></svg>There is no open player directory: you only see compatible players, and only players with Limited or Public privacy. Inviting players to games comes next.</p>
+  </main>
+</section>
+
+<!-- ── 7f · LA TARJETA DEL JUGADOR ────────────────────────── -->
+<section class="pj-screen" data-screen="player" data-chrome="app" aria-labelledby="pc-name">
+  <main class="pj-wrap">
+    <div class="pc-wrap">
+      <a class="pj-back" href="#/play">← Play</a>
+      <div class="pj-alert pj-alert-error" id="pc-error" role="alert" tabindex="-1" hidden></div>
+      <div class="pc-preview" id="pc-preview" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/></svg><span><span id="pc-preview-t">This is how other players see your card. Change what they see in </span><a href="#/dna">My DNA</a> (Who sees what) and <a href="#/profile">My Identity</a> (Who can find you).</span></div>
+      <article class="pc-card" id="pc-card" aria-busy="true">
+        <div class="pc-top">
+          <span class="pl-av pl-av-lime" id="pc-ini" aria-hidden="true"></span>
+          <div class="pc-top-t">
+            <h1 class="pc-name" id="pc-name" tabindex="-1" data-focus-title></h1>
+            <div class="pc-meta" id="pc-meta"></div>
+            <div class="pc-line" id="pc-line"></div>
+          </div>
+        </div>
+        <div class="pc-body">
+          <ul class="pl-why" id="pc-why" hidden></ul>
+          <dl class="dn-rows" id="pc-rows"></dl>
+          <dl class="pc-stats" id="pc-stats" hidden></dl>
+          <div class="pc-recent" id="pc-recent" hidden></div>
+          <div class="pc-hidden" id="pc-hidden" hidden></div>
+          <div class="pc-acts" id="pc-acts"><button class="pl-btn" type="button" disabled>Invite to play</button><span class="pl-soon">Inviting players to games comes in the next step.</span></div>
+        </div>
+      </article>
+    </div>
+  </main>
+</section>
+
 <!-- ── 9 · ACCOUNT SETTINGS ───────────────────────────────── -->
 <section class="pj-screen" data-screen="settings" data-chrome="app" aria-labelledby="st-title">
   <main class="pj-wrap pj-wrap-sm">
@@ -677,6 +756,15 @@
         <span class="pj-row-help" id="st-club-help"></span>
       </div>
       <span class="pj-pill" id="st-club"></span>
+    </section>
+    <section class="pj-row-card">
+      <span class="pj-row-ico pj-row-ico-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5h.01"/></svg></span>
+      <div class="pj-row-txt">
+        <h2 class="pj-row-label">Help</h2>
+        <span class="pj-row-value">Questions about your account or your history?</span>
+        <span class="pj-row-help">Send us a message and our team will get back to you.</span>
+      </div>
+      <a class="pj-btn pj-btn-outline pj-btn-sm" href="#/help" id="st-help">Get help</a>
     </section>
     <div>
       <button type="button" class="pj-btn pj-btn-quiet" id="st-out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</button>
@@ -747,7 +835,7 @@
   <a href="#/home" data-nav="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></a>
   <a href="#/profile" data-nav="profile"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Identity</span></a>
   <a href="#/dna" data-nav="dna"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3c0 6 10 6 10 12s-10 6-10 6"/><path d="M17 3c0 6-10 6-10 12"/><path d="M8 6h8"/><path d="M8 18h8"/></svg><span>DNA</span></a>
-  <a href="#/help" data-nav="help"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5h.01"/></svg><span>Help</span></a>
+  <a href="#/play" data-nav="play"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><path d="M17 4a4 4 0 0 1 0 8"/><path d="M22 21c0-3-2-5-4-5.5"/></svg><span>Play</span></a>
   <a href="#/settings" data-nav="settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Account</span></a>
 </nav>
 
@@ -764,7 +852,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- Hito 5: el captcha de Cloudflare para pedir el correo de entrada. -->
 <script src="ferocia-captcha.js?v=20261014e"></script>
-<script src="pj-app.js?v=20261015c"></script>
+<script src="pj-app.js?v=20261015g"></script>
 <script src="pj-auth.js?v=20261014e"></script>
 <!-- FEROCIA Identity: ciudad y estado (el mismo archivo que el formulario de suscripción). -->
 <script src="location-fields.js?v=20261015a"></script>
@@ -772,7 +860,8 @@
 <script src="pj-home.js?v=20261015b"></script>
 <script src="pj-profile.js?v=20261015b"></script>
 <script src="pj-identity.js?v=20261015b"></script>
-<script src="pj-dna.js?v=20261015f"></script>
+<script src="pj-dna.js?v=20261015g"></script>
+<script src="pj-play.js?v=20261015h"></script>
 <script src="pj-account.js?v=20261014e"></script>
 <script src="pj-help.js?v=20261014e"></script>
 </body>
