@@ -44,6 +44,8 @@
   const RECONOCIMIENTOS = [['great_partner', 'Great Partner'], ['great_communication', 'Great Communication'],
     ['reliable', 'Reliable'], ['positive_energy', 'Positive Energy'], ['competitive', 'Competitive'],
     ['encouraging', 'Encouraging'], ['respectful', 'Respectful'], ['would_play_again', 'Would Play Again']];
+  /* "How you compete" es una lista desde el SQL 94 (antes, una sola). */
+  const competiciones = (d) => (Array.isArray(d.competitions) ? d.competitions : (d.competition ? [d.competition] : []));
   const etiqueta = (lista, code) => (lista.find((x) => x[0] === code) || [])[1] || '';
   const enOrden = (lista, codes) => lista.map((x) => x[0]).filter((c) => (codes || []).includes(c));
   const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
@@ -76,7 +78,7 @@
     styles: 'How you usually play your points. Pick up to 3 that sound most like you — for example, Strategic if you place the ball and plan your shots, or Soft Game / Dinker if you love long rallies at the kitchen line.',
     side: 'In doubles, the side of the court you prefer to play from: right or left. Choose Either side if you are happy on both.',
     formats: 'The kinds of games you play: Singles (1 vs 1), Doubles (2 vs 2) or Mixed doubles (a man and a woman on each team). Choose all that apply.',
-    competition: 'The experience you look for on court — from relaxed, social games (Recreational, Social) to competitive play (League Player, Tournament Focused). Practice Oriented means you mostly play to improve.',
+    competition: 'The experience you look for on court — from relaxed, social games (Recreational, Social) to competitive play (League Player, Tournament Focused). Practice Oriented means you mostly play to improve. Pick up to 3.',
     when: 'The times you are usually free to play. Tap every box that fits: weekdays or weekends, in the morning, afternoon or evening. Flexible = any time works. Last-minute games = you are happy to join a game on short notice.',
     venue: 'Whether you prefer indoor courts, outdoor courts, or both.',
     intent: 'What you are looking for at the moment, like one more player for tonight. It is optional and clears on its own: "tonight" at midnight, "this weekend" after Sunday, the others after 7 days.',
@@ -168,7 +170,7 @@
       pregunta(pref, 'styles', 'Play style', 'Choose up to 3', ESTILOS, 'checkbox'),
       pregunta(pref, 'side', 'Side', 'Choose one', LADOS, 'radio'),
       pregunta(pref, 'formats', 'Format', 'Choose all you play', FORMATOS, 'checkbox'),
-      pregunta(pref, 'competition', 'How you compete', 'Choose one', COMPETICION, 'radio'),
+      pregunta(pref, 'competition', 'How you compete', 'Choose up to 3', COMPETICION, 'checkbox'),
       preguntaCuando(pref),
       pregunta(pref, 'venue', 'Where you like to play', 'Choose one', SEDES, 'radio'),
       pregunta(pref, 'intent', 'Right now (optional)', 'Clears on its own', INTENCIONES.concat([['', 'Not right now']]), 'radio'));
@@ -188,11 +190,14 @@
     caja.querySelectorAll('input').forEach((i) => {
       i.closest('label').classList.toggle('is-on', i.checked);
     });
-    const estilos = [...caja.querySelectorAll(`input[name="${pref}-styles"]`)];
-    const lleno = estilos.filter((i) => i.checked).length >= 3;
-    estilos.forEach((i) => {
-      i.disabled = lleno && !i.checked;
-      i.closest('label').classList.toggle('is-off', i.disabled);
+    /* Play style y How you compete: hasta 3 cada una. */
+    ['styles', 'competition'].forEach((clave) => {
+      const lista = [...caja.querySelectorAll(`input[name="${pref}-${clave}"]`)];
+      const lleno = lista.filter((i) => i.checked).length >= 3;
+      lista.forEach((i) => {
+        i.disabled = lleno && !i.checked;
+        i.closest('label').classList.toggle('is-off', i.disabled);
+      });
     });
   }
 
@@ -202,7 +207,7 @@
       p_play_styles: marcados(pref, 'styles'),
       p_side: marcados(pref, 'side')[0] || null,
       p_formats: marcados(pref, 'formats'),
-      p_competition: marcados(pref, 'competition')[0] || null,
+      p_competitions: marcados(pref, 'competition'),
       p_availability: marcados(pref, 'when'),
       p_venue: marcados(pref, 'venue')[0] || null,
       p_intent: marcados(pref, 'intent')[0] || null,
@@ -210,7 +215,7 @@
   }
   function llenar(pref, d) {
     const valores = {
-      styles: d.play_styles || [], side: [d.side], formats: d.formats || [], competition: [d.competition],
+      styles: d.play_styles || [], side: [d.side], formats: d.formats || [], competition: competiciones(d),
       when: d.availability || [], venue: [d.venue_pref], intent: [d.intent || ''],
     };
     for (const [clave, lista] of Object.entries(valores)) {
@@ -236,7 +241,7 @@
     mira('styles', v.p_play_styles.length < 1 || v.p_play_styles.length > 3);
     mira('side', !v.p_side);
     mira('formats', v.p_formats.length < 1);
-    mira('competition', !v.p_competition);
+    mira('competition', v.p_competitions.length < 1 || v.p_competitions.length > 3);
     mira('when', v.p_availability.length < 1);
     mira('venue', !v.p_venue);
     return faltan[0] || null;
@@ -251,7 +256,7 @@
     invalid_play_styles: 'Choose 1 to 3 play styles.',
     invalid_side: 'Choose your side.',
     invalid_formats: 'Choose at least one format.',
-    invalid_competition: 'Choose how you compete.',
+    invalid_competition: 'Choose 1 to 3 ways you compete.',
     invalid_availability: 'Choose when you play.',
     invalid_venue: 'Choose where you like to play.',
     invalid_intent: 'Choose what you are looking for right now, or leave it empty.',
@@ -392,7 +397,7 @@
     const rasgos = [];
     const rasgo = (ico, texto) => { const s = h('span', { class: 'dn-trait' }); s.append(icono(ico), document.createTextNode(texto)); return s; };
     if (dec) {
-      rasgos.push(rasgo('trofeo', etiqueta(COMPETICION, dec.competition)));
+      rasgos.push(rasgo('trofeo', enOrden(COMPETICION, competiciones(dec)).map((c) => etiqueta(COMPETICION, c)).join(' · ')));
       rasgos.push(rasgo('lados', etiqueta(LADOS, dec.side)));
       const cuando = enOrden(MOMENTOS.concat(EXTRAS), dec.availability);
       if (cuando.length) rasgos.push(rasgo('calendario', etiqueta(MOMENTOS.concat(EXTRAS), cuando[0])));
@@ -546,7 +551,7 @@
       fila('Play style', enOrden(ESTILOS, dec.play_styles).map((c) => etiqueta(ESTILOS, c)), true),
       fila('Side', [etiqueta(LADOS, dec.side)]),
       fila('Format', enOrden(FORMATOS, dec.formats).map((c) => etiqueta(FORMATOS, c))),
-      fila('Competition', [etiqueta(COMPETICION, dec.competition)]),
+      fila('Competition', enOrden(COMPETICION, competiciones(dec)).map((c) => etiqueta(COMPETICION, c))),
       fila('Availability', enOrden(todos, dec.availability).map((c) => etiqueta(todos, c))),
       fila('Where', [dec.venue_pref === 'both' ? 'Indoor & outdoor' : etiqueta(SEDES, dec.venue_pref)]));
   }
