@@ -10,7 +10,8 @@
      se comprueba que esté bien escrito; quién es quién lo decide la
      base, nunca el navegador.
    · La pantalla de espera (en revisión, o no se pudo confirmar).
-   · La bienvenida cuando se acaba de unir.
+   · La bienvenida cuando se acaba de unir (después del paso "Your
+     Player DNA", que lleva pj-dna.js).
    ============================================================ */
 
 (function () {
@@ -65,7 +66,28 @@
 
   P.mascaraTelefono($('ab-phone'));
   P.camposLugar('ab-city', 'ab-state');
-  let bienvenida = null;     // { nuevo } al acabar de unirse
+  /* { nuevo } al acabar de unirse. Se guarda también en esta pestaña
+     (sessionStorage) por si recarga en el paso "Your Player DNA", que va
+     justo después (Player DNA, §62); luego vuelve a la bienvenida. Va
+     con el id de la cuenta: otra cuenta en la misma pestaña no la ve. */
+  const CLAVE_BV = 'ferocia-players-bienvenida';
+  let bienvenida = null;
+  const yo = () => { const s = P.sesion(); return s && s.user ? s.user.id : null; };
+  function guardarBienvenida(v) {
+    bienvenida = v;
+    try {
+      if (v) sessionStorage.setItem(CLAVE_BV, JSON.stringify({ uid: yo(), nuevo: !!v.nuevo }));
+      else sessionStorage.removeItem(CLAVE_BV);
+    } catch (_) { /* sin almacenamiento: sólo en memoria */ }
+  }
+  P.hayBienvenida = () => {
+    if (bienvenida) return true;
+    try {
+      const g = JSON.parse(sessionStorage.getItem(CLAVE_BV) || 'null');
+      if (g && g.uid && g.uid === yo()) { bienvenida = { nuevo: !!g.nuevo }; return true; }
+    } catch (_) { /* nada */ }
+    return false;
+  };
   const elegido = (name) => {
     const r = document.querySelector(`input[name="${name}"]:checked`);
     return r ? r.value : '';
@@ -133,7 +155,7 @@
       P.olvidarDatos();
       /* Recién unido: directo a la bienvenida (sin pasar por Home). */
       if (data && data.estado === 'vinculado' && data.recien) {
-        bienvenida = { nuevo: !!data.nuevo };
+        guardarBienvenida({ nuevo: !!data.nuevo });
         history.replaceState(null, '', '#/welcome');
       }
       await P.refrescar();
@@ -241,7 +263,10 @@
   /* ── 5b · BIENVENIDA ── */
   P.alEntrar('welcome', async () => {
     const e = P.estado() || {};
+    P.hayBienvenida();
     const nuevo = !!(bienvenida && bienvenida.nuevo);
+    /* Ya se enseñó: fuera de la pestaña (en memoria sigue para repintar). */
+    try { sessionStorage.removeItem(CLAVE_BV); } catch (_) { /* nada */ }
     $('wb-title').replaceChildren(
       document.createTextNode(nuevo ? 'Welcome to FEROCIA,' : 'Welcome back,'),
       h('br'),

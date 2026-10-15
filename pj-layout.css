@@ -219,7 +219,7 @@ a.pj-row:hover .pj-row-name { color: var(--pj-blue); }
   .pj-me-name { display: none; }
   .pj-me svg { display: none; }
   .pj-tabbar:not([hidden]) {
-    display: grid; grid-template-columns: repeat(4, 1fr);
+    display: grid; grid-template-columns: repeat(5, 1fr);
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
     background: #fff; border-top: 1px solid var(--pj-line);
     padding: 6px 4px calc(6px + env(safe-area-inset-bottom));

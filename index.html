@@ -11,10 +11,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="design-tokens.css?v=20261014e">
 <link rel="stylesheet" href="pj-base.css?v=20261014e">
-<link rel="stylesheet" href="pj-auth.css?v=20261014f">
-<link rel="stylesheet" href="pj-layout.css?v=20261015a">
+<link rel="stylesheet" href="pj-auth.css?v=20261015c">
+<link rel="stylesheet" href="pj-layout.css?v=20261015c">
 <link rel="stylesheet" href="pj-pages.css?v=20261015a">
 <link rel="stylesheet" href="pj-identity.css?v=20261015a">
+<link rel="stylesheet" href="pj-dna.css?v=20261015c">
 </head>
 <body>
 
@@ -84,6 +85,7 @@
         <li class="is-done" aria-current="step">1 · Your details</li>
         <li>2 · Confirm email</li>
         <li>3 · About you</li>
+        <li>4 · Your DNA</li>
       </ol>
       <div class="pj-card-head">
         <h1 class="pj-title" id="ca-title" tabindex="-1" data-focus-title>Join the FEROCIA Player Portal</h1>
@@ -137,6 +139,7 @@
         <li class="is-done">1 · Your details</li>
         <li class="is-done" aria-current="step">2 · Confirm email</li>
         <li>3 · About you</li>
+        <li>4 · Your DNA</li>
       </ol>
       <div class="pj-check-head">
         <div class="pj-mail-ico">
@@ -186,6 +189,7 @@
     <nav class="pj-nav" aria-label="Main">
       <a href="#/home" data-nav="home">Home</a>
       <a href="#/profile" data-nav="profile">My Identity</a>
+      <a href="#/dna" data-nav="dna">My DNA</a>
       <a href="#/help" data-nav="help">Help</a>
     </nav>
     <a class="pj-me" href="#/settings" data-nav="settings" aria-label="Account settings">
@@ -219,6 +223,7 @@
         <li class="is-done">1 · Your details</li>
         <li class="is-done">2 · Confirm email</li>
         <li class="is-done" aria-current="step">3 · About you</li>
+        <li>4 · Your DNA</li>
       </ol>
       <div class="pj-card-head">
         <h1 class="pj-title" id="ab-title" tabindex="-1" data-focus-title>A little about you</h1>
@@ -509,6 +514,123 @@
   </main>
 </section>
 
+<!-- ── 7b · TU DNA: EL PASO OBLIGATORIO (Player DNA, etapa DNA-1) ──
+     Cuentas nuevas: el último paso después de "A little about you".
+     Cuentas de antes: una vez, antes del Home. -->
+<section class="pj-screen" data-screen="dna-start" aria-labelledby="ds-title">
+  <div class="pj-band">
+    <div class="pj-band-in">
+      <img class="pj-band-logo" src="assets/ferocia-logo.png" alt="FEROCIA">
+      <button type="button" class="pj-band-btn" data-action="sign-out">Sign out</button>
+    </div>
+  </div>
+  <main class="pj-card-wrap pj-card-wrap-md">
+    <div class="pj-card">
+      <ol class="pj-steps" id="ds-steps" aria-label="Progress">
+        <li class="is-done">1 · Your details</li>
+        <li class="is-done">2 · Confirm email</li>
+        <li class="is-done">3 · About you</li>
+        <li class="is-done" aria-current="step">4 · Your DNA</li>
+      </ol>
+      <div class="pj-card-head">
+        <div class="pj-eyebrow" id="ds-eyebrow">Last step · about 1 minute</div>
+        <h1 class="pj-title" id="ds-title" tabindex="-1" data-focus-title>Your Player DNA</h1>
+        <p class="pj-lead">How you like to play. FEROCIA uses it to connect you with players you'll enjoy sharing the court with. You can change it any time.</p>
+      </div>
+      <form class="pj-form pj-form-roomy" id="ds-form" novalidate>
+        <div class="pj-alert pj-alert-error" id="ds-error" role="alert" hidden></div>
+        <div class="dn-qs" id="ds-qs"></div>
+        <button class="pj-btn pj-btn-primary pj-btn-block" type="submit" id="ds-submit">Finish <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
+        <p class="pj-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#24BC96" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Only your style, competition and availability will be visible to other players when matching launches — you choose in My DNA.</p>
+        <p class="pj-small-center">Something not working? <a href="#/help">Send us a message</a></p>
+      </form>
+    </div>
+  </main>
+</section>
+
+<!-- ── 7c · MY DNA ────────────────────────────────────────── -->
+<section class="pj-screen" data-screen="dna" data-chrome="app" aria-labelledby="dn-title">
+  <section class="dn-hero">
+    <div class="dn-hero-in">
+      <div>
+        <div class="dn-eyebrow">Player DNA</div>
+        <h1 class="dn-title" id="dn-title" tabindex="-1" data-focus-title>Your Player DNA</h1>
+        <div class="dn-traits" id="dn-traits"></div>
+      </div>
+      <div class="dn-intent" id="dn-intent">
+        <div class="dn-intent-k"><span class="dn-live" aria-hidden="true"></span>Right now</div>
+        <div class="dn-intent-n" id="dn-intent-n"></div>
+        <div class="dn-intent-s" id="dn-intent-s"></div>
+        <button type="button" class="dn-intent-go" id="dn-intent-go" aria-expanded="false" aria-controls="dn-intent-pick">Change</button>
+        <fieldset class="dn-intent-pick" id="dn-intent-pick" hidden>
+          <legend>What are you looking for? It clears on its own.</legend>
+        </fieldset>
+      </div>
+    </div>
+  </section>
+  <main class="pj-wrap" id="dn-main" aria-busy="true">
+    <div class="pj-alert pj-alert-error" id="dn-error" role="alert" hidden></div>
+    <div class="dn-grid">
+      <div class="dn-col">
+        <section class="pj-panel dn-give" id="dn-give" aria-labelledby="dn-give-t" hidden>
+          <div class="pj-panel-head"><h2 class="pj-panel-title" id="dn-give-t">Recognize your last session</h2><span class="dn-src dn-src-com"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><span id="dn-give-where"></span></span></div>
+          <p class="dn-sub">Up to 3 for each player. Only positive — they'll see the recognition, never who gave it.</p>
+          <div class="dn-give-list" id="dn-give-list"></div>
+          <div class="dn-give-foot">
+            <span id="dn-give-until"></span>
+            <span class="dn-give-acts"><button type="button" class="dn-skip" id="dn-give-skip">Skip</button><button type="button" class="dn-btn-lime" id="dn-give-send" disabled>Send recognition</button></span>
+          </div>
+        </section>
+        <section class="pj-panel" aria-labelledby="dn-style-t">
+          <div class="pj-panel-head"><h2 class="pj-panel-title" id="dn-style-t">Your style</h2><span class="dn-src dn-src-you">You said · <a href="#/dna-edit">Edit</a></span></div>
+          <dl class="dn-rows" id="dn-rows"></dl>
+        </section>
+        <section class="pj-panel" aria-labelledby="dn-sees-t">
+          <div class="pj-panel-head"><h2 class="pj-panel-title" id="dn-sees-t">What FEROCIA sees</h2><span class="dn-src dn-src-ver"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>From your games</span></div>
+          <p class="dn-sub">Built from your verified ladder and tournament games — the last 12 months count most.</p>
+          <div class="dn-sees" id="dn-sees"></div>
+        </section>
+      </div>
+      <div class="dn-col">
+        <section class="pj-panel" aria-labelledby="dn-social-t">
+          <div class="pj-panel-head"><h2 class="pj-panel-title" id="dn-social-t">Social DNA</h2><span class="dn-src dn-src-com"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>From recognition</span></div>
+          <p class="dn-sub">What the players you share the court with say about you.</p>
+          <div class="dn-recog" id="dn-recog"></div>
+        </section>
+        <section class="pj-panel dn-rel" id="dn-rel" aria-labelledby="dn-rel-t" hidden>
+          <div class="pj-panel-head"><h2 class="pj-panel-title" id="dn-rel-t">Your reliability</h2><span class="dn-src dn-src-me"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Only you</span></div>
+          <div class="dn-rel-top"><span class="dn-rel-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></span><span><span class="dn-rel-n" id="dn-rel-n"></span><br><span class="dn-rel-s" id="dn-rel-s"></span></span></div>
+          <dl class="dn-rel-kpis" id="dn-rel-kpis"></dl>
+          <p class="dn-only"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Only you can see this. Reliability measures commitment, not skill — winning or losing never changes it.</p>
+        </section>
+        <section class="pj-panel" aria-labelledby="dn-priv-t">
+          <div class="pj-panel-head"><h2 class="pj-panel-title" id="dn-priv-t">Who sees what</h2></div>
+          <ul class="dn-priv" id="dn-priv"></ul>
+          <p class="id-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v5h1"/></svg>This applies when FEROCIA player matching launches. Your reliability is always private.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+</section>
+
+<!-- ── 7d · EDIT MY DNA ───────────────────────────────────── -->
+<section class="pj-screen" data-screen="dna-edit" data-chrome="app" aria-labelledby="de-title">
+  <main class="pj-wrap pj-wrap-md">
+    <div class="pj-page-head pj-page-head-col">
+      <a class="pj-back" href="#/dna">← My DNA</a>
+      <h1 class="pj-h1" id="de-title" tabindex="-1" data-focus-title>Edit your DNA</h1>
+    </div>
+    <form class="pj-panel pj-form pj-form-roomy" id="de-form" novalidate>
+      <div class="pj-alert pj-alert-error" id="de-error" role="alert" hidden></div>
+      <div class="dn-qs" id="de-qs"></div>
+      <div class="pj-form-actions">
+        <button class="pj-btn pj-btn-primary pj-btn-md" type="submit" id="de-submit">Save changes</button>
+        <a class="pj-btn pj-btn-quiet pj-btn-md" href="#/dna">Cancel</a>
+      </div>
+    </form>
+  </main>
+</section>
+
 <!-- ── 9 · ACCOUNT SETTINGS ───────────────────────────────── -->
 <section class="pj-screen" data-screen="settings" data-chrome="app" aria-labelledby="st-title">
   <main class="pj-wrap pj-wrap-sm">
@@ -624,6 +746,7 @@
 <nav class="pj-tabbar" id="pj-tabbar" aria-label="Main" hidden>
   <a href="#/home" data-nav="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></a>
   <a href="#/profile" data-nav="profile"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Identity</span></a>
+  <a href="#/dna" data-nav="dna"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3c0 6 10 6 10 12s-10 6-10 6"/><path d="M17 3c0 6-10 6-10 12"/><path d="M8 6h8"/><path d="M8 18h8"/></svg><span>DNA</span></a>
   <a href="#/help" data-nav="help"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5h.01"/></svg><span>Help</span></a>
   <a href="#/settings" data-nav="settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Account</span></a>
 </nav>
@@ -641,14 +764,15 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- Hito 5: el captcha de Cloudflare para pedir el correo de entrada. -->
 <script src="ferocia-captcha.js?v=20261014e"></script>
-<script src="pj-app.js?v=20261015b"></script>
+<script src="pj-app.js?v=20261015c"></script>
 <script src="pj-auth.js?v=20261014e"></script>
 <!-- FEROCIA Identity: ciudad y estado (el mismo archivo que el formulario de suscripción). -->
 <script src="location-fields.js?v=20261015a"></script>
-<script src="pj-onboarding.js?v=20261015b"></script>
+<script src="pj-onboarding.js?v=20261015d"></script>
 <script src="pj-home.js?v=20261015b"></script>
 <script src="pj-profile.js?v=20261015b"></script>
 <script src="pj-identity.js?v=20261015b"></script>
+<script src="pj-dna.js?v=20261015d"></script>
 <script src="pj-account.js?v=20261014e"></script>
 <script src="pj-help.js?v=20261014e"></script>
 </body>

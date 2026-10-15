@@ -3,6 +3,7 @@
    Hito 2 (14 de octubre) — decisiones §42–§45
    Hitos 3 y 4 (14 de octubre) — decisiones §46–§49
    FEROCIA Identity I-1 (15 de octubre): ciudad y estado (§57)
+   Player DNA, etapa DNA-1 (15 de octubre): My DNA y su paso (§62, §63)
 
    · Crea la conexión con Supabase (la misma base que el panel; la
      clave es la PÚBLICA, como en el sitio: lo que protege los datos
@@ -12,7 +13,9 @@
      (portal_estado) y sólo deja ver las pantallas de ese punto:
        sin_ficha            → "A little about you" (y Help)
        en_revision/rechazado → la pantalla de espera (y Help)
-       vinculado            → Home, My Identity, Edit, Settings, Help
+       vinculado            → Home, My Identity, My DNA, Edit, Settings, Help
+       vinculado sin su DNA  → "Your Player DNA" (y Help): se pide una
+                               vez, antes del Home (§62)
      Así nadie se queda en una pantalla sin salida.
    · La sesión se guarda en ESTE dominio: no se comparte con el panel.
 
@@ -66,8 +69,11 @@
     sin_ficha:   { inicio: 'about',  rutas: ['about', 'help'] },
     en_revision: { inicio: 'review', rutas: ['review', 'help'] },
     rechazado:   { inicio: 'review', rutas: ['review', 'help'] },
-    vinculado:   { inicio: 'home',   rutas: ['home', 'profile', 'edit', 'settings', 'help', 'welcome'] },
+    vinculado:   { inicio: 'home',   rutas: ['home', 'profile', 'dna', 'dna-edit', 'edit', 'settings', 'help', 'welcome'] },
   };
+  /* Unido pero sin su Player DNA: primero el DNA. (Sólo si la base lo
+     dice claramente: si el SQL 92 todavía no está, no se pide.) */
+  const SIN_DNA = { inicio: 'dna-start', rutas: ['dna-start', 'help'] };
 
   let sesion = null;
   let estado = null;          // lo que contestó portal_estado
@@ -253,6 +259,7 @@
     if (!sesion) return { inicio: 'sign-in', rutas: PUBLICAS };
     if (estadoFallo) return { inicio: 'oops', rutas: ['oops'] };
     if (!estado) return { inicio: 'loading', rutas: ['loading'] };
+    if (estado.estado === 'vinculado' && estado.dna_completo === false) return SIN_DNA;
     return POR_ESTADO[estado.estado] || { inicio: 'oops', rutas: ['oops'] };
   }
 
@@ -278,7 +285,8 @@
     document.body.classList.toggle('pj-con-barra', conApp && unido);
     document.body.dataset.pantalla = nombre;
     document.querySelectorAll('[data-nav]').forEach((a) => {
-      const activo = a.dataset.nav === nombre || (nombre === 'edit' && a.dataset.nav === 'profile');
+      const activo = a.dataset.nav === nombre || (nombre === 'edit' && a.dataset.nav === 'profile')
+        || (nombre === 'dna-edit' && a.dataset.nav === 'dna');
       if (activo) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
