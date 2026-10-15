@@ -193,3 +193,40 @@ body.gm-con-ventana { overflow: hidden; }
   .gm-reqcard .gm-acts > .gm-btn-dark, .gm-reqcard .gm-acts > .gm-btn-quiet { flex: 1 1 auto; }
   .pc-safety { margin-left: 0; }
 }
+
+/* ── El chat del juego (M-2b, §75) ── */
+.ch-panel { gap: 14px; }
+.ch-list { list-style: none; margin: 0; padding: 4px 2px; display: flex; flex-direction: column; gap: 12px; max-height: 520px; overflow-y: auto; overscroll-behavior: contain; }
+.ch-list:empty { display: none; }
+.ch-sys { align-self: center; max-width: 92%; text-align: center; font-size: 12px; font-weight: 700; color: var(--pj-muted); background: var(--pj-bg); padding: 5px 12px; border-radius: 99px; }
+.ch-m { display: flex; gap: 10px; align-items: flex-end; max-width: 85%; }
+.ch-m-mine { align-self: flex-end; justify-content: flex-end; }
+.ch-m .pl-av-sm { width: 36px; height: 36px; font-size: 12px; }
+.ch-b { min-width: 0; border-radius: 16px 16px 16px 4px; background: var(--pj-bg); padding: 10px 14px; display: flex; flex-direction: column; gap: 3px; }
+.ch-m-mine .ch-b { background: var(--pj-blue); color: #fff; border-radius: 16px 16px 4px 16px; }
+.ch-n { font-size: 12px; font-weight: 800; color: var(--pj-navy); }
+.ch-t { font-size: 14.5px; line-height: 1.45; font-weight: 500; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ch-t-del { font-style: italic; opacity: .7; }
+.ch-meta { font-size: 11.5px; font-weight: 600; color: var(--pj-muted); }
+.ch-m-mine .ch-meta { color: rgba(255, 255, 255, .8); text-align: right; }
+.ch-act { display: inline-flex; align-items: center; min-height: 40px; border: 0; background: none; padding: 0 4px; margin: -12px -4px; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; }
+.ch-act:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 4px; }
+.ch-compose { display: flex; gap: 10px; align-items: flex-end; border-top: 1px solid var(--pj-line); padding-top: 14px; }
+.ch-compose[hidden], .ch-closed[hidden], .ch-err[hidden] { display: none; }
+.ch-input { flex: 1; min-height: 52px; }
+.ch-input[aria-invalid="true"] { border-color: #B42318; }
+.ch-send { flex: 0 0 auto; width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--pj-blue); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.ch-send:focus-visible { outline: 3px solid rgba(23, 76, 204, .35); outline-offset: 2px; }
+.ch-send[disabled] { opacity: .55; cursor: default; }
+.ch-err { margin: -6px 0 0; font-size: 13px; font-weight: 700; color: #B42318; }
+.ch-count:empty { display: none; }
+.ch-count { margin-top: -8px; }
+.ch-closed { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--pj-bg); font-size: 13.5px; font-weight: 600; color: var(--pj-soft); }
+.gm-unread { flex: 0 0 auto; margin-left: auto; padding: 4px 10px; border-radius: 99px; background: var(--pj-blue); color: #fff; font-size: 11.5px; font-weight: 800; white-space: nowrap; }
+.gm-unread + .gm-pill { margin-left: 0; }
+.gm-host-tags { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+.gm-quote { margin: 0; padding: 12px 14px; border-left: 3px solid #FECDCA; border-radius: 8px; background: #FEF3F2; font-size: 14px; line-height: 1.5; color: var(--pj-ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .ch-m { max-width: 92%; }
+  .ch-list { max-height: 60vh; }
+}

@@ -37,6 +37,7 @@
     escudo: '<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="m9 12 2 2 4-4"/>',
     check: '<path d="M20 6 9 17l-5-5"/>',
     bandera: '<path d="M4 22V4"/><path d="M4 4h12l-2 4 2 4H4"/>',
+    enviar: '<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
   };
   function icono(nombre, w) {
     const s = h('span');
@@ -78,6 +79,11 @@
     already_in: "You're already in this game (or your request is waiting).",
     too_many_requests: 'You have 3 requests waiting. Withdraw one, or wait for a host to answer.',
     too_many_games: 'You created 3 games in the last 24 hours. Please try again tomorrow.',
+    too_many_messages: "You're sending messages very fast. Please wait a few minutes.",
+    chat_closed: 'This chat is closed.',
+    message_too_long: 'Messages can be up to 500 characters.',
+    empty_message: 'Write a message first.',
+
     invite_limit: 'You used your 8 invitations for this game.',
     invalid_reason: 'Choose a reason.',
     detail_required: 'Tell us a little more in "Other".',
@@ -223,7 +229,8 @@
   }
 
   /* Reportar a un jugador (y, si quiere, bloquearlo). */
-  function reportar(persona, juegoId) {
+  /* mensaje (M-2b): { id, body } cuando se reporta un mensaje del chat. */
+  function reportar(persona, juegoId, mensaje) {
     const quien = nombreDe(persona);
     const nombreCorto = quien.split(' ')[0];
     return ventana((caja, cerrar, idT) => {
@@ -242,8 +249,13 @@
         if (!motivo) { err.textContent = 'Choose what happened.'; err.hidden = false; return; }
         si.disabled = true;
         try {
-          await rpc('portal_reportar', { p_player: persona.player_id, p_game: juegoId || null, p_reason: motivo,
-            p_detail: detalle.value.trim() || null, p_block: bloquear.checked });
+          if (mensaje) {
+            await rpc('portal_reportar_mensaje', { p_message: mensaje.id, p_reason: motivo,
+              p_detail: detalle.value.trim() || null, p_block: bloquear.checked });
+          } else {
+            await rpc('portal_reportar', { p_player: persona.player_id, p_game: juegoId || null, p_reason: motivo,
+              p_detail: detalle.value.trim() || null, p_block: bloquear.checked });
+          }
           cerrar({ bloqueado: bloquear.checked });
         } catch (e) {
           err.textContent = textoError(e);
@@ -254,8 +266,9 @@
       no.addEventListener('click', () => cerrar(null));
       caja.append(
         h('span', { class: 'gm-modal-ico gm-modal-ico-red', 'aria-hidden': 'true' }, icono('bandera', 24)),
-        h('h2', { id: idT, text: `Report ${quien}` }),
-        h('p', { class: 'pj-small gm-m0', text: `Only the FEROCIA team sees reports. ${nombreCorto} won't know who reported.` }),
+        h('h2', { id: idT, text: mensaje ? `Report a message from ${quien}` : `Report ${quien}` }),
+        h('p', { class: 'pj-small gm-m0', text: `Only the FEROCIA team sees reports${mensaje ? ' — and only this message, not the rest of the chat' : ''}. ${nombreCorto} won't know who reported.` }),
+        ...(mensaje && mensaje.body ? [h('blockquote', { class: 'gm-quote', text: mensaje.body })] : []),
         ops, detalle, check, err, si, no,
         h('p', { class: 'gm-small gm-center gm-m0', text: 'In an emergency, call 911 first.' }));
       return ops.querySelector('input');
@@ -317,6 +330,7 @@
       h('span', { class: 'gm-date', 'aria-hidden': 'true' }, h('small', { text: c.mes }), h('b', { text: c.num })),
       h('span', { class: 'gm-who' }, h('b', { text: `${TIPO[j.kind] || 'Game'} · ${c.dia} · ${c.hora}` }),
         h('span', { text: `Hosted by ${nombreDe(j.host)} · ${j.place}` })),
+      j.unread ? h('span', { class: 'gm-unread', text: `${plural(j.unread, 'new message', 'new messages')}` }) : null,
       pill[0] ? h('span', { class: `gm-pill ${pill[1]}`, text: pill[0] }) : null);
   }
   function tarjetaAnfitrion(j) {
@@ -330,8 +344,10 @@
         conIcono('gente', `${(j.taken || 0) + 1} of ${j.needed + 1} players`),
         conIcono('nivel', niveles(j.levels))),
       h('div', { class: 'gm-host-f' },
-        pend ? h('span', { class: 'gm-req', text: `${plural(pend, 'request', 'requests')} waiting` })
-          : h('span', { class: 'gm-req gm-req-0', text: j.visibility === 'invite' ? 'Invite only' : 'Open to compatible players' }),
+        h('span', { class: 'gm-host-tags' },
+          pend ? h('span', { class: 'gm-req', text: `${plural(pend, 'request', 'requests')} waiting` })
+            : h('span', { class: 'gm-req gm-req-0', text: j.visibility === 'invite' ? 'Invite only' : 'Open to compatible players' }),
+          j.unread ? h('span', { class: 'gm-req', text: plural(j.unread, 'new message', 'new messages') }) : null),
         h('a', { class: 'gm-btn-lime', href: `#/game/${j.id}`, text: 'Open game' })));
   }
   function puestos(j) {
@@ -660,8 +676,7 @@
 
   function panelNotas(j) {
     return panel(tituloPanel('Notes'),
-      j.notes ? h('div', { class: 'gm-note', text: j.notes }) : h('p', { class: 'gm-small gm-m0', text: 'No notes for this game.' }),
-      h('p', { class: 'gm-small gm-m0', text: 'Game chat comes in the next step. For now, everything players need is on this page.' }));
+      j.notes ? h('div', { class: 'gm-note', text: j.notes }) : h('p', { class: 'gm-small gm-m0', text: 'No notes for this game.' }));
   }
   function panelSeguridad() {
     const punto = (t) => { const li = h('li'); li.append(icono('check', 16), document.createTextNode(t)); return li; };
@@ -763,17 +778,26 @@
 
     /* Las dos columnas. */
     const izq = [], der = [];
+    /* M-2b: el chat, para el anfitrión y los jugadores aceptados (pj-chat.js). */
+    const chat = (host || est === 'accepted') && !j.minimal && P.chatPanel ? P.chatPanel(j) : null;
+    if (!chat && P.chatParar) P.chatParar();
     if (host) {
-      if (activo) izq.push(panelSolicitudes(j), panelInvitar(j));
+      if (activo) izq.push(panelSolicitudes(j));
+      if (chat) izq.push(chat);
+      if (activo) izq.push(panelInvitar(j));
       der.push(panelJugadores(j, true), panelNotas(j));
-      if (!activo) { izq.push(...der.splice(0)); }
+    } else if (chat) {
+      izq.push(chat);
+      der.push(panelJugadores(j, false), panelNotas(j), panelSeguridad());
     } else if (j.players) {
       izq.push(panelJugadores(j, false), panelNotas(j));
       der.push(panelSeguridad());
     } else {
       izq.push(panelSeguridad());
     }
+    if (!izq.length) izq.push(...der.splice(0));
     $('gp-left').replaceChildren(...izq);
+
     $('gp-right').replaceChildren(...der);
     $('gp-grid').classList.toggle('gm-grid-1', !der.length);
     $('gp-grid').hidden = false;
@@ -786,6 +810,10 @@
     }
   }
   P.alEntrar('game', pintarJuego);
+  /* Lo que usa el chat (pj-chat.js, M-2b). */
+  P.avisosRecargar = () => cargarAvisos(true);
+  P.juegosUI = { rpc, icono, reportar, ventanaConfirmar, textoError, conContacto: (t) => conContacto(t), cuando, plural };
+
 
   /* ============================================================
      LA TARJETA DEL JUGADOR: invitar, reportar, bloquear
@@ -863,6 +891,7 @@
       case 'game_changed': return [b(d.host), ' changed your game. Now: ', b(`${c.dia} · ${c.hora} · ${d.place || ''}`), '.'];
       case 'game_cancelled': return [`Your ${tipo} game ${cuandoTxt} was cancelled by the host`, ...motivo, '.'];
       case 'reminder': return [d.host_view ? 'Reminder: you are hosting ' : 'Reminder: your game, ', b(`${tipo} · ${c.dia} · ${c.hora}`), '.'];
+      case 'chat': return [b(plural(Number(d.count) || 1, 'new message', 'new messages')), ` in ${d.host_view ? 'your' : `${d.host || 'the host'}'s`} ${tipo} game ${cuandoTxt}.`];
       default: return ['You have an update about a game.'];
     }
   }
