@@ -88,8 +88,6 @@
 .pj-hero { position: relative; overflow: hidden; background: var(--pj-night); border-bottom: 4px solid var(--pj-lime); }
 /* En Home la línea lima va debajo del saludo, no de la cabecera. */
 body[data-pantalla="home"] .pj-appbar { border-bottom: 1px solid rgba(255, 255, 255, .08); }
-.pj-hero-court { position: absolute; right: -60px; top: 40px; width: 560px; height: 360px; border: 2px solid rgba(198, 242, 33, .1); border-radius: 6px; pointer-events: none; }
-.pj-hero-line { position: absolute; right: 220px; top: 40px; height: 360px; border-left: 2px solid rgba(198, 242, 33, .1); pointer-events: none; }
 .pj-hero-in {
   position: relative; max-width: 1200px; margin: 0 auto; padding: 48px 24px 56px;
   display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 32px;

@@ -146,6 +146,8 @@
   }
 
   /* ── Lo que viene ── */
+  /* El tipo de evento, en palabras (en la base: ladder, private_session…). */
+  const TIPOS = { tournament: 'Tournament', ladder: 'Ladder', clinic: 'Clinic', private_session: 'Private session', other: 'Event' };
   const COLOR_TIPO = (t) => /tourn/i.test(t || '') ? 'pj-orange' : /clinic|camp|lesson/i.test(t || '') ? 'pj-green' : 'pj-blue';
   function eventos(lista) {
     if (!lista || !lista.length) return [h('p', { class: 'pj-empty', text: 'Nothing scheduled yet — check back soon.' })];
@@ -156,7 +158,7 @@
       return h('a', { class: 'pj-event', href, target: '_blank', rel: 'noopener' },
         h('span', { class: `pj-event-date ${i % 2 ? 'is-navy' : ''}` }, h('span', { class: 'pj-event-mon', text: fmt.mes3(e.event_date) }), h('span', { class: 'pj-event-day', text: fmt.dia(e.event_date) })),
         h('span', { class: 'pj-event-txt' },
-          h('span', { class: `pj-event-kind ${COLOR_TIPO(e.event_type)}`, text: e.event_type || 'Event' }),
+          h('span', { class: `pj-event-kind ${COLOR_TIPO(e.event_type)}`, text: TIPOS[e.event_type] || 'Event' }),
           h('span', { class: 'pj-event-title', text: e.title }),
           h('span', { class: 'pj-event-sub', text: cuando })));
     });
