@@ -2,6 +2,7 @@
    FEROCIA PLAYER PORTAL — el arranque, las rutas y lo común
    Hito 2 (14 de octubre) — decisiones §42–§45
    Hitos 3 y 4 (14 de octubre) — decisiones §46–§49
+   FEROCIA Identity I-1 (15 de octubre): ciudad y estado (§57)
 
    · Crea la conexión con Supabase (la misma base que el panel; la
      clave es la PÚBLICA, como en el sitio: lo que protege los datos
@@ -11,7 +12,7 @@
      (portal_estado) y sólo deja ver las pantallas de ese punto:
        sin_ficha            → "A little about you" (y Help)
        en_revision/rechazado → la pantalla de espera (y Help)
-       vinculado            → Home, My profile, Edit, Settings, Help
+       vinculado            → Home, My Identity, Edit, Settings, Help
      Así nadie se queda en una pantalla sin salida.
    · La sesión se guarda en ESTE dominio: no se comparte con el panel.
 
@@ -157,6 +158,36 @@
     });
   }
 
+  /* Ciudad (con la lista de ciudades cercanas) y estado (Florida
+     primero): los mismos campos que el formulario de suscripción
+     (location-fields.js, que se carga después). Lo usan "A little about
+     you" y Edit profile. FEROCIA Identity, etapa I-1. */
+  const lugarL = () => window.FerociaLocation;
+  function camposLugar(idCiudad, idEstado) {
+    const L = lugarL();
+    if (!L) return;
+    L.mountCitySuggest(idCiudad);
+    /* stateOptions sólo trae la lista fija de estados (ningún dato de
+       nadie): por eso se puede poner como HTML. */
+    document.getElementById(idEstado).innerHTML = L.stateOptions('');
+  }
+  /* Lee y limpia ciudad y estado ("boca ratón" → "Boca Raton"). */
+  function leerLugar(idCiudad, idEstado) {
+    const L = lugarL();
+    const ci = document.getElementById(idCiudad), es = document.getElementById(idEstado);
+    /* El apóstrofo curvo del iPhone (’) cuenta como el recto (Coeur d'Alene),
+       y nada de puntos, guiones o apóstrofos delante (".boca" → "Boca"). */
+    const crudo = ci.value.replace(/[\u2018\u2019\u02BC]/g, "'").replace(/^[\s.'-]+/, '');
+    const c = L ? L.validateCity(crudo, { required: true }) : { ok: !!crudo.trim(), value: crudo.trim() };
+    const e = L ? L.validateState(es.value, { required: true }) : { ok: !!es.value, value: es.value };
+    if (c.ok) ci.value = c.value;
+    return { ciudad: c.ok ? c.value : '', estado: e.ok ? e.value : '', malCiudad: !c.ok, malEstado: !e.ok };
+  }
+  const errorLugar = {
+    invalid_city: 'Check your city — letters only, like "Boca Raton".',
+    invalid_state: 'Choose your state.',
+  };
+
   /* Los errores de la base, en palabras. */
   function errorTexto(err, propios) {
     const m = String((err && (err.message || err.msg)) || err || '');
@@ -178,7 +209,7 @@
     return estado;
   }
 
-  /* Los datos de Home / My profile / Edit: una sola lectura, guardada
+  /* Los datos de Home / My Identity / Edit: una sola lectura, guardada
      un minuto (cambiar de pantalla no vuelve a pedirlos). */
   let datosPromesa = null;
   let datosHora = 0;
@@ -354,6 +385,9 @@
     h,
     fmt,
     mascaraTelefono,
+    camposLugar,
+    leerLugar,
+    errorLugar,
     errorTexto,
     sesion: () => sesion,
     estado: () => estado,

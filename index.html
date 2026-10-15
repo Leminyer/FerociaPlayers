@@ -11,9 +11,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="design-tokens.css?v=20261014e">
 <link rel="stylesheet" href="pj-base.css?v=20261014e">
-<link rel="stylesheet" href="pj-auth.css?v=20261014e">
-<link rel="stylesheet" href="pj-layout.css?v=20261014e">
-<link rel="stylesheet" href="pj-pages.css?v=20261014e">
+<link rel="stylesheet" href="pj-auth.css?v=20261014f">
+<link rel="stylesheet" href="pj-layout.css?v=20261015a">
+<link rel="stylesheet" href="pj-pages.css?v=20261015a">
+<link rel="stylesheet" href="pj-identity.css?v=20261015a">
 </head>
 <body>
 
@@ -34,9 +35,6 @@
 <!-- ── 1 · ENTRAR ─────────────────────────────────────────── -->
 <section class="pj-screen pj-split" data-screen="sign-in" aria-labelledby="si-title">
   <div class="pj-brand">
-    <div class="pj-court pj-court-box" aria-hidden="true"></div>
-    <div class="pj-court pj-court-mid" aria-hidden="true"></div>
-    <div class="pj-court pj-court-cen" aria-hidden="true"></div>
     <img class="pj-brand-logo" src="assets/ferocia-logo.png" alt="FEROCIA">
     <div class="pj-brand-copy">
       <div class="pj-brand-eyebrow">Player Portal</div>
@@ -187,7 +185,7 @@
     <a class="pj-appbar-logo" href="#/home"><img src="assets/ferocia-logo.png" alt="FEROCIA — Home"></a>
     <nav class="pj-nav" aria-label="Main">
       <a href="#/home" data-nav="home">Home</a>
-      <a href="#/profile" data-nav="profile">My profile</a>
+      <a href="#/profile" data-nav="profile">My Identity</a>
       <a href="#/help" data-nav="help">Help</a>
     </nav>
     <a class="pj-me" href="#/settings" data-nav="settings" aria-label="Account settings">
@@ -244,6 +242,14 @@
           <div class="pj-field">
             <label class="pj-label" for="ab-phone">Mobile phone</label>
             <div class="pj-phone"><span class="pj-phone-cc" aria-hidden="true">+1</span><input class="pj-phone-in" id="ab-phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(561) 000-0000" maxlength="16"></div>
+          </div>
+          <div class="pj-field">
+            <label class="pj-label" for="ab-city">City</label>
+            <input class="pj-input" id="ab-city" type="text" maxlength="60">
+          </div>
+          <div class="pj-field">
+            <label class="pj-label" for="ab-state">State</label>
+            <select class="pj-input pj-select" id="ab-state"></select>
           </div>
         </div>
         <fieldset class="pj-fieldset" id="ab-gender">
@@ -362,39 +368,79 @@
   </main>
 </section>
 
-<!-- ── 7 · MY PROFILE ─────────────────────────────────────── -->
-<section class="pj-screen" data-screen="profile" data-chrome="app" aria-labelledby="pf-title">
-  <main class="pj-wrap">
-    <div class="pj-page-head">
-      <div>
-        <div class="pj-eyebrow">Player profile</div>
-        <h1 class="pj-h1" id="pf-title" tabindex="-1" data-focus-title>My profile</h1>
+<!-- ── 7 · MY IDENTITY ────────────────────────────────────── -->
+<section class="pj-screen" data-screen="profile" data-chrome="app" aria-labelledby="id-name">
+  <section class="id-hero">
+    <div class="id-hero-in">
+      <div class="id-who">
+        <div class="id-avatar" id="id-ini" aria-hidden="true"></div>
+        <div class="id-who-text">
+          <div class="id-eyebrow">FEROCIA Identity</div>
+          <h1 class="id-name" id="id-name" tabindex="-1" data-focus-title></h1>
+          <div class="id-place" id="id-place" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span id="id-place-t"></span></div>
+          <div class="pj-chips" id="id-chips"></div>
+        </div>
       </div>
-      <a class="pj-btn pj-btn-primary pj-btn-md" href="#/edit"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Edit profile</a>
+      <dl class="id-facts" id="id-facts"></dl>
+      <p class="id-statement" id="id-statement"></p>
     </div>
-    <div class="pj-alert pj-alert-error" id="pf-error" role="alert" hidden></div>
-    <div class="pj-profile">
-      <aside class="pj-idcard" aria-label="Summary">
-        <div class="pj-idcard-line" aria-hidden="true"></div>
-        <div class="pj-idcard-avatar" id="pf-ini" aria-hidden="true"></div>
-        <div class="pj-idcard-name" id="pf-name"></div>
-        <div class="pj-chips pj-chips-center" id="pf-chips"></div>
-        <dl class="pj-idcard-stats" id="pf-stats"></dl>
-      </aside>
-      <div class="pj-profile-main">
-        <section class="pj-panel" aria-labelledby="pf-personal-t">
-          <h2 class="pj-panel-title" id="pf-personal-t">Personal information</h2>
-          <dl class="pj-dl" id="pf-personal"></dl>
+  </section>
+  <main class="pj-wrap" id="id-main" aria-busy="true">
+    <div class="pj-alert pj-alert-error" id="id-error" role="alert" hidden></div>
+    <a class="id-nudge" id="id-nudge" href="#/edit" hidden><span class="id-nudge-t"><strong>Add your city</strong> so the FEROCIA community knows where you play.</span><span class="id-nudge-go" aria-hidden="true">→</span></a>
+    <div class="id-grid">
+      <div class="id-col">
+        <section class="pj-panel" aria-labelledby="id-people-t">
+          <div class="pj-panel-head"><h2 class="pj-panel-title" id="id-people-t">Your people</h2></div>
+          <p class="id-sub">The players who've been part of your game the most.</p>
+          <div class="id-people">
+            <div class="id-people-col">
+              <h3 class="id-people-h">Regular partners</h3>
+              <ul class="id-list" id="id-partners"></ul>
+            </div>
+            <div class="id-people-col">
+              <h3 class="id-people-h">Familiar opponents</h3>
+              <ul class="id-list" id="id-opponents"></ul>
+            </div>
+          </div>
         </section>
-        <section class="pj-panel" aria-labelledby="pf-pb-t">
-          <h2 class="pj-panel-title" id="pf-pb-t">Pickleball</h2>
-          <dl class="pj-dl" id="pf-pickleball"></dl>
-        </section>
-        <section class="pj-panel" aria-labelledby="pf-acc-t">
-          <h2 class="pj-panel-title" id="pf-acc-t">Your account</h2>
-          <div class="pj-facts" id="pf-account"></div>
+        <section class="pj-panel" aria-labelledby="id-story-t">
+          <div class="pj-panel-head"><h2 class="pj-panel-title" id="id-story-t">Your FEROCIA story</h2></div>
+          <div class="id-next" id="id-next"></div>
+          <ol class="id-timeline" id="id-timeline"></ol>
         </section>
       </div>
+      <div class="id-col">
+        <section class="pj-panel" aria-labelledby="id-game-t">
+          <div class="pj-panel-head"><h2 class="pj-panel-title" id="id-game-t">Your game</h2></div>
+          <dl class="id-kpis" id="id-kpis"></dl>
+          <div class="id-form" id="id-form"></div>
+        </section>
+        <section class="pj-panel" aria-labelledby="id-hist-t">
+          <div class="pj-panel-head"><h2 class="pj-panel-title" id="id-hist-t">Where you've competed</h2></div>
+          <ul class="id-hist" id="id-hist"></ul>
+        </section>
+      </div>
+    </div>
+    <div class="id-grid-2">
+      <section class="pj-panel" aria-labelledby="id-priv-t">
+        <div class="pj-panel-head"><h2 class="pj-panel-title" id="id-priv-t">Who can find you</h2></div>
+        <fieldset class="id-priv" id="id-priv">
+          <legend class="pj-sr">Who can find you</legend>
+          <label class="id-opt"><input class="id-radio" type="radio" name="id-vis" value="public"><span class="id-opt-t"><span class="id-opt-n">Public</span><span class="id-opt-s">Any FEROCIA player can find you and see your identity.</span></span></label>
+          <label class="id-opt"><input class="id-radio" type="radio" name="id-vis" value="limited"><span class="id-opt-t"><span class="id-opt-n">Limited · recommended</span><span class="id-opt-s">Players can find you for games. Your contact details and full history stay private.</span></span></label>
+          <label class="id-opt"><input class="id-radio" type="radio" name="id-vis" value="private"><span class="id-opt-t"><span class="id-opt-n">Private</span><span class="id-opt-s">Only you and FEROCIA staff. You won't appear in player matching.</span></span></label>
+        </fieldset>
+        <p class="id-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v5h1"/></svg>This applies when FEROCIA player matching launches. Ladder standings and tournament results are always public.</p>
+      </section>
+      <section class="pj-panel" aria-labelledby="id-me-t">
+        <div class="pj-panel-head">
+          <h2 class="pj-panel-title" id="id-me-t">Personal details</h2>
+          <a class="pj-panel-link" href="#/edit">Edit</a>
+        </div>
+        <dl class="id-dl" id="id-details"></dl>
+        <p class="id-sub">Only you and FEROCIA staff see these.</p>
+      </section>
     </div>
   </main>
 </section>
@@ -403,7 +449,7 @@
 <section class="pj-screen" data-screen="edit" data-chrome="app" aria-labelledby="ed-title">
   <main class="pj-wrap pj-wrap-md">
     <div class="pj-page-head pj-page-head-col">
-      <a class="pj-back" href="#/profile">← My profile</a>
+      <a class="pj-back" href="#/profile">← My Identity</a>
       <h1 class="pj-h1" id="ed-title" tabindex="-1" data-focus-title>Edit profile</h1>
     </div>
     <div class="pj-edit">
@@ -413,6 +459,16 @@
         <div class="pj-field pj-field-narrow">
           <label class="pj-label" for="ed-phone">Mobile phone</label>
           <div class="pj-phone"><span class="pj-phone-cc" aria-hidden="true">+1</span><input class="pj-phone-in" id="ed-phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(561) 000-0000" maxlength="16"></div>
+        </div>
+        <div class="pj-grid-2">
+          <div class="pj-field">
+            <label class="pj-label" for="ed-city">City</label>
+            <input class="pj-input" id="ed-city" type="text" maxlength="60">
+          </div>
+          <div class="pj-field">
+            <label class="pj-label" for="ed-state">State</label>
+            <select class="pj-input pj-select" id="ed-state"></select>
+          </div>
         </div>
         <fieldset class="pj-fieldset" id="ed-gender">
           <legend class="pj-label">Gender</legend>
@@ -446,7 +502,7 @@
         </section>
         <section class="pj-panel pj-panel-tint">
           <h2 class="pj-panel-title pj-panel-title-sm">Changing your email?</h2>
-          <p class="pj-small pj-small-dark">Do it in <a class="pj-link-strong" href="#/settings">Account settings</a> — we'll confirm the new address with a link. Your new phone and email also update the FEROCIA mailing list.</p>
+          <p class="pj-small pj-small-dark">Do it in <a class="pj-link-strong" href="#/settings">Account settings</a> — we'll confirm the new address with a link. Your new phone, city and email also update the FEROCIA mailing list.</p>
         </section>
       </aside>
     </div>
@@ -567,7 +623,7 @@
 <!-- La barra de abajo, en el teléfono (ya unido a su ficha). -->
 <nav class="pj-tabbar" id="pj-tabbar" aria-label="Main" hidden>
   <a href="#/home" data-nav="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></a>
-  <a href="#/profile" data-nav="profile"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Profile</span></a>
+  <a href="#/profile" data-nav="profile"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Identity</span></a>
   <a href="#/help" data-nav="help"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5h.01"/></svg><span>Help</span></a>
   <a href="#/settings" data-nav="settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Account</span></a>
 </nav>
@@ -585,11 +641,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- Hito 5: el captcha de Cloudflare para pedir el correo de entrada. -->
 <script src="ferocia-captcha.js?v=20261014e"></script>
-<script src="pj-app.js?v=20261014e"></script>
+<script src="pj-app.js?v=20261015a"></script>
 <script src="pj-auth.js?v=20261014e"></script>
-<script src="pj-onboarding.js?v=20261014e"></script>
+<!-- FEROCIA Identity: ciudad y estado (el mismo archivo que el formulario de suscripción). -->
+<script src="location-fields.js?v=20261015a"></script>
+<script src="pj-onboarding.js?v=20261015a"></script>
 <script src="pj-home.js?v=20261014e"></script>
-<script src="pj-profile.js?v=20261014e"></script>
+<script src="pj-profile.js?v=20261015a"></script>
+<script src="pj-identity.js?v=20261015a"></script>
 <script src="pj-account.js?v=20261014e"></script>
 <script src="pj-help.js?v=20261014e"></script>
 </body>

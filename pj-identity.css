@@ -1,0 +1,200 @@
+/* ============================================================
+   FEROCIA PLAYER PORTAL — My Identity (FEROCIA Identity, etapa I-1)
+   15 de octubre — diseño aprobado (§58, §59)
+
+   Responde de un vistazo: "Who is this player — not only as a
+   competitor, but as a member of the community?"
+   Arriba, la respuesta (quién es, desde cuándo, con cuánta gente ha
+   jugado y una frase que lo resume); debajo, su gente, su historia,
+   su juego, dónde ha competido, su privacidad y sus datos.
+   ============================================================ */
+
+/* ── La cabecera de identidad ── */
+.id-hero { background: var(--pj-night); border-bottom: 4px solid var(--pj-lime); color: #fff; }
+.id-hero-in {
+  max-width: 1200px; margin: 0 auto; padding: 44px 24px 40px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px 48px; align-items: center;
+}
+.id-who { display: flex; gap: 26px; align-items: center; min-width: 0; }
+.id-avatar {
+  flex: 0 0 auto; width: 112px; height: 112px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--pj-lime); color: var(--pj-night);
+  font-size: 40px; font-weight: 900; letter-spacing: -1px;
+  box-shadow: 0 0 0 6px rgba(198, 242, 33, .14);
+}
+.id-who-text { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.id-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--pj-lime); }
+.id-name { margin: 0; font-size: 44px; line-height: 1.02; font-weight: 900; letter-spacing: -1.4px; overflow-wrap: anywhere; }
+.id-place { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; color: rgba(255, 255, 255, .72); }
+.id-place svg { color: var(--pj-lime); }
+.id-chip-ok { display: inline-flex; align-items: center; gap: 5px; background: rgba(36, 188, 150, .18); color: #7BE3C6; }
+
+/* La frase que responde la pregunta */
+.id-statement {
+  grid-column: 1 / -1; margin: 6px 0 0; max-width: 860px;
+  font-size: 22px; line-height: 1.45; font-weight: 500; color: rgba(255, 255, 255, .88);
+}
+.id-statement strong { color: #fff; font-weight: 800; }
+.id-statement em { font-style: normal; color: var(--pj-lime); font-weight: 800; }
+
+/* 3 datos de comunidad */
+.id-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 168px)); gap: 12px; }
+.id-facts { margin: 0; }
+.id-fact {
+  padding: 16px 18px; border-radius: 16px;
+  background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .1);
+  display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 4px;
+}
+.id-fact dd { margin: 0; }
+.id-fact-n { font-size: 30px; font-weight: 900; letter-spacing: -.6px; color: #fff; line-height: 1; }
+.id-fact-l { font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, .62); line-height: 1.35; }
+
+/* ── Cuerpo ── */
+.id-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.id-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.id-col { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.id-sub { margin: 0; font-size: 13.5px; font-weight: 500; color: var(--pj-muted); line-height: 1.5; }
+
+/* Your people */
+.id-people { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 28px; }
+.id-people-h { margin: 0 0 4px; font-size: 11px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--pj-muted); }
+.id-list { list-style: none; margin: 0; padding: 0; }
+.id-person { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--pj-line); }
+.id-list > .id-person:first-child { border-top: 0; }
+.id-empty { margin: 6px 0 0; font-size: 13.5px; line-height: 1.5; font-weight: 500; color: var(--pj-muted); }
+.id-pav {
+  flex: 0 0 auto; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 14px; font-weight: 900;
+}
+.id-pav-1 { background: #E8EEFC; color: var(--pj-blue); }
+.id-pav-2 { background: var(--pj-green-bg); color: var(--pj-green-tx); }
+.id-pav-3 { background: #FDF0D5; color: #9A6200; }
+.id-pav-4 { background: #F0E4FA; color: #7B2FBE; }
+.id-person-t { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.id-person-n { font-size: 15px; font-weight: 800; color: var(--pj-ink); overflow-wrap: anywhere; }
+.id-person-s { font-size: 12.5px; font-weight: 600; color: var(--pj-muted); }
+.id-rec {
+  flex: 0 0 auto; padding: 4px 10px; border-radius: 99px; background: var(--pj-bg); border: 1px solid var(--pj-line);
+  font-size: 13px; font-weight: 800; color: var(--pj-navy); font-variant-numeric: tabular-nums;
+}
+
+/* Your FEROCIA story (línea de tiempo) */
+.id-next {
+  display: flex; gap: 16px; align-items: center; padding: 16px 18px; border-radius: 16px;
+  background: var(--pj-night); color: #fff;
+}
+.id-next-ico { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: rgba(198, 242, 33, .14); color: var(--pj-lime); }
+.id-next-t { flex: 1 1 auto; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.id-next-k { font-size: 11px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase; color: var(--pj-lime); }
+.id-next-n { font-size: 16px; font-weight: 800; }
+.id-bar { height: 6px; border-radius: 99px; background: rgba(255, 255, 255, .14); overflow: hidden; }
+.id-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--pj-lime); }
+
+.id-timeline { list-style: none; margin: 0; padding: 0; position: relative; }
+.id-timeline::before { content: ""; position: absolute; left: 19px; top: 8px; bottom: 8px; width: 2px; background: var(--pj-line); }
+.id-step { position: relative; display: flex; gap: 16px; padding: 9px 0; align-items: center; }
+.id-dot {
+  position: relative; flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center; background: #fff; border: 2px solid var(--pj-line); color: var(--pj-blue);
+}
+.id-dot-gold { border-color: #F5B700; background: #FFF6D6; color: #9A6200; }
+.id-dot-lime { border-color: var(--pj-lime); background: var(--pj-night); color: var(--pj-lime); }
+.id-step-t { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.id-step-n { font-size: 15px; font-weight: 800; color: var(--pj-ink); }
+.id-step-s { font-size: 12.5px; font-weight: 600; color: var(--pj-muted); }
+
+/* Your game (compacto) */
+.id-kpis { margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.id-kpi { padding: 14px; border-radius: 14px; background: var(--pj-bg); display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 4px; min-width: 0; }
+.id-kpi dd { margin: 0; }
+.id-kpi-n { font-size: 24px; font-weight: 900; color: var(--pj-navy); letter-spacing: -.4px; font-variant-numeric: tabular-nums; }
+.id-kpi-n.is-up { color: var(--pj-green-tx); }
+.id-kpi-l { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--pj-muted); }
+.id-form { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.id-form-l { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--pj-muted); }
+.id-form-dots { display: flex; gap: 6px; }
+.id-fd { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 900; }
+.id-fd-w { background: var(--pj-green-bg); color: var(--pj-green-tx); }
+.id-fd-l { background: #FDE8D8; color: #9A3412; }
+
+/* Competition history */
+.id-hist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.id-h { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-top: 1px solid var(--pj-line); }
+.id-h:first-child { border-top: 0; padding-top: 2px; }
+.id-h-ico { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 13px; font-weight: 900; }
+.id-h-lad { background: #E8EEFC; color: var(--pj-blue); }
+.id-h-tro { background: #FFF6D6; color: #9A6200; }
+.id-h-t { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.id-h-n { font-size: 15px; font-weight: 800; color: var(--pj-ink); overflow-wrap: anywhere; }
+.id-h-s { font-size: 12.5px; font-weight: 600; color: var(--pj-muted); }
+.id-h-r { flex: 0 0 auto; font-size: 12.5px; font-weight: 800; color: var(--pj-navy); text-align: right; }
+.id-h-r.is-gold { color: #9A6200; }
+
+/* Privacidad ("Who can find you"): radios de verdad, con forma de tarjeta */
+.id-priv { margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.id-opt {
+  display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 14px;
+  border: 1.5px solid var(--pj-line); background: #fff; cursor: pointer;
+}
+.id-opt:hover { border-color: var(--pj-field); }
+.id-opt:has(.id-radio:checked) { border-color: var(--pj-blue); background: rgba(23, 76, 204, .04); }
+.id-opt:has(.id-radio:focus-visible) { box-shadow: 0 0 0 4px rgba(23, 76, 204, .14); }
+.id-radio {
+  appearance: none; -webkit-appearance: none; margin: 2px 0 0; flex: 0 0 auto;
+  width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--pj-field); background: #fff; cursor: pointer;
+}
+.id-radio:checked { border: 5px solid var(--pj-blue); }
+.id-radio:focus-visible { outline: none; }
+.id-radio:disabled { cursor: progress; }
+.id-opt-t { display: flex; flex-direction: column; gap: 2px; }
+.id-opt-n { font-size: 14px; font-weight: 800; color: var(--pj-ink); }
+.id-opt-s { font-size: 12.5px; font-weight: 500; color: var(--pj-muted); line-height: 1.45; }
+.id-note { display: flex; gap: 8px; align-items: flex-start; margin: 4px 0 0; font-size: 12.5px; font-weight: 600; color: var(--pj-soft); line-height: 1.45; }
+.id-note svg { flex: 0 0 auto; margin-top: 1px; color: var(--pj-blue); }
+
+/* "Add your city" (sólo si su ficha no tiene ciudad) */
+.id-nudge {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 18px; border-radius: 14px; text-decoration: none;
+  background: rgba(198, 242, 33, .18); border: 1px solid rgba(122, 146, 0, .35); color: var(--pj-navy);
+  font-size: 14px; font-weight: 600;
+}
+.id-nudge[hidden] { display: none; }
+.id-nudge:hover { color: var(--pj-navy); background: rgba(198, 242, 33, .28); }
+.id-nudge-go { font-size: 18px; font-weight: 900; }
+
+/* Datos personales (resumen) */
+.id-dl { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+.id-dl > div { min-width: 0; }
+.id-dl dt { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--pj-muted); }
+.id-dl dd { margin: 3px 0 0; font-size: 14.5px; font-weight: 700; color: var(--pj-ink); overflow-wrap: anywhere; }
+
+/* Mientras llegan los datos */
+#id-main[aria-busy="true"] .id-grid, #id-main[aria-busy="true"] .id-grid-2 { opacity: .55; transition: opacity .2s; }
+
+/* ── Teléfono ── */
+@media (max-width: 900px) {
+  .id-hero-in { grid-template-columns: 1fr; padding: 28px 20px 26px; gap: 20px; }
+  .id-grid, .id-grid-2 { grid-template-columns: 1fr; }
+  .id-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .id-who { gap: 16px; }
+  .id-avatar { width: 72px; height: 72px; font-size: 26px; box-shadow: 0 0 0 4px rgba(198, 242, 33, .14); }
+  .id-name { font-size: 30px; letter-spacing: -.8px; }
+  .id-statement { font-size: 17px; margin: 0; }
+  .id-facts { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .id-fact { padding: 12px; }
+  .id-fact-n { font-size: 22px; }
+  .id-fact-l { font-size: 11px; }
+  .id-people { grid-template-columns: 1fr; }
+  .id-people-col + .id-people-col { margin-top: 10px; }
+  .id-kpi-n { font-size: 20px; }
+  .id-dl { grid-template-columns: 1fr; }
+}
+@media (max-width: 360px) {
+  .id-name { font-size: 26px; }
+  .id-kpis { grid-template-columns: repeat(2, 1fr); }
+  .id-fact-n { font-size: 20px; }
+}

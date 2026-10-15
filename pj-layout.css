@@ -201,12 +201,12 @@ a.pj-row:hover .pj-row-name { color: var(--pj-blue); }
 .pj-res.is-win { background: var(--pj-green-bg); color: var(--pj-green-tx); }
 .pj-res.is-loss { background: #fde8d8; color: #9A3412; }
 
-/* ── Lista de datos (My profile) ── */
-.pj-dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px 28px; }
-.pj-dl-item { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.pj-dl dt { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--pj-muted); }
-.pj-dl dd { margin: 0; font-size: 16px; font-weight: 700; overflow-wrap: anywhere; }
-.pj-dd-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* ── Lista de estados (ciudad y estado, como el formulario de suscripción) ── */
+.pj-select {
+  appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; background-size: 16px;
+}
 
 /* Ajustes: icono gris. */
 .pj-row-ico-gray { background: #F3F4F6; color: #374151; }

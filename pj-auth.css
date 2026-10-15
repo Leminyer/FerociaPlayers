@@ -12,12 +12,6 @@
   display: flex; flex-direction: column; justify-content: space-between; gap: 48px;
   min-height: 420px;
 }
-/* Las líneas de una cancha, de adorno. */
-.pj-court { position: absolute; border-color: rgba(198, 242, 33, .18); pointer-events: none; }
-.pj-court-box { right: -120px; bottom: -80px; width: 520px; height: 640px; border: 2px solid; border-color: inherit; border-radius: 6px; }
-.pj-court-mid { right: -120px; bottom: 240px; width: 520px; border-top: 2px solid; border-color: inherit; }
-.pj-court-cen { right: 140px; bottom: -80px; height: 320px; border-left: 2px solid; border-color: inherit; }
-.pj-brand > :not(.pj-court) { position: relative; }
 .pj-brand-logo { width: 170px; height: auto; display: block; }
 .pj-brand-copy { display: flex; flex-direction: column; gap: 22px; max-width: 520px; }
 .pj-brand-eyebrow { font-size: 15px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--pj-lime); }

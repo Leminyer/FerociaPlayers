@@ -2,8 +2,9 @@
    FEROCIA PLAYER PORTAL — completar el perfil y unir la ficha
    Hitos 3 y 4 (14 de octubre) — pantallas 4, 5a y 5b del diseño
 
-   · "A little about you": fecha de nacimiento, teléfono, género y
-     nivel (y nombre y apellido, ya escritos desde "Create account").
+   · "A little about you": fecha de nacimiento, teléfono, ciudad, estado,
+     género y nivel (y nombre y apellido, ya escritos desde "Create
+     account"). Ciudad y estado: FEROCIA Identity I-1 (15 de octubre).
      Lo manda a la base (portal_completar), que decide sola si une su
      ficha, si la deja en revisión o si le crea una nueva. Aquí sólo
      se comprueba que esté bien escrito; quién es quién lo decide la
@@ -63,6 +64,7 @@
   }
 
   P.mascaraTelefono($('ab-phone'));
+  P.camposLugar('ab-city', 'ab-state');
   let bienvenida = null;     // { nuevo } al acabar de unirse
   const elegido = (name) => {
     const r = document.querySelector(`input[name="${name}"]:checked`);
@@ -88,6 +90,7 @@
     const apellido = limpiarNombre(last.value);
     const fecha = leerFecha(dob.value);
     const digitos = phone.value.replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '');
+    const lugar = P.leerLugar('ab-city', 'ab-state');
     const genero = elegido('ab-gender');
     const nivel = elegido('ab-level');
 
@@ -97,6 +100,8 @@
     revisa(last, !NOMBRE_OK.test(apellido));
     revisa(dob, !fecha);
     revisa(phone, digitos.length !== 10);
+    revisa($('ab-city'), lugar.malCiudad);
+    revisa($('ab-state'), lugar.malEstado);
     revisa($('ab-gender'), !genero);
     revisa($('ab-level'), !nivel);
     if (fallos.length) {
@@ -122,6 +127,7 @@
       const { data, error } = await sb.rpc('portal_completar', {
         p_first_name: nombre, p_last_name: apellido, p_date_of_birth: fecha,
         p_phone: digitos, p_gender: genero, p_skill_level: nivel,
+        p_city: lugar.ciudad, p_state: lugar.estado,
       });
       if (error) throw error;
       P.olvidarDatos();
@@ -139,6 +145,8 @@
         invalid_phone: 'Enter a 10-digit US phone number.',
         invalid_name: 'Check your first and last name.',
         email_not_confirmed: 'Please confirm your email first — open the link we sent you.',
+        invalid_city: P.errorLugar.invalid_city,
+        invalid_state: P.errorLugar.invalid_state,
       }));
     } finally {
       enviando = false;
