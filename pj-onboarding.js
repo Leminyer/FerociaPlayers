@@ -245,7 +245,7 @@
     $('wb-title').replaceChildren(
       document.createTextNode(nuevo ? 'Welcome to FEROCIA,' : 'Welcome back,'),
       h('br'),
-      document.createTextNode(`${e.first_name || 'player'}.`));
+      document.createTextNode(`${fmt.nombre(e.first_name) || 'player'}.`));
     $('wb-lead').textContent = nuevo
       ? 'Your player profile is ready. Join a ladder or a tournament and your results will show up here.'
       : "We connected your account to your FEROCIA player record. Here's what's waiting for you:";

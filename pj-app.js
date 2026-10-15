@@ -140,6 +140,19 @@
       const hh = +m[1];
       return `${((hh + 11) % 12) + 1}:${m[2]} ${hh < 12 ? 'AM' : 'PM'}`;
     },
+    /* Un nombre como se debe ver: "ivy STONE" → "Ivy Stone", "o'neil" →
+       "O'Neil", "j. chen" → "J. Chen". Si una palabra ya mezcla mayúsculas
+       y minúsculas ("McDonald", "DeLuca") se respeta; sólo se pone en
+       mayúscula su primera letra. (Cambio del 15 de octubre.) */
+    nombre(texto) {
+      return String(texto || '').trim().replace(/\s+/g, ' ').split(' ').map((palabra) =>
+        palabra.split(/([-'\u2019])/).map((t) => {
+          if (!t || /^[-'\u2019]$/.test(t)) return t;
+          const min = t.toLowerCase();
+          const base = (t === min || t === t.toUpperCase()) ? min : t;
+          return base.charAt(0).toUpperCase() + base.slice(1);
+        }).join('')).join(' ');
+    },
     iniciales(nombre, apellido, email) {
       const ini = ((nombre || '').trim().charAt(0) + (apellido || '').trim().charAt(0)) || (email || '?').charAt(0);
       return ini.toUpperCase();
@@ -248,7 +261,7 @@
     const ini = document.getElementById('pj-me-ini');
     const nom = document.getElementById('pj-me-name');
     if (ini) ini.textContent = fmt.iniciales(e.first_name, e.last_name, e.email);
-    if (nom) nom.textContent = [e.first_name, e.last_name].filter(Boolean).join(' ') || e.email || '';
+    if (nom) nom.textContent = fmt.nombre([e.first_name, e.last_name].filter(Boolean).join(' ')) || e.email || '';
   }
 
   function pintarMarco(nueva, nombre) {

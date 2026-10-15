@@ -91,8 +91,8 @@
   /* ── Últimos resultados ── */
   function conQuien(r) {
     const partes = [];
-    if (r.partners && r.partners.length) partes.push(`w/ ${r.partners.join(' & ')}`);
-    if (r.opponents && r.opponents.length) partes.push(`vs ${r.opponents.join(' & ')}`);
+    if (r.partners && r.partners.length) partes.push(`w/ ${r.partners.map(fmt.nombre).join(' & ')}`);
+    if (r.opponents && r.opponents.length) partes.push(`vs ${r.opponents.map(fmt.nombre).join(' & ')}`);
     return partes.join(' · ') || '—';
   }
   function resultados(lista) {
@@ -189,7 +189,7 @@
     const mia = ++vez;
     const e = P.estado() || {};
     $('hm-greeting').textContent = saludo();
-    $('hm-name').textContent = [e.first_name, e.last_name].filter(Boolean).join(' ');
+    $('hm-name').textContent = fmt.nombre([e.first_name, e.last_name].filter(Boolean).join(' '));
     const main = $('hm-main');
     main.setAttribute('aria-busy', 'true');
     $('hm-error').hidden = true;
@@ -206,7 +206,7 @@
     }
     if (mia !== vez) return;
     const p = d.player || {};
-    $('hm-name').textContent = [p.first_name, p.last_name].filter(Boolean).join(' ');
+    $('hm-name').textContent = fmt.nombre([p.first_name, p.last_name].filter(Boolean).join(' '));
     $('hm-chips').replaceChildren(
       p.skill_level ? h('span', { class: 'pj-chip pj-chip-lime', text: p.skill_level }) : null,
       p.date_joined ? h('span', { class: 'pj-chip', text: `FEROCIA player since ${fmt.mesAnio(p.date_joined)}` }) : null);

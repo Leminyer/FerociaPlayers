@@ -61,7 +61,7 @@
     [telefono, $('ed-city'), $('ed-state')].forEach((el) => marcar(el, false));
     elegir('ed-gender', p.gender);
     elegir('ed-level', p.skill_level);
-    $('ed-name').textContent = [p.first_name, p.last_name].filter(Boolean).join(' ');
+    $('ed-name').textContent = fmt.nombre([p.first_name, p.last_name].filter(Boolean).join(' '));
     $('ed-dob').textContent = fmt.largo(p.date_of_birth) || 'Date of birth not on file';
   });
 

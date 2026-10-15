@@ -51,7 +51,7 @@
 
   const UMBRALES = [10, 25, 50, 100, 250, 500];
   const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
-  const nombreCompleto = (p) => [p.first_name, p.last_name].filter(Boolean).join(' ');
+  const nombreCompleto = (p) => fmt.nombre([p.first_name, p.last_name].filter(Boolean).join(' '));
 
   /* "Hoy" en la hora del club (la misma regla que el resto del portal). */
   const hoyClub = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date());
@@ -118,7 +118,7 @@
      Devuelve los trozos ya como nodos de texto. */
   function frase(d, id) {
     const p = d.player || {};
-    const nombre = p.first_name || 'You';
+    const nombre = fmt.nombre(p.first_name) || 'You';
     const B = (t) => h('strong', { text: t });
     const E = (t) => h('em', { text: t });
     if (!id.games) {
@@ -159,7 +159,8 @@
       h('span', { class: 'id-person-t' },
         h('span', { class: 'id-person-n', text: nombreCompleto(x) }),
         h('span', { class: 'id-person-s', text: texto(x.games) })),
-      h('span', { class: 'id-rec', 'aria-label': `${x.wins} wins, ${x.losses} losses`, text: `${x.wins}–${x.losses}` }))));
+      h('span', { class: 'id-rec', 'aria-label': `${x.wins} ${x.wins === 1 ? 'win' : 'wins'}, ${x.losses} ${x.losses === 1 ? 'loss' : 'losses'}`,
+        text: `W ${x.wins} · L ${x.losses}` }))));
   }
 
   /* ── 3 · Your FEROCIA story ── */
