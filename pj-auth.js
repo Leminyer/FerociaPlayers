@@ -87,17 +87,31 @@
     if (enCodigo && (codigo === 'otp_expired' || /expired|invalid/i.test(msg))) {
       return { tipo: 'codigo', texto: "That code didn't work. Check the numbers, or ask for a new email." };
     }
+    if (window.FerociaCaptcha && window.FerociaCaptcha.esErrorDeCaptcha(error)) {
+      return { tipo: 'captcha', texto: "We couldn't check that you're a person. If you use an ad blocker, pause it for this page (or try another browser), then try again." };
+    }
     if (error instanceof TypeError || /fetch|network|failed to/i.test(msg)) {
       return { tipo: 'red', texto: "We couldn't connect. Check your internet connection and try again." };
     }
     return { tipo: 'otro', texto: 'Something went wrong. Please try again in a moment.' };
   }
 
-  async function pedirCorreo(email, modo, datos) {
+  /* Hito 5: antes de pedir el correo, la verificación de Cloudflare
+     (ferocia-captcha.js). "caja" es dónde aparece la casilla, si hace
+     falta marcarla. Cada verificación vale una sola vez. */
+  async function pedirCorreo(email, modo, datos, caja) {
     const opciones = { emailRedirectTo: P.vuelta(), shouldCreateUser: modo === 'create' };
     if (modo === 'create' && datos) opciones.data = datos;
-    const { error } = await sb.auth.signInWithOtp({ email, options: opciones });
-    return error || null;
+    const C = window.FerociaCaptcha;
+    const cajaEl = caja ? $(caja) : null;
+    const token = C && cajaEl ? await C.token(cajaEl) : null;
+    if (token) opciones.captchaToken = token;
+    try {
+      const { error } = await sb.auth.signInWithOtp({ email, options: opciones });
+      return error || null;
+    } finally {
+      if (C && cajaEl) C.usado(cajaEl);
+    }
   }
 
   function ocupado(boton, si) {
@@ -126,7 +140,7 @@
     enviando = true;
     ocupado($('si-submit'), true);
     try {
-      const error = await pedirCorreo(email, 'sign-in');
+      const error = await pedirCorreo(email, 'sign-in', null, 'si-captcha');
       if (error) {
         const e = explicar(error);
         /* Sin cuenta: a "Crear cuenta", con su correo ya escrito. */
@@ -176,7 +190,7 @@
     enviando = true;
     ocupado($('ca-submit'), true);
     try {
-      const error = await pedirCorreo(email, 'create', { first_name: nombre, last_name: apellido });
+      const error = await pedirCorreo(email, 'create', { first_name: nombre, last_name: apellido }, 'ca-captcha');
       if (error) {
         const e = explicar(error);
         mostrarError('ca-error', e.tipo === 'sin_registro'
@@ -306,7 +320,7 @@
     $('ck-resend').disabled = true;
     mostrarError('ck-error', '');
     try {
-      const error = await pedirCorreo(p.email, p.modo);
+      const error = await pedirCorreo(p.email, p.modo, null, 'ck-captcha');
       if (error) {
         const e = explicar(error);
         if (e.tipo !== 'sin_registro') { mostrarError('ck-error', e.texto); return; }

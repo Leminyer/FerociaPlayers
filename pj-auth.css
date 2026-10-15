@@ -115,3 +115,11 @@
   .pj-code { gap: 6px; }
   .pj-code input { height: 54px; font-size: 22px; }
 }
+
+/* ── Hito 5: la caja del captcha. Vacía casi siempre (Cloudflare sólo
+   enseña una casilla si algo le parece raro). ── */
+.pj-captcha { display: flex; justify-content: center; }
+/* Escondida no ocupa sitio ni suma el espacio entre filas (gap): queda
+   fuera del flujo, pero sigue "pintada" para que Cloudflare trabaje. */
+.pj-captcha:not(.is-visible) { position: absolute; width: 0; height: 0; overflow: hidden; }
+.pj-captcha.is-visible { min-height: 65px; }
