@@ -69,10 +69,65 @@
      EL FORMULARIO (el paso obligatorio y "Edit")
      ============================================================ */
 
+  /* Qué significa cada pregunta: sale en el circulito "?" al lado del
+     título (al pasar el ratón, con el teclado o tocándolo en el teléfono).
+     Pedido el 15 de octubre. */
+  const AYUDA = {
+    styles: 'How you usually play your points. Pick up to 3 that sound most like you — for example, Strategic if you place the ball and plan your shots, or Soft Game / Dinker if you love long rallies at the kitchen line.',
+    side: 'In doubles, the side of the court you prefer to play from: right or left. Choose Either side if you are happy on both.',
+    formats: 'The kinds of games you play: Singles (1 vs 1), Doubles (2 vs 2) or Mixed doubles (a man and a woman on each team). Choose all that apply.',
+    competition: 'The experience you look for on court — from relaxed, social games (Recreational, Social) to competitive play (League Player, Tournament Focused). Practice Oriented means you mostly play to improve.',
+    when: 'The times you are usually free to play. Tap every box that fits: weekdays or weekends, in the morning, afternoon or evening. Flexible = any time works. Last-minute games = you are happy to join a game on short notice.',
+    venue: 'Whether you prefer indoor courts, outdoor courts, or both.',
+    intent: 'What you are looking for at the moment, like one more player for tonight. It is optional and clears on its own: "tonight" at midnight, "this weekend" after Sunday, the others after 7 days.',
+  };
+  /* El título de una pregunta: el nombre, el circulito "?" con su
+     explicación y la nota de la derecha. */
+  function cabecera(pref, clave, titulo, nota) {
+    const id = `${pref}-tip-${clave}`;
+    const boton = h('button', { type: 'button', class: 'dn-help-btn', 'aria-label': `What does "${titulo.replace(/ \(optional\)$/, '')}" mean?`,
+      'aria-describedby': id, 'aria-expanded': 'false', 'data-help': id }, h('span', { class: 'dn-help-i', 'aria-hidden': 'true', text: '?' }));
+    return h('legend', { class: 'dn-q-h' },
+      h('span', { class: 'dn-q-tl' }, h('span', { class: 'dn-q-t', text: titulo }),
+        h('span', { class: 'dn-help' }, boton, h('span', { class: 'dn-tip', role: 'tooltip', id, text: AYUDA[clave] }))),
+      h('span', { class: 'dn-q-n', text: nota }));
+  }
+  /* Tocarlo (teléfono) lo abre o lo cierra; Escape o tocar fuera, lo cierra. */
+  function cerrarAyudas(salvo) {
+    document.querySelectorAll('.dn-help.is-open').forEach((w) => {
+      if (w === salvo) return;
+      w.classList.remove('is-open');
+      w.querySelector('.dn-help-btn').setAttribute('aria-expanded', 'false');
+    });
+  }
+  document.addEventListener('click', (ev) => {
+    const b = ev.target.closest && ev.target.closest('.dn-help-btn');
+    if (!b) { cerrarAyudas(null); return; }
+    ev.preventDefault();
+    const w = b.parentElement;
+    w.classList.remove('is-dismissed');
+    const abrir = !w.classList.contains('is-open');
+    cerrarAyudas(w);
+    w.classList.toggle('is-open', abrir);
+    b.setAttribute('aria-expanded', String(abrir));
+  });
+  /* Escape la cierra aunque el círculo siga con el foco o el ratón encima
+     (vuelve a funcionar al salir de él). */
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Escape') return;
+    cerrarAyudas(null);
+    document.querySelectorAll('.dn-help').forEach((w) => { if (w.matches(':hover, :focus-within')) w.classList.add('is-dismissed'); });
+  });
+  const reactivar = (ev) => { const w = ev.target.closest && ev.target.closest('.dn-help'); if (w) w.classList.remove('is-dismissed'); };
+  document.addEventListener('mouseleave', (ev) => {
+    if (ev.target.classList && ev.target.classList.contains('dn-help')) ev.target.classList.remove('is-dismissed');
+  }, true);
+  document.addEventListener('focusout', reactivar);
+
   /* Una pregunta: un grupo con su título, su nota y sus opciones. */
   function pregunta(pref, clave, titulo, nota, opciones, tipo) {
     const caja = h('fieldset', { class: 'dn-q', id: `${pref}-q-${clave}`, 'data-q': clave });
-    caja.append(h('legend', { class: 'dn-q-h' }, h('span', { class: 'dn-q-t', text: titulo }), h('span', { class: 'dn-q-n', text: nota })));
+    caja.append(cabecera(pref, clave, titulo, nota));
     const lista = h('div', { class: 'dn-opts' });
     opciones.forEach(([code, texto]) => lista.append(
       h('label', { class: 'dn-opt' }, h('input', { class: 'pj-sr', type: tipo, name: `${pref}-${clave}`, value: code }), texto)));
@@ -83,7 +138,7 @@
   /* "When you play": la cuadrícula (días × momento) + Flexible y Last-minute. */
   function preguntaCuando(pref) {
     const caja = h('fieldset', { class: 'dn-q', id: `${pref}-q-when`, 'data-q': 'when' });
-    caja.append(h('legend', { class: 'dn-q-h' }, h('span', { class: 'dn-q-t', text: 'When you play' }), h('span', { class: 'dn-q-n', text: 'Choose all that apply' })));
+    caja.append(cabecera(pref, 'when', 'When you play', 'Choose all that apply'));
     const rejilla = h('div', { class: 'dn-when' }, h('span', { 'aria-hidden': 'true' }));
     FRANJAS.forEach(([, t]) => rejilla.append(h('span', { class: 'dn-when-h', 'aria-hidden': 'true', text: t })));
     DIAS.forEach(([d, dn]) => {

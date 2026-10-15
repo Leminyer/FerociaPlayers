@@ -127,10 +127,36 @@
 
 /* ── El formulario (el paso del DNA y "Edit") ── */
 .dn-q { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; border: 0; min-width: 0; }
-.dn-q-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; width: 100%; padding: 0; margin-bottom: 10px; }
+/* El título y, justo debajo, cuántas elegir (antes iba a la derecha y
+   pasaba desapercibido; cambio del 15 de octubre). */
+.dn-q-h { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; width: 100%; padding: 0; margin-bottom: 12px; }
 .dn-q-t { margin: 0; font-size: 15px; font-weight: 800; color: var(--pj-ink); }
 .dn-q[aria-invalid="true"] .dn-q-t { color: var(--pj-red); }
-.dn-q-n { font-size: 12px; font-weight: 700; color: var(--pj-muted); }
+.dn-q-n { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--pj-blue); }
+.dn-q-n::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.dn-q[aria-invalid="true"] .dn-q-n { color: var(--pj-red); }
+/* El circulito "?" con lo que significa cada pregunta. El botón mide
+   40 × 40 (fácil de tocar); el círculo que se ve, 20 × 20. */
+.dn-q-tl { display: inline-flex; align-items: center; gap: 2px; min-width: 0; }
+.dn-help { display: inline-flex; }
+/* La burbuja se ancla al título entero (no al círculo): nunca se sale de la pantalla. */
+.dn-q-h { position: relative; }
+.dn-help-btn { width: 40px; height: 40px; margin: -10px -8px -10px -6px; padding: 0; border: 0; background: none; display: grid; place-items: center; cursor: help; }
+.dn-help-i { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid var(--pj-field); color: var(--pj-muted); font: 800 12px/1 'Inter', sans-serif; transition: border-color .15s, color .15s, background .15s; }
+.dn-help-btn:hover .dn-help-i, .dn-help.is-open .dn-help-i { border-color: var(--pj-blue); color: var(--pj-blue); background: rgba(23, 76, 204, .06); }
+.dn-help-btn:focus-visible { outline: none; }
+.dn-help-btn:focus-visible .dn-help-i { box-shadow: 0 0 0 3px rgba(23, 76, 204, .3); border-color: var(--pj-blue); color: var(--pj-blue); }
+.dn-tip {
+  position: absolute; z-index: 30; top: calc(100% + 6px); left: 0;
+  width: max-content; max-width: min(340px, 100%);
+  padding: 12px 14px; border-radius: 12px; background: var(--pj-night); color: #fff;
+  font-size: 13px; font-weight: 500; line-height: 1.5; letter-spacing: 0; text-transform: none; text-align: left;
+  box-shadow: 0 10px 30px rgba(8, 15, 46, .22);
+  visibility: hidden; opacity: 0; transform: translateY(-4px); transition: opacity .15s, transform .15s, visibility .15s;
+  pointer-events: none;
+}
+.dn-help:hover .dn-tip, .dn-help-btn:focus-visible + .dn-tip, .dn-help.is-open .dn-tip { visibility: visible; opacity: 1; transform: none; }
+.dn-help.is-dismissed .dn-tip { visibility: hidden; opacity: 0; }
 .dn-opts { display: flex; flex-wrap: wrap; gap: 8px; }
 .dn-opt { position: relative; padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--pj-field); background: #fff; font-size: 14px; font-weight: 700; color: var(--pj-ink); cursor: pointer; }
 .dn-opt.is-on { border-color: var(--pj-blue); background: rgba(23, 76, 204, .06); color: var(--pj-blue); }
