@@ -71,7 +71,7 @@
     sin_ficha:   { inicio: 'about',  rutas: ['about', 'help'] },
     en_revision: { inicio: 'review', rutas: ['review', 'help'] },
     rechazado:   { inicio: 'review', rutas: ['review', 'help'] },
-    vinculado:   { inicio: 'home',   rutas: ['home', 'profile', 'dna', 'dna-edit', 'play', 'player', 'game', 'game-form', 'edit', 'settings', 'help', 'welcome'] },
+    vinculado:   { inicio: 'home',   rutas: ['home', 'profile', 'dna', 'dna-edit', 'play', 'player', 'game', 'game-form', 'log-game', 'edit', 'settings', 'help', 'welcome'] },
   };
   /* Unido pero sin su Player DNA: primero el DNA. (Sólo si la base lo
      dice claramente: si el SQL 92 todavía no está, no se pide.) */
@@ -295,7 +295,7 @@
     document.querySelectorAll('[data-nav]').forEach((a) => {
       const activo = a.dataset.nav === nombre || (nombre === 'edit' && a.dataset.nav === 'profile')
         || (nombre === 'dna-edit' && a.dataset.nav === 'dna')
-        || (['player', 'game', 'game-form'].includes(nombre) && a.dataset.nav === 'play');
+        || (['player', 'game', 'game-form', 'log-game'].includes(nombre) && a.dataset.nav === 'play');
       if (activo) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });

@@ -67,7 +67,7 @@
     invalid_time: 'Choose a time at least 30 minutes from now.',
     too_far: 'Games can be up to 14 days ahead.',
     invalid_kind: 'Choose the type of game.',
-    invalid_needed: 'Choose how many players you need (singles is always 1).',
+    invalid_needed: 'Choose how many players you need: Singles 1 to 3, Doubles and Mixed 3 to 5, Drill 1 to 5.',
     invalid_levels: 'Choose at least one level.',
     invalid_visibility: 'Choose who can see your game.',
     invalid_place: 'Tell players where you will play (3 to 80 characters).',
@@ -93,6 +93,39 @@
     hidden_caller: 'Your privacy is Private, so you can\'t use games. Switch to Limited in My Identity (Who can find you).',
     suspended: 'Your access to Play and games is paused.',
     members_only: 'Games are for FEROCIA members.',
+    /* M-3a: el resultado. */
+    not_played_yet: 'You can report the result once the game has started.',
+    report_closed: 'Results can be reported up to 3 days after the game.',
+    already_reported: 'The result was already reported.',
+    not_enough_players: 'Nobody else was in this game, so there is no result to report.',
+    invalid_people: 'Mark who played, who didn\'t show up and who was excused — for everyone in the game.',
+    invalid_teams: 'Check the teams: each game needs its players, all different, and only people who played.',
+    invalid_score: 'Check the scores: no ties, and a Best of 3 or 5 ends as soon as a team wins 2 (or 3) games.',
+    invalid_entry: 'Something in a game is missing. Check the format, the teams and the score.',
+    too_many_games_day: 'That is more than 8 games in one day for someone (counting their other games that day).',
+    same_partner_limit: 'Up to 4 single games with the same partner (same opponent in singles). Use Best of 3 or 5 for longer matches.',
+    no_scores_drill: 'Drill / practice has no scores — just mark who came.',
+    scores_required: 'Add at least one game with its score.',
+    result_closed: 'This result is closed now.',
+    already_voted: 'You already answered.',
+    invalid_value: 'Something went wrong. Please try again.',
+    /* M-3b: registrar un juego, códigos e invitados. */
+    code_not_found: "We couldn't find a player with that code. Check it with them and try again.",
+    own_code: "That's your own code.",
+    too_many_attempts: "You've looked up many codes in the last hour. Please try again later.",
+    code_changed_today: 'You can get a new code once a day.',
+    too_old: 'You can log a game up to 3 days (72 hours) after you played it.',
+    too_many_logged: 'You can log up to 3 games a day. Please try again tomorrow.',
+    invalid_players: 'Check who played: Singles 2 to 4 players, Doubles and Mixed 4 to 6, Drill 2 to 6 (counting you).',
+    invalid_guest: 'Guest names can be up to 40 characters, without phone numbers, emails or links.',
+    too_many_players: 'That is more players than this game allows (Singles 4, the others 6).',
+    cannot_add_now: "Players can't be added while correcting a result.",
+    already_in_game: "That player is already in this result.",
+    link_closed: 'Guests can be linked to a player code up to 7 days after the game was reported.',
+    link_pending: 'This guest is already linked, or waiting for that player to confirm.',
+    link_declined_before: 'That player already said it wasn\'t them for this game.',
+    log_future: 'That time hasn\'t happened yet. Log a game after you play it.',
+    log_place: 'Write at least 3 characters for the place, or leave it empty.',
   };
   const textoError = (err) => P.errorTexto(err, ERRORES);
 
@@ -333,6 +366,20 @@
       j.unread ? h('span', { class: 'gm-unread', text: `${plural(j.unread, 'new message', 'new messages')}` }) : null,
       pill[0] ? h('span', { class: `gm-pill ${pill[1]}`, text: pill[0] }) : null);
   }
+  /* M-3a: una fila de "Results": reportar, corregir o confirmar. */
+  function filaResultado(j) {
+    const c = cuando(j.plays_at);
+    const t = { report: ['Report the result', 'gm-pill-wait'], correct: ['Correct the result', 'gm-pill-wait'], confirm: ['Confirm the result', 'gm-pill-inv'],
+      link: ["Is it you?", 'gm-pill-inv'] }[j.todo] || ['Open', ''];
+    /* M-3b: un juego registrado puede no tener lugar. */
+    const lugar = j.place || (j.logged ? 'Logged game' : '');
+    const sub = j.todo === 'confirm' ? [`${j.logged ? 'Logged' : 'Reported'} by ${j.reporter || 'the host'}`, j.place].filter(Boolean).join(' · ')
+      : j.todo === 'link' ? `${j.reporter || 'A player'} added you to this result` : lugar;
+    return h('a', { class: 'gm-joined-row', href: `#/game/${j.id}` },
+      h('span', { class: 'gm-date', 'aria-hidden': 'true' }, h('small', { text: c.mes }), h('b', { text: c.num })),
+      h('span', { class: 'gm-who' }, h('b', { text: `${TIPO[j.kind] || 'Game'} · ${c.largo} · ${c.hora}` }), h('span', { text: sub })),
+      h('span', { class: `gm-pill ${t[1]}`, text: t[0] }));
+  }
   function tarjetaAnfitrion(j) {
     const c = cuando(j.plays_at);
     const pend = j.pending || 0;
@@ -382,22 +429,38 @@
     try { d = await rpc('portal_juegos'); } catch (e) {
       if (mia !== vezPlay) return;
       console.warn('[portal] juegos:', e);
-      ['gm-mine-sec', 'gm-open-sec', 'gm-create'].forEach((id) => { $(id).hidden = true; });
+      ['gm-mine-sec', 'gm-open-sec', 'gm-create', 'gm-log'].forEach((id) => { $(id).hidden = true; });
       /* Si el SQL 97 todavía no está, Play sigue como antes (sin aviso). */
       if (!/portal_juegos|function|schema cache/i.test(String(e && e.message))) { $('gm-error').textContent = textoError(e); $('gm-error').hidden = false; }
       return;
     }
     if (mia !== vezPlay) return;
     d = d || {};
-    if (d.locked) { ['gm-mine-sec', 'gm-open-sec', 'gm-create'].forEach((id) => { $(id).hidden = true; }); return; }
+    if (d.locked) {
+      ['gm-mine-sec', 'gm-open-sec', 'gm-create', 'gm-log'].forEach((id) => { $(id).hidden = true; });
+      /* M-3b: quien no usa Play (Private) también puede tener un resultado por confirmar (lo añadieron con su código). */
+      const t = d.results || [];
+      if (t.length && !d.suspended) {
+        $('gm-mine').replaceChildren(h('div', { class: 'gm-joined rs-todo' }, h('div', { class: 'gm-k gm-k-blue', text: 'Results' }), ...t.map(filaResultado)));
+        $('gm-mine').classList.add('gm-mine-1');
+        $('gm-mine-sec').hidden = false;
+      }
+      return;
+    }
     $('gm-create').hidden = !!d.hosting;
+    $('gm-log').hidden = false;   // M-3b: registrar un juego que no se planificó aquí
 
     const jugando = d.playing || [];
     const mias = [];
+    /* M-3a: reportar, corregir o confirmar un resultado (va primero). */
+    const tareas = d.results || [];
+    if (tareas.length) {
+      mias.push(h('div', { class: 'gm-joined rs-todo' }, h('div', { class: 'gm-k gm-k-blue', text: 'Results' }), ...tareas.map(filaResultado)));
+    }
     if (d.hosting) mias.push(tarjetaAnfitrion(d.hosting));
     if (jugando.length) {
-      mias.push(h('div', { class: 'gm-joined' }, h('div', { class: 'gm-k gm-k-blue', text: 'Your other games' }), ...jugando.map(filaMia)));
-      if (!d.hosting) mias[0].firstChild.textContent = "You're playing";
+      const otros = h('div', { class: 'gm-joined' }, h('div', { class: 'gm-k gm-k-blue', text: d.hosting ? 'Your other games' : "You're playing" }), ...jugando.map(filaMia));
+      mias.push(otros);
     }
     $('gm-mine').replaceChildren(...mias);
     $('gm-mine').classList.toggle('gm-mine-1', mias.length === 1);
@@ -429,28 +492,39 @@
     const v = [].concat(valores).map(String);
     radios(nombre).forEach((i) => { i.checked = v.includes(i.value); });
   }
-  /* Pinta lo elegido (como My DNA): la etiqueta con is-on; en singles,
-     sólo 1 jugador. */
+  const PLAZAS = { singles: [1, 3], doubles: [3, 5], mixed: [3, 5], drill: [1, 5] };
+  const AYUDA_PLAZAS = {
+    singles: 'Singles: 2 to 4 players with you, so people can rotate.',
+    doubles: 'Doubles and Mixed: 4 to 6 players with you, so people can rotate.',
+    mixed: 'Doubles and Mixed: 4 to 6 players with you, so people can rotate.',
+    drill: 'Drill / practice: 2 to 6 players with you.',
+  };
+  /* Pinta lo elegido (como My DNA): la etiqueta con is-on; las plazas
+     según el tipo de juego. */
   function repasarForm() {
     form.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach((i) => {
       const l = i.closest('label');
       if (l) l.classList.toggle('is-on', i.checked);
     });
-    const singles = valorRadio('gf-kind') === 'singles';
+    /* M-3a: Singles de 2 a 4 personas, Doubles y Mixed de 4 a 6, Drill de 2 a 6 (con el anfitrión). */
+    const tipo = valorRadio('gf-kind');
+    const [min, max] = PLAZAS[tipo] || [1, 5];
     radios('gf-needed').forEach((i) => {
-      i.disabled = singles && i.value !== '1';
+      const n = Number(i.value);
+      /* Un juego creado antes (por ejemplo, Doubles con 1 más) se edita sin cambiar eso. */
+      const comoAntes = antes && antes.kind === tipo && antes.needed === n;
+      i.disabled = (n < min || n > max) && !comoAntes;
       if (i.disabled) i.checked = false;
       i.closest('label').classList.toggle('is-off', i.disabled);
     });
-    if (singles) marcar('gf-needed', '1');
+    $('gf-needed-help').textContent = AYUDA_PLAZAS[tipo] || AYUDA_PLAZAS.doubles;
     form.querySelectorAll('input[name="gf-needed"]').forEach((i) => i.closest('label').classList.toggle('is-on', i.checked));
     $('gf-notes-n').textContent = String(280 - $('gf-notes').value.length);
   }
   form.addEventListener('change', (ev) => {
     if (ev.target.name === 'gf-kind') {
-      /* Al cambiar de tipo se propone lo normal: 1 en singles, 3 en dobles. */
-      const k = ev.target.value;
-      if (k === 'doubles' || k === 'mixed') marcar('gf-needed', '3');
+      /* Al cambiar de tipo se propone lo normal: 1 en singles, 3 en dobles y en drill. */
+      marcar('gf-needed', ev.target.value === 'singles' ? '1' : '3');
     }
     repasarForm();
   });
@@ -462,10 +536,12 @@
     || /(\d[^a-z0-9]{0,3}){7,}/i.test(t) || /(^|[^a-z0-9._%+-])@[a-z0-9_.]{2,}/i.test(t);
 
   let editando = null;
+  let antes = null;   // el tipo y los jugadores que tenía el juego que se edita
   let enviandoForm = false;
   P.alEntrar('game-form', async () => {
     const crudo = P.rutaParam();
     editando = /^\d{1,18}$/.test(crudo) ? Number(crudo) : null;
+    antes = null;
     $('gf-error').hidden = true;
     form.hidden = false;
     form.reset();
@@ -487,6 +563,7 @@
       const j = await rpc('portal_juego', { p_game: editando });
       if (!j || !j.is_host || j.status !== 'active') throw new Error(j && j.is_host ? 'game_closed' : 'not_available');
       const d = new Date(j.plays_at);
+      antes = { kind: j.kind, needed: Number(j.needed) };
       marcar('gf-kind', j.kind); marcar('gf-needed', String(j.needed)); marcar('gf-levels', j.levels || []); marcar('gf-vis', j.visibility);
       $('gf-day').value = diaNY(d);
       $('gf-time').value = horaNY(d);
@@ -674,6 +751,14 @@
     return caja;
   }
 
+  /* M-3b: quien lo reportó, con Report y Block (para quien está en el resultado). */
+  function panelAnfitrion(j) {
+    const quien = { player_id: j.host.player_id, name: nombreDe(j.host) };
+    const bloq = h('button', { type: 'button', class: 'gm-link gm-link-soft', text: 'Block', 'aria-label': `Block ${quien.name}` });
+    bloq.addEventListener('click', async () => { if (await bloquear(quien)) pintarJuego(); });
+    return panel(tituloPanel(j.logged ? 'Logged by' : 'Hosted by'),
+      h('ul', { class: 'gm-people' }, personaFila(quien, j.logged ? 'Logged this game' : 'Host', [botonReportar(quien, j.id), bloq], true)));
+  }
   function panelNotas(j) {
     return panel(tituloPanel('Notes'),
       j.notes ? h('div', { class: 'gm-note', text: j.notes }) : h('p', { class: 'gm-small gm-m0', text: 'No notes for this game.' }));
@@ -716,13 +801,20 @@
     const dentro = host || est === 'accepted';
     const activo = j.status === 'active';
 
-    $('gp-k').textContent = host ? "You're hosting" : `Hosted by ${nombreDe(j.host)}`;
+    /* M-3b: un juego registrado ("Log a game") sólo tiene su resultado. */
+    const reg = !!j.logged;
+    $('gp-k').textContent = reg ? (host ? 'Logged by you' : `Logged by ${nombreDe(j.host)}`) : host ? "You're hosting" : `Hosted by ${nombreDe(j.host)}`;
     $('gp-title').textContent = c.dia ? `${TIPO[j.kind] || 'Game'} · ${c.dia}` : (TIPO[j.kind] || 'Game');
-    /* j.minimal: ya no está en el juego (ni lo puede ver como abierto): sin cuándo ni dónde. */
-    const chips = j.minimal ? [] : [conIcono('reloj', c.hora, 'span', { class: 'gm-chip' }), conIcono('lugar', j.place, 'span', { class: 'gm-chip' }),
-      conIcono('nivel', niveles(j.levels), 'span', { class: 'gm-chip' })];
-    if (dentro && j.reminder && activo) chips.push(conIcono('campana', 'Reminder 24 h before', 'span', { class: 'gm-chip' }));
-    if (j.visibility === 'invite') chips.push(h('span', { class: 'gm-chip', text: 'Invite only' }));
+    /* j.minimal: ya no está en el juego (ni lo puede ver como abierto): sin cuándo ni dónde,
+       salvo que esté en el resultado sin haberse apuntado (M-3b: lo trae la base). */
+    const chips = [];
+    if (!j.minimal || j.plays_at) {
+      chips.push(conIcono('reloj', c.hora, 'span', { class: 'gm-chip' }));
+      if (j.place) chips.push(conIcono('lugar', j.place, 'span', { class: 'gm-chip' }));
+      if (!reg && !j.minimal) chips.push(conIcono('nivel', niveles(j.levels), 'span', { class: 'gm-chip' }));
+    }
+    if (dentro && j.reminder && activo && !reg) chips.push(conIcono('campana', 'Reminder 24 h before', 'span', { class: 'gm-chip' }));
+    if (j.visibility === 'invite' && !reg) chips.push(h('span', { class: 'gm-chip', text: 'Invite only' }));
     $('gp-sub').replaceChildren(...chips);
 
     /* Las acciones de arriba. */
@@ -768,7 +860,8 @@
     /* El estado, en palabras. */
     let txt = '';
     if (j.status === 'cancelled') txt = `This game was cancelled by the host${j.cancel_reason ? ` — ${MOTIVO[j.cancel_reason]}` : ''}.`;
-    else if (j.status === 'past') txt = 'This game has already been played.';
+    else if (j.status === 'past' && !j.result && !j.report) txt = 'This game has already been played.';
+    else if (reg) txt = '';
     else if (['declined', 'removed'].includes(est) || (est === 'withdrawn' && j.minimal)) txt = "You're not in this game. There are more games waiting for you in Play.";
     else if (est === 'left') txt = 'You left this game.';
     else if (est === 'requested') txt = `Your request is waiting. ${nombreDe(j.host).split(' ')[0]} will accept or decline — we'll let you know.`;
@@ -778,10 +871,18 @@
 
     /* Las dos columnas. */
     const izq = [], der = [];
+    /* M-3a: el resultado (reportar, confirmar, su estado), arriba (pj-results.js). */
+    const res = (j.result || j.report) && P.resultadoPanel ? P.resultadoPanel(j) : null;
+    if (res) izq.push(res);
     /* M-2b: el chat, para el anfitrión y los jugadores aceptados (pj-chat.js). */
-    const chat = (host || est === 'accepted') && !j.minimal && P.chatPanel ? P.chatPanel(j) : null;
+    const chat = (host || est === 'accepted') && !j.minimal && !reg && P.chatPanel ? P.chatPanel(j) : null;
     if (!chat && P.chatParar) P.chatParar();
-    if (host) {
+    if (reg || (j.minimal && j.result && !host)) {
+      /* Sólo el resultado (sin jugadores apuntados, notas ni chat). M-3b: quien
+         está en el resultado puede reportar o bloquear a quien lo reportó. */
+      if (!host && j.host && j.host.player_id) der.push(panelAnfitrion(j));
+      if (!izq.length) izq.push(panelSeguridad());
+    } else if (host) {
       if (activo) izq.push(panelSolicitudes(j));
       if (chat) izq.push(chat);
       if (activo) izq.push(panelInvitar(j));
@@ -789,7 +890,7 @@
     } else if (chat) {
       izq.push(chat);
       der.push(panelJugadores(j, false), panelNotas(j), panelSeguridad());
-    } else if (j.players) {
+    } else if (j.players && !j.minimal) {
       izq.push(panelJugadores(j, false), panelNotas(j));
       der.push(panelSeguridad());
     } else {
@@ -812,7 +913,11 @@
   P.alEntrar('game', pintarJuego);
   /* Lo que usa el chat (pj-chat.js, M-2b). */
   P.avisosRecargar = () => cargarAvisos(true);
-  P.juegosUI = { rpc, icono, reportar, ventanaConfirmar, textoError, conContacto: (t) => conContacto(t), cuando, plural };
+  P.juegosUI = { rpc, icono, reportar, ventanaConfirmar, textoError, conContacto: (t) => conContacto(t), cuando, plural,
+    /* M-3a (pj-results.js) */
+    ventana, opciones, elegido, iniciales, TIPO, recargarJuego: () => pintarJuego(),
+    /* M-3b (pj-log.js) */
+    diaNY, horaNY, sumarDias, conIcono };
 
 
   /* ============================================================
@@ -891,6 +996,17 @@
       case 'game_changed': return [b(d.host), ' changed your game. Now: ', b(`${c.dia} · ${c.hora} · ${d.place || ''}`), '.'];
       case 'game_cancelled': return [`Your ${tipo} game ${cuandoTxt} was cancelled by the host`, ...motivo, '.'];
       case 'reminder': return [d.host_view ? 'Reminder: you are hosting ' : 'Reminder: your game, ', b(`${tipo} · ${c.dia} · ${c.hora}`), '.'];
+      case 'result_due': return ['How did it go? Report the result of your ', b(`${tipo} game ${cuandoTxt}`), '.'];
+      case 'result_reported': return d.logged ? [b(d.host), ` logged a ${tipo} game you played ${cuandoTxt}. Please check it.`]
+        : [b(d.host), ` reported the result of the ${tipo} game ${cuandoTxt}. Please check it.`];
+      /* M-3b: el cambio de un invitado por un jugador. */
+      case 'result_linked': return [b(d.host), ` added you to the result of a ${tipo} game ${cuandoTxt}, in place of their guest "${d.guest || ''}". Is it you?`];
+      case 'link_accepted': return [b(d.who), ` confirmed they played your ${tipo} game ${cuandoTxt}.`];
+      case 'link_declined': return [b(d.who), ` said they weren't your guest "${d.guest || ''}" in the ${tipo} game ${cuandoTxt}.`];
+      case 'result_declined': return [b(d.who), ` declined the result of your ${tipo} game ${cuandoTxt}. You can correct it once.`];
+      case 'result_disputed': return [`The FEROCIA team will review the result of your ${tipo} game ${cuandoTxt}.`];
+      case 'result_verified': return [`The result of the ${tipo} game ${cuandoTxt} is verified and added to your profile.`];
+      case 'result_discarded': return [`The result of the ${tipo} game ${cuandoTxt} was discarded by the FEROCIA team.`];
       case 'chat': return [b(plural(Number(d.count) || 1, 'new message', 'new messages')), ` in ${d.host_view ? 'your' : `${d.host || 'the host'}'s`} ${tipo} game ${cuandoTxt}.`];
       default: return ['You have an update about a game.'];
     }

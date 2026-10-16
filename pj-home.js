@@ -89,6 +89,20 @@
   }
 
   /* ── Últimos resultados ── */
+  const ETIQUETA = { verified: 'Verified', pending: 'Awaiting confirmation', review: 'In review', self: 'Self-reported' };
+  const FORMATO_PLAY = { single: '', bo3: ' · Best of 3', bo5: ' · Best of 5' };
+  const TIPO_PLAY = { singles: 'Singles', doubles: 'Doubles', mixed: 'Mixed', drill: 'Drill' };
+  /* Un partido de Play como fila de "Recent results" (sueltos: el marcador; Best of: los games ganados). */
+  function filaPlay(m) {
+    const juegos = m.scores || [];
+    return {
+      play: true, status: m.status, played_on: m.played_on, result: m.result,
+      competition: `${m.logged ? 'Logged game' : 'Play game'} · ${TIPO_PLAY[m.kind] || 'Game'}${FORMATO_PLAY[m.format] || ''}`,
+      partners: m.partners || [], opponents: m.opponents || [],
+      score_for: m.format === 'single' && juegos[0] ? juegos[0][0] : m.won,
+      score_against: m.format === 'single' && juegos[0] ? juegos[0][1] : m.lost,
+    };
+  }
   function conQuien(r) {
     const partes = [];
     if (r.partners && r.partners.length) partes.push(`w/ ${r.partners.map(fmt.nombre).join(' & ')}`);
@@ -99,13 +113,22 @@
     if (!lista || !lista.length) {
       return h('p', { class: 'pj-empty', text: 'No results yet. Your games will show up here after your first ladder session or tournament.' });
     }
-    const filas = lista.map((r) => h('tr', null,
-      h('td', { class: 'pj-td-date', text: fmt.corto(r.played_on) }),
-      h('td', { class: 'pj-td-strong', text: r.category ? `${r.competition} · ${r.category}` : r.competition }),
-      h('td', { class: 'pj-td-soft', text: conQuien(r) }),
-      h('td', { class: 'pj-td-score', text: r.score_for != null && r.score_against != null ? `${r.score_for}–${r.score_against}` : '' }),
-      h('td', { class: 'pj-td-res' }, h('span', { class: `pj-res ${r.result === 'win' ? 'is-win' : 'is-loss'}`, title: r.result === 'win' ? 'Win' : 'Loss' },
-        h('span', { 'aria-hidden': 'true', text: r.result === 'win' ? 'W' : 'L' }), h('span', { class: 'pj-sr', text: r.result === 'win' ? 'Win' : 'Loss' })))));
+    const filas = lista.map((r) => {
+      /* M-3a: los juegos de Play llevan su etiqueta; mientras esperan, sin W/L. */
+      /* M-3b: un Self-reported cuenta (con W/L), con su propia etiqueta. */
+      const espera = r.play && r.status !== 'verified' && r.status !== 'self';
+      const etiqueta = r.play ? h('span', { class: `hm-tag${espera ? ' is-wait' : r.status === 'self' ? ' is-self' : ''}`, text: ETIQUETA[r.status] || '' }) : null;
+      const res = espera
+        ? h('span', { class: 'pj-res is-wait', title: ETIQUETA[r.status] }, h('span', { 'aria-hidden': 'true', text: '·' }), h('span', { class: 'pj-sr', text: ETIQUETA[r.status] }))
+        : h('span', { class: `pj-res ${r.result === 'win' ? 'is-win' : 'is-loss'}`, title: r.result === 'win' ? 'Win' : 'Loss' },
+          h('span', { 'aria-hidden': 'true', text: r.result === 'win' ? 'W' : 'L' }), h('span', { class: 'pj-sr', text: r.result === 'win' ? 'Win' : 'Loss' }));
+      return h('tr', null,
+        h('td', { class: 'pj-td-date', text: fmt.corto(r.played_on) }),
+        h('td', { class: 'pj-td-strong' }, r.category ? `${r.competition} · ${r.category}` : r.competition, etiqueta),
+        h('td', { class: 'pj-td-soft', text: conQuien(r) }),
+        h('td', { class: 'pj-td-score', text: r.score_for != null && r.score_against != null ? `${r.score_for}–${r.score_against}` : '' }),
+        h('td', { class: 'pj-td-res' }, res));
+    });
     return h('div', { class: 'pj-table-scroll' },
       h('table', { class: 'pj-table' },
         h('thead', null, h('tr', null,
@@ -113,6 +136,37 @@
           h('th', { scope: 'col', text: 'With / against' }), h('th', { scope: 'col', class: 'pj-th-right', text: 'Score' }),
           h('th', { scope: 'col' }, h('span', { class: 'pj-sr', text: 'Result' })))),
         h('tbody', null, filas)));
+  }
+
+  /* ── M-3a: "Play games" (aparte de lo oficial) y sus partidos en Recent results ── */
+  async function pintarPlay(mia, oficiales) {
+    let p;
+    try {
+      const { data, error } = await P.sb.rpc('portal_mis_partidos');
+      if (error) throw error;
+      p = data || {};
+    } catch (e) { $('hm-play').hidden = true; return; }   // sin el SQL 100: Home como antes
+    if (mia !== vez) return;
+    const st = p.stats || {};
+    const recientes = p.recent || [];
+    const jugados = st.played || 0;
+    $('hm-play').hidden = !jugados && !recientes.length;
+    if (!$('hm-play').hidden) {
+      const pct = jugados ? `${Math.round(((st.wins || 0) / jugados) * 100)}%` : '—';
+      const racha = st.streak ? `${st.streak} ${st.streak_kind === 'win' ? (st.streak === 1 ? 'win' : 'wins') : (st.streak === 1 ? 'loss' : 'losses')}` : '—';
+      const celda = (l, n, s) => h('div', null, h('span', { class: 'hm-play-l', text: l }), h('span', { class: 'hm-play-n', text: n }), s ? h('span', { class: 'hm-play-s', text: s }) : null);
+      $('hm-play').replaceChildren(
+        h('div', null, h('span', { class: 'hm-play-k', text: 'Play games' }), h('span', { class: 'hm-play-t', text: st.self ? 'Your games with other players' : 'Verified games with other FEROCIA players' })),
+        celda('Played', String(jugados), st.self ? `incl. ${st.self} self-reported` : null), celda('Wins', String(st.wins || 0)), celda('Win rate', pct), celda('Streak', racha));
+    }
+    if (!recientes.length) return;
+    /* Juntos, por fecha (el más reciente primero); los de Play primero en el mismo día. */
+    const todos = [...recientes.map(filaPlay), ...oficiales]
+      .map((r, i) => ({ r, i }))
+      .sort((a, b) => String(b.r.played_on || '').localeCompare(String(a.r.played_on || '')) || a.i - b.i)
+      .map((x) => x.r)
+      .slice(0, Math.max(10, oficiales.length));
+    $('hm-results').replaceChildren(resultados(todos));
   }
 
   /* ── Mis escaleras ── */
@@ -213,6 +267,7 @@
     $('hm-rank').replaceChildren(tarjetaPuesto(d.ladders));
     $('hm-stats').replaceChildren(...numeros(d.stats || {}));
     $('hm-results').replaceChildren(resultados(d.recent));
+    pintarPlay(mia, d.recent || []);
     $('hm-ladders').replaceChildren(...[].concat(escaleras(d.ladders)));
     $('hm-tournaments').replaceChildren(...[].concat(torneos(d.tournaments)));
     $('hm-events').replaceChildren(...eventos(d.events));

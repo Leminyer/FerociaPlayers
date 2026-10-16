@@ -17,7 +17,8 @@
 <link rel="stylesheet" href="pj-identity.css?v=20261015a">
 <link rel="stylesheet" href="pj-dna.css?v=20261015e">
 <link rel="stylesheet" href="pj-play.css?v=20261015g">
-<link rel="stylesheet" href="pj-games.css?v=20261015b">
+<link rel="stylesheet" href="pj-games.css?v=20261015c">
+<link rel="stylesheet" href="pj-results.css?v=20261016a">
 </head>
 <body>
 
@@ -357,6 +358,7 @@
   <main class="pj-wrap" id="hm-main" aria-busy="true">
     <div class="pj-alert pj-alert-error" id="hm-error" role="alert" hidden></div>
     <div class="pj-stats" id="hm-stats"></div>
+    <div class="hm-play" id="hm-play" aria-label="Play games" hidden></div>
     <div class="pj-cols">
       <section class="pj-panel pj-col-main" aria-labelledby="hm-results-t">
         <div class="pj-panel-head"><h2 class="pj-panel-title" id="hm-results-t">Recent results</h2></div>
@@ -432,6 +434,7 @@
         <section class="pj-panel" aria-labelledby="id-game-t">
           <div class="pj-panel-head"><h2 class="pj-panel-title" id="id-game-t">Your game</h2></div>
           <dl class="id-kpis" id="id-kpis"></dl>
+          <p class="id-play" id="id-play" hidden></p>
           <div class="id-form" id="id-form"></div>
         </section>
         <section class="pj-panel" aria-labelledby="id-hist-t">
@@ -450,6 +453,7 @@
           <label class="id-opt"><input class="id-radio" type="radio" name="id-vis" value="private"><span class="id-opt-t"><span class="id-opt-n">Private</span><span class="id-opt-s">Only you and FEROCIA staff. You won't appear in player matching.</span></span></label>
         </fieldset>
         <p class="id-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v5h1"/></svg>This applies when FEROCIA player matching launches. Ladder standings and tournament results are always public.</p>
+        <div class="lg-code" id="id-code" hidden></div>
       </section>
       <section class="pj-panel" aria-labelledby="id-me-t">
         <div class="pj-panel-head">
@@ -654,12 +658,16 @@
         <p class="pl-lead">Every suggestion comes with the reasons behind it — your DNA, your level, when you play and the games you've shared. Never random.</p>
       </div>
       <div class="gm-hero-side">
-        <a class="gm-btn-lime gm-create" href="#/game-form" id="gm-create" hidden>+ Create a game</a>
+        <div class="lg-btns">
+          <a class="gm-btn-lime gm-create" href="#/game-form" id="gm-create" hidden>+ Create a game</a>
+          <a class="lg-ghost" href="#/log-game" id="gm-log" hidden>Log a game you played</a>
+        </div>
         <div class="pl-me" id="pl-me" hidden>
           <div class="pl-me-k">How others find you</div>
           <div class="pl-me-n"><span class="pl-dot" aria-hidden="true"></span><span id="pl-me-n"></span></div>
           <div class="pl-me-s" id="pl-me-s"></div>
           <a href="#/player/me" id="pl-me-go">See your player card →</a>
+          <div class="lg-code lg-code-dark" id="pl-code" hidden></div>
         </div>
       </div>
     </div>
@@ -769,7 +777,10 @@
           <label class="dn-opt"><input class="pj-sr" type="radio" name="gf-needed" value="1">1</label>
           <label class="dn-opt"><input class="pj-sr" type="radio" name="gf-needed" value="2">2</label>
           <label class="dn-opt"><input class="pj-sr" type="radio" name="gf-needed" value="3">3</label>
+          <label class="dn-opt"><input class="pj-sr" type="radio" name="gf-needed" value="4">4</label>
+          <label class="dn-opt"><input class="pj-sr" type="radio" name="gf-needed" value="5">5</label>
         </div>
+        <p class="gm-small gm-tight" id="gf-needed-help">Doubles and Mixed: 4 to 6 players with you, so people can rotate.</p>
       </fieldset>
       <fieldset class="dn-q" id="gf-q-levels">
         <legend class="dn-q-h"><span class="dn-q-tl"><span class="dn-q-t">Level</span></span><span class="dn-q-n">Choose all that fit</span></legend>
@@ -791,6 +802,22 @@
       <button class="pj-btn pj-btn-primary pj-btn-block" type="submit" id="gf-send">Create game</button>
       <p class="pj-note gm-center">FEROCIA doesn't book courts or handle court fees — arrange those yourself.</p>
     </form>
+  </main>
+</section>
+
+<!-- ── 7g2 · LOG A GAME YOU PLAYED (Matchmaking M-3b) ─────── -->
+<section class="pj-screen" data-screen="log-game" data-chrome="app" aria-labelledby="lg-title">
+  <section class="gm-hero">
+    <div class="gm-hero-in">
+      <div>
+        <a class="gm-hero-back" href="#/play">← Play</a>
+        <div class="gm-k">Log a game you played</div>
+        <h1 class="gm-title" id="lg-title" tabindex="-1" data-focus-title>A game outside the app</h1>
+      </div>
+    </div>
+  </section>
+  <main class="pj-wrap pj-wrap-md" id="lg-main">
+    <div id="lg-body"></div>
   </main>
 </section>
 
@@ -978,20 +1005,23 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- Hito 5: el captcha de Cloudflare para pedir el correo de entrada. -->
 <script src="ferocia-captcha.js?v=20261014e"></script>
-<script src="pj-app.js?v=20261015h"></script>
+<script src="pj-app.js?v=20261016a"></script>
 <script src="pj-auth.js?v=20261014e"></script>
 <!-- FEROCIA Identity: ciudad y estado (el mismo archivo que el formulario de suscripción). -->
 <script src="location-fields.js?v=20261015a"></script>
 <script src="pj-onboarding.js?v=20261015d"></script>
-<script src="pj-home.js?v=20261015b"></script>
+<script src="pj-home.js?v=20261016a"></script>
 <script src="pj-profile.js?v=20261015b"></script>
-<script src="pj-identity.js?v=20261015b"></script>
-<script src="pj-dna.js?v=20261015g"></script>
+<script src="pj-identity.js?v=20261016a"></script>
+<script src="pj-dna.js?v=20261015h"></script>
 <script src="pj-play.js?v=20261015i"></script>
 <!-- Matchmaking M-2a: los juegos, la campanita y Player Safety. -->
-<script src="pj-games.js?v=20261015b"></script>
+<script src="pj-games.js?v=20261016a"></script>
 <!-- Matchmaking M-2b: el chat del juego (después de pj-games.js). -->
 <script src="pj-chat.js?v=20261015a"></script>
+<!-- Matchmaking M-3a: el resultado de cada juego (después de pj-games.js). -->
+<script src="pj-results.js?v=20261016a"></script>
+<script src="pj-log.js?v=20261016a"></script>
 <script src="pj-account.js?v=20261014e"></script>
 <script src="pj-help.js?v=20261014e"></script>
 </body>

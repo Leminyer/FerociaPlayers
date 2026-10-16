@@ -254,6 +254,24 @@
       ...forma.map((r) => h('span', { class: `id-fd ${r === 'win' ? 'id-fd-w' : 'id-fd-l'}`, 'aria-hidden': 'true', text: r === 'win' ? 'W' : 'L' }))));
   }
 
+  /* M-3a: "Play games" debajo de los números oficiales (sólo lo verificado). */
+  async function pintarPlay(mia) {
+    const caja = $('id-play');
+    let p;
+    try {
+      const { data, error } = await P.sb.rpc('portal_mis_partidos');
+      if (error) throw error;
+      p = (data && data.stats) || {};
+    } catch (e) { caja.hidden = true; return; }   // sin el SQL 100: como antes
+    if (mia !== vez) return;
+    const n = p.played || 0;
+    caja.hidden = !n;
+    if (!n) return;
+    caja.replaceChildren(h('b', { text: 'Play games' }),
+      h('span', { text: `${n} played${p.self ? ` (incl. ${p.self} self-reported)` : ''}` }), h('span', { text: `${p.wins || 0}–${p.losses || 0}` }),
+      h('span', { text: `${Math.round(((p.wins || 0) / n) * 100)}% wins` }));
+  }
+
   /* ── 5 · Where you've competed ── */
   function pintarHistorial(d) {
     const filas = [];
@@ -365,6 +383,7 @@
       'The players you face most will show up here.', 3);
     pintarHistoria(d, id);
     pintarJuego(d, id);
+    pintarPlay(mia);
     pintarHistorial(d);
     /* Si eligió otra opción mientras esto cargaba, manda la suya (la
        lectura de la base es de antes). */

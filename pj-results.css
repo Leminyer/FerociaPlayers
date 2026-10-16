@@ -1,0 +1,195 @@
+/* ============================================================
+   FEROCIA PLAYER PORTAL — El resultado de un juego (M-3a, §79)
+   Reportar, confirmar, su estado; "Play games" en Home e Identity.
+   ============================================================ */
+
+/* ── El panel ── */
+.rs-wrap { display: flex; flex-direction: column; gap: 14px; }
+.rs-intro { margin: 0; font-size: 14px; line-height: 1.5; font-weight: 500; color: var(--pj-muted); }
+.rs-h { margin: 6px 0 -6px; font-size: 12.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--pj-muted); }
+
+/* Quién vino */
+.rs-att { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.rs-att li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 12px;
+  border: 1px solid var(--pj-line); border-radius: 14px; padding: 10px 12px; }
+.rs-att-n { font-size: 14.5px; font-weight: 800; color: var(--pj-navy); min-width: 0; overflow-wrap: anywhere; }
+.rs-why { grid-column: 1 / -1; margin: 0; font-size: 12.5px; font-weight: 600; line-height: 1.45; color: #B54708; background: #FFFAEB; border-radius: 10px; padding: 8px 10px; }
+.rs-why-soft { color: var(--pj-soft); background: var(--pj-bg); }
+
+/* Opciones segmentadas (quién vino, el formato) */
+.rs-seg { display: flex; flex-wrap: wrap; background: var(--pj-bg); border-radius: 10px; padding: 3px; gap: 3px; }
+.rs-opt { flex: 1 0 auto; text-align: center; font-size: 12.5px; font-weight: 700; padding: 8px 9px; border-radius: 8px; color: var(--pj-muted); cursor: pointer; min-height: 36px; display: grid; place-items: center; }
+.rs-opt.is-on { background: #fff; color: var(--pj-navy); box-shadow: 0 1px 2px rgba(16, 24, 40, .12); }
+.rs-opt.is-no_show, .rs-opt.is-late { background: #FEF3F2; color: var(--pj-red); }
+.rs-opt.is-excused, .rs-opt.is-late_excused { background: #FFFAEB; color: #B54708; }
+.rs-opt:focus-within { outline: 2px solid var(--pj-blue); outline-offset: 1px; }
+
+/* Cada juego */
+.rs-games { display: flex; flex-direction: column; gap: 12px; }
+.rs-game { border: 1px solid var(--pj-line); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; background: #fff; }
+.rs-game-h { display: flex; justify-content: space-between; align-items: center; }
+.rs-game-h b { font-size: 15px; color: var(--pj-navy); }
+.rs-team { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.rs-team-l { flex: 0 0 64px; font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--pj-muted); }
+.rs-chip { font: inherit; font-size: 13px; font-weight: 700; padding: 8px 12px; border-radius: 99px; border: 1px solid var(--pj-line); background: #fff; color: var(--pj-navy); cursor: pointer; min-height: 40px; }
+.rs-chip.is-on { background: var(--pj-navy); border-color: var(--pj-navy); color: #fff; }
+.rs-chip.is-me:not(.is-on) { color: var(--pj-blue); }
+.rs-chip:disabled { opacity: .45; cursor: not-allowed; }
+.rs-scores { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--pj-line); padding-top: 12px; }
+.rs-sc-row { display: flex; align-items: center; gap: 8px; }
+.rs-sc-l { flex: 1; font-size: 12.5px; font-weight: 700; color: var(--pj-muted); }
+.rs-sc { width: 52px; height: 42px; border: 1px solid var(--pj-field); border-radius: 10px; text-align: center; font: inherit; font-size: 16px; font-weight: 800; color: var(--pj-navy); }
+.rs-sc:focus { outline: 2px solid var(--pj-blue); outline-offset: 1px; border-color: var(--pj-blue); }
+.rs-sc-x { font-weight: 800; color: var(--pj-muted); min-width: 8px; text-align: center; }
+.rs-sc-h { margin-bottom: -4px; }
+.rs-sc-t { width: 52px; text-align: center; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--pj-muted); }
+.rs-add { font: inherit; border: 1.5px dashed #C9D3E6; border-radius: 14px; padding: 13px; background: #fff; text-align: center; font-weight: 800; font-size: 14px; color: var(--pj-blue); cursor: pointer; }
+.rs-add:hover { background: rgba(23, 76, 204, .04); }
+.rs-rule, .rs-clock { margin: 0; display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; font-weight: 600; line-height: 1.45; color: var(--pj-muted); }
+.rs-rule svg, .rs-clock svg { flex: none; margin-top: 1px; }
+.rs-sum { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; font-weight: 700; color: var(--pj-navy); border-top: 1px solid var(--pj-line); padding-top: 12px; }
+
+/* Confirmar */
+.rs-banner { background: var(--pj-navy); color: #fff; border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+.rs-k { font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--pj-lime); }
+.rs-banner h2 { margin: 0; font-size: 19px; line-height: 1.25; }
+.rs-banner p { margin: 0; font-size: 13.5px; line-height: 1.45; font-weight: 500; color: rgba(255, 255, 255, .82); }
+.rs-res { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.rs-res li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 3px 12px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--pj-line); }
+.rs-res li:last-child { border-bottom: 0; }
+.rs-t { font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--pj-muted); }
+.rs-w { grid-column: 1; font-size: 13.5px; font-weight: 600; color: var(--pj-navy); overflow-wrap: anywhere; }
+.rs-s { grid-row: 1 / 3; grid-column: 2; font-weight: 800; font-size: 14px; color: var(--pj-navy); text-align: right; }
+.rs-res .pj-res { grid-row: 1 / 3; grid-column: 3; }
+.rs-att-notes { list-style: none; margin: 0; padding: 0; font-size: 13px; color: var(--pj-soft); display: flex; flex-direction: column; gap: 4px; }
+.rs-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rs-accept, .rs-decline { font: inherit; font-weight: 800; font-size: 15px; padding: 13px; border-radius: 12px; cursor: pointer; min-height: 48px; }
+.rs-accept { background: var(--pj-blue); color: #fff; border: 1.5px solid var(--pj-blue); }
+.rs-decline { background: #fff; color: var(--pj-red); border: 1.5px solid #FECDCA; }
+.rs-accept:disabled, .rs-decline:disabled { opacity: .6; cursor: default; }
+
+/* Estado */
+.rs-pill { font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 99px; }
+.rs-pill.is-wait { background: #FFFAEB; color: #B54708; }
+.rs-pill.is-ok { background: var(--pj-green-bg); color: var(--pj-green-tx); }
+.rs-pill.is-off { background: #F2F4F7; color: #667085; }
+.rs-alert { border-color: #FECDCA; }
+.rs-declines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--pj-navy); }
+.rs-declines q { display: block; margin-top: 4px; font-size: 13px; color: var(--pj-soft); border-left: 3px solid #FECDCA; padding-left: 10px; quotes: none; }
+
+/* "Results" en Your games */
+.rs-todo .gm-pill { white-space: nowrap; }
+
+/* ── "Play games" en Home ── */
+.hm-play { display: grid; grid-template-columns: minmax(170px, auto) repeat(4, 1fr); background: #fff; border: 1px solid var(--pj-line); border-radius: 18px; overflow: hidden; margin: 18px 0; }
+.hm-play > div { padding: 16px 20px; border-left: 1px solid var(--pj-line); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.hm-play > div:first-child { border-left: 0; background: rgba(23, 76, 204, .05); justify-content: center; }
+.hm-play-k { font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--pj-blue); }
+.hm-play-t { font-size: 13px; font-weight: 600; color: var(--pj-muted); }
+.hm-play-l { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--pj-muted); }
+.hm-play-n { font-size: 24px; font-weight: 900; color: var(--pj-navy); line-height: 1.1; }
+.hm-tag { display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 99px; background: #EEF4FF; color: var(--pj-blue); vertical-align: 1px; white-space: nowrap; }
+.hm-tag.is-wait { background: #FFFAEB; color: #B54708; }
+.pj-res.is-wait { background: #F2F4F7; color: #667085; }
+@media (max-width: 760px) {
+  .hm-play { grid-template-columns: repeat(2, 1fr); }
+  .hm-play > div:first-child { grid-column: 1 / -1; }
+  .hm-play > div:nth-child(2), .hm-play > div:nth-child(4) { border-left: 0; }
+  .hm-play > div:nth-child(n+2) { border-top: 1px solid var(--pj-line); }
+}
+
+/* ── "Play games" en Identity ── */
+.id-play { margin: 4px 0 0; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; font-size: 13.5px; font-weight: 600; color: var(--pj-soft); }
+.id-play b { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--pj-blue); }
+
+@media (max-width: 480px) {
+  .rs-att li { grid-template-columns: 1fr; }
+  .rs-team-l { flex-basis: 100%; }
+  .rs-banner { padding: 16px; }
+}
+
+/* ============================================================
+   M-3b (§81): "Log a game", el código de jugador, añadidos e invitados
+   ============================================================ */
+/* Los dos botones de Play (Create a game · Log a game you played) */
+.lg-btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.lg-btns .gm-create { flex: 0 0 auto; }
+.lg-ghost { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; border-radius: 99px; padding: 9px 18px;
+  border: 1.5px solid rgba(255, 255, 255, .4); color: #fff; font: 900 12.5px 'Inter', sans-serif; letter-spacing: .4px; text-decoration: none; }
+.lg-ghost:hover { border-color: #fff; }
+.lg-ghost:focus-visible { outline: 3px solid rgba(200, 240, 49, .6); outline-offset: 2px; }
+
+/* El código */
+.lg-code { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; border-top: 1px solid var(--pj-line); margin-top: 14px; padding-top: 14px; }
+.lg-code-k { width: 100%; font-size: 11px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase; color: var(--pj-muted); }
+.lg-code-v { font: 900 22px/1 'Inter', sans-serif; letter-spacing: 4px; color: var(--pj-navy); background: var(--pj-bg); border-radius: 10px; padding: 9px 12px; }
+.lg-code-acts { display: flex; gap: 12px; flex-wrap: wrap; }
+.lg-code-btn { font: inherit; font-size: 13px; font-weight: 800; color: var(--pj-blue); background: none; border: 0; padding: 0 2px; min-height: 40px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.lg-code-btn:focus-visible { outline: 3px solid rgba(23, 76, 204, .35); outline-offset: 2px; border-radius: 6px; }
+.lg-code-dark .lg-code-btn:focus-visible { outline-color: rgba(200, 240, 49, .6); }
+.lg-code-btn:disabled { opacity: .5; cursor: default; text-decoration: none; }
+.lg-code small { width: 100%; font-size: 12.5px; font-weight: 600; color: var(--pj-muted); line-height: 1.45; }
+.lg-code-dark { border-top-color: rgba(255, 255, 255, .12); margin-top: 4px; padding-top: 12px; }
+.lg-code-dark .lg-code-k { color: rgba(255, 255, 255, .6); }
+.lg-code-dark .lg-code-v { color: #fff; background: rgba(255, 255, 255, .08); }
+.lg-code-dark .lg-code-btn { color: var(--pj-lime); }
+.lg-code-dark small { color: rgba(255, 255, 255, .65); }
+.pl-me .lg-code-btn { padding: 0 2px; margin: 0; }
+
+/* Log a game */
+.lg-form { display: flex; flex-direction: column; gap: 12px; }
+.lg-lbl { font-size: 13px; font-weight: 800; color: var(--pj-navy); }
+.lg-seg .rs-opt { flex: 1 0 auto; }
+.lg-people { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.lg-people li { display: flex; align-items: center; gap: 10px; border: 1px solid var(--pj-line); border-radius: 14px; padding: 10px 12px; background: #fff; }
+.lg-people-n { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.lg-people-n b { font-size: 14px; color: var(--pj-navy); overflow-wrap: anywhere; }
+.lg-people-n small { font-size: 12px; font-weight: 600; color: var(--pj-muted); }
+.lg-guest, .lg-fer { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 99px; white-space: nowrap; }
+.lg-guest { background: #F2F4F7; color: #475467; }
+.lg-fer { background: #EEF4FF; color: var(--pj-blue); }
+.lg-summary { display: flex; flex-direction: column; gap: 4px; background: #fff; border: 1px solid var(--pj-line); border-radius: 16px; padding: 14px 16px; margin-bottom: 14px; }
+.lg-summary b { font-size: 15px; color: var(--pj-navy); }
+.lg-summary span { font-size: 13px; font-weight: 600; color: var(--pj-muted); overflow-wrap: anywhere; }
+
+/* En el reporte: los añadidos con código y los invitados */
+.rs-att li.lg-att-fixed { grid-template-columns: minmax(0, 1fr) auto; }
+.lg-att-r { display: flex; align-items: center; gap: 12px; }
+.lg-add-help { margin-top: -6px; }
+
+/* La ventana para añadir a alguien */
+.lg-tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--pj-bg); border-radius: 12px; padding: 3px; gap: 3px; }
+.lg-tabs[hidden] { display: none; }
+.lg-tab { font: inherit; font-size: 13px; font-weight: 800; padding: 10px; border-radius: 9px; color: var(--pj-muted); background: none; border: 0; cursor: pointer; min-height: 40px; }
+.lg-tab[aria-pressed="true"] { background: #fff; color: var(--pj-navy); box-shadow: 0 1px 2px rgba(16, 24, 40, .12); }
+.lg-tab:focus-visible { outline: 2px solid var(--pj-blue); outline-offset: 1px; }
+.lg-modal-body { display: flex; flex-direction: column; gap: 12px; }
+.lg-add { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.lg-code-in { letter-spacing: 3px; text-transform: uppercase; font-weight: 800; }
+.lg-find { font: inherit; background: var(--pj-navy); color: #fff; border: 0; border-radius: 12px; font-weight: 800; font-size: 14px; padding: 0 18px; cursor: pointer; min-height: 50px; }
+.lg-find:disabled { opacity: .6; cursor: default; }
+.lg-found { display: flex; gap: 10px; align-items: center; border: 1.5px solid var(--pj-blue); background: #F5F8FF; border-radius: 14px; padding: 12px; }
+.lg-found b { display: block; font-size: 14.5px; color: var(--pj-navy); }
+.lg-found small { display: block; font-size: 12.5px; font-weight: 600; color: var(--pj-muted); }
+
+/* Los invitados de un resultado (cambiarlos por su código) */
+.lg-guests-wrap { display: flex; flex-direction: column; gap: 10px; }
+.lg-guests { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.lg-guests li { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; border: 1px dashed #C9D3E6; border-radius: 12px; padding: 10px 12px; }
+.lg-guests li > span:first-child { display: flex; flex-direction: column; min-width: 0; }
+.lg-guests b { font-size: 14px; color: var(--pj-navy); overflow-wrap: anywhere; }
+.lg-guest-s { font-size: 12px; font-weight: 700; color: #B54708; }
+
+/* Home: la etiqueta "Self-reported" y "incl. N self-reported" */
+.hm-tag.is-self { background: #F2F4F7; color: #475467; }
+.hm-play-s { font-size: 12px; font-weight: 600; color: var(--pj-muted); }
+
+@media (max-width: 480px) {
+  .lg-btns { flex-direction: column; align-items: stretch; }
+  .lg-att-r { justify-content: space-between; }
+}
+/* "+ Add a player" (como "+ Add a game or match") */
+.lg-add-player { font: inherit; border: 1.5px dashed #C9D3E6; border-radius: 14px; padding: 13px; background: #fff; text-align: center; font-weight: 800; font-size: 14px; color: var(--pj-blue); cursor: pointer; min-height: 48px; }
+.lg-add-player:hover { background: rgba(23, 76, 204, .04); }
+.lg-add-player:disabled { opacity: .5; cursor: default; }
+.lg-add-player:focus-visible { outline: 2px solid var(--pj-blue); outline-offset: 2px; }
