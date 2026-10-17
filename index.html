@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="pj-base.css?v=20261014e">
 <link rel="stylesheet" href="pj-auth.css?v=20261015c">
 <link rel="stylesheet" href="pj-layout.css?v=20261017a">
-<link rel="stylesheet" href="pj-pages.css?v=20261015a">
+<link rel="stylesheet" href="pj-pages.css?v=20261017a">
 <link rel="stylesheet" href="pj-identity.css?v=20261015a">
 <link rel="stylesheet" href="pj-dna.css?v=20261015e">
 <link rel="stylesheet" href="pj-play.css?v=20261015g">
@@ -291,6 +291,22 @@
         <p class="pj-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#24BC96" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Your details are private. Other players never see them.</p>
         <p class="pj-small-center">Something not working? <a href="#/help">Send us a message</a></p>
       </form>
+    </div>
+    <!-- Menores de 18 (17 oct): en vez del aviso rojo, esta tarjeta. No se guarda nada. -->
+    <div class="pj-card pj-review pj-junior" id="ab-junior" hidden>
+      <div class="pj-review-main">
+        <div class="pj-review-ico"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.3 6.8 19l1-5.8-4.2-4.1 5.8-.8z"/></svg></div>
+        <div class="pj-review-eyebrow">Junior players</div>
+        <h1 class="pj-review-title" id="ab-junior-title" tabindex="-1">Junior players are coming soon</h1>
+        <p class="pj-review-lead">Right now the FEROCIA Player Portal is for players 18 and older. We love having our junior players on the courts, and we're working on an experience made just for you.</p>
+        <p class="pj-review-lead">You can still check your ladder standings and upcoming events with the link you always use.</p>
+        <p class="pj-review-lead">Questions? Write to us at <a class="pj-link-strong" href="mailto:contact@ferociasports.com">contact@ferociasports.com</a>.</p>
+        <div class="pj-form-actions pj-junior-actions">
+          <a class="pj-btn pj-btn-primary pj-btn-md" href="https://ferociasports.com">Back to ferociasports.com</a>
+          <button type="button" class="pj-btn pj-btn-quiet pj-btn-md" data-action="sign-out">Sign out</button>
+        </div>
+        <p class="pj-small-center pj-junior-back"><button type="button" class="pj-link-btn" id="ab-junior-back">Entered the wrong date of birth? Go back</button></p>
+      </div>
     </div>
   </main>
 </section>
@@ -1123,7 +1139,7 @@
 <script src="pj-auth.js?v=20261017a"></script>
 <!-- FEROCIA Identity: ciudad y estado (el mismo archivo que el formulario de suscripción). -->
 <script src="location-fields.js?v=20261015a"></script>
-<script src="pj-onboarding.js?v=20261015d"></script>
+<script src="pj-onboarding.js?v=20261017a"></script>
 <script src="pj-charts.js?v=20261016a"></script>
 <script src="pj-share.js?v=20261016a"></script>
 <script src="pj-home.js?v=20261016d"></script>

@@ -7,6 +7,10 @@
 .pj-card-wrap-md { max-width: 680px; }
 .pj-card-wrap-lg { max-width: 920px; display: flex; flex-direction: column; gap: 24px; }
 .pj-form-roomy { gap: 22px; }
+/* … y la tarjeta para menores de 18 (17 oct) */
+.pj-junior .pj-review-ico { background: rgba(198, 242, 33, .25); color: var(--pj-navy); }
+.pj-junior-actions { flex-wrap: wrap; margin-top: 6px; }
+.pj-junior-back { margin: 0; text-align: left; }
 
 /* ── 5a · En revisión ── */
 .pj-review { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 32px; }

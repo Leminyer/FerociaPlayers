@@ -94,7 +94,25 @@
   };
 
   /* ── 4 · A LITTLE ABOUT YOU ── */
+  /* Menores de 18 (17 oct): la tarjeta "Junior players are coming soon"
+     en vez del formulario. No se guarda nada; "Go back" vuelve al
+     formulario por si se equivocó de fecha. */
+  function mostrarJunior(si) {
+    const form = $('ab-form').closest('.pj-card');
+    form.hidden = si;
+    $('ab-junior').hidden = !si;
+    $('ab-form').closest('[data-screen]').setAttribute('aria-labelledby', si ? 'ab-junior-title' : 'ab-title');
+    if (si) { mostrarError('ab-error', ''); window.scrollTo(0, 0); $('ab-junior-title').focus(); }
+  }
+  $('ab-junior-back').addEventListener('click', () => {
+    mostrarJunior(false);
+    const dob = $('ab-dob');
+    dob.select();
+    dob.focus();
+  });
+
   P.alEntrar('about', () => {
+    mostrarJunior(false);
     const e = P.estado() || {};
     const f = $('ab-first'), l = $('ab-last');
     if (!f.value) f.value = e.first_name || '';
@@ -136,8 +154,7 @@
     }
     if (edad(fecha) < 18) {
       marcar(dob, true);
-      mostrarError('ab-error', 'The FEROCIA Player Portal is for players 18 and older.');
-      dob.focus();
+      mostrarJunior(true);
       return;
     }
 
@@ -161,8 +178,8 @@
       await P.refrescar();
     } catch (err) {
       console.warn('[portal] completar:', err);
+      if (/under_18/.test((err && err.message) || '')) { mostrarJunior(true); return; }
       mostrarError('ab-error', P.errorTexto(err, {
-        under_18: 'The FEROCIA Player Portal is for players 18 and older.',
         invalid_date_of_birth: 'Enter your date of birth as MM / DD / YYYY.',
         invalid_phone: 'Enter a 10-digit US phone number.',
         invalid_name: 'Check your first and last name.',
