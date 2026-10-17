@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="design-tokens.css?v=20261014e">
 <link rel="stylesheet" href="pj-base.css?v=20261014e">
 <link rel="stylesheet" href="pj-auth.css?v=20261015c">
-<link rel="stylesheet" href="pj-layout.css?v=20261015c">
+<link rel="stylesheet" href="pj-layout.css?v=20261017a">
 <link rel="stylesheet" href="pj-pages.css?v=20261015a">
 <link rel="stylesheet" href="pj-identity.css?v=20261015a">
 <link rel="stylesheet" href="pj-dna.css?v=20261015e">
@@ -611,13 +611,15 @@
           <label class="pj-choice"><input type="radio" name="ed-gender" value="Male">Male</label>
           </div>
         </fieldset>
-        <fieldset class="pj-fieldset" id="ed-level">
+        <fieldset class="pj-fieldset" id="ed-level" aria-describedby="ed-level-help ed-level-note">
           <legend class="pj-label">Playing level</legend>
+          <p class="pj-level-help" id="ed-level-help">Your level helps Play find the right players for you. Ladder and tournament placement is decided by FEROCIA. Not sure? Ask one of our coaches.</p>
           <div class="pj-levels">
           <label class="pj-level"><input class="pj-sr" type="radio" name="ed-level" value="Beginner"><span class="pj-level-name">Beginner</span><span class="pj-level-desc">Learning the rules and the basic shots.</span></label>
           <label class="pj-level"><input class="pj-sr" type="radio" name="ed-level" value="Intermediate"><span class="pj-level-name">Intermediate</span><span class="pj-level-desc">Steady rallies, working on the kitchen game.</span></label>
           <label class="pj-level"><input class="pj-sr" type="radio" name="ed-level" value="Advanced"><span class="pj-level-name">Advanced</span><span class="pj-level-desc">Competitive, tournament-level play.</span></label>
           </div>
+          <p class="pj-level-note" id="ed-level-note">You can change your level once every 30 days.</p>
         </fieldset>
         <div class="pj-form-actions">
           <button class="pj-btn pj-btn-primary pj-btn-md" type="submit" id="ed-submit">Save changes</button>
@@ -1125,7 +1127,7 @@
 <script src="pj-charts.js?v=20261016a"></script>
 <script src="pj-share.js?v=20261016a"></script>
 <script src="pj-home.js?v=20261016d"></script>
-<script src="pj-profile.js?v=20261015b"></script>
+<script src="pj-profile.js?v=20261017a"></script>
 <script src="pj-identity.js?v=20261016a"></script>
 <script src="pj-dna.js?v=20261015h"></script>
 <script src="pj-play.js?v=20261015i"></script>

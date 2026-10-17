@@ -10,6 +10,12 @@
      están bloqueados: "Request a change" abre Help con "My details".
    · El teléfono, la ciudad y el estado nuevos también pasan a su ficha
      de suscriptor (§43 y §57).
+   · El nivel (SQL 107, 17 de octubre): una vez cada 30 días. Si ya lo
+     cambió hace poco, los otros niveles salen bloqueados y la nota dice
+     desde qué día puede volver a cambiarlo. La base lo comprueba igual.
+     Si no tocó el nivel, se manda vacío y la ficha se queda con el que
+     tiene (así un nivel del panel que aquí no existe, como "Advanced
+     Intermediate", no le impide cambiar el teléfono).
    · Ciudad y estado se escriben igual que en el formulario de
      suscripción (location-fields.js): "boca ratón" queda "Boca Raton".
    ============================================================ */
@@ -44,9 +50,23 @@
   const elegido = (name) => { const r = document.querySelector(`input[name="${name}"]:checked`); return r ? r.value : ''; };
   function error(texto) { $('ed-error').textContent = texto || ''; $('ed-error').hidden = !texto; }
 
+  /* El nivel: libre, o bloqueado hasta una fecha (YYYY-MM-DD). */
+  const NOTA_NIVEL = 'You can change your level once every 30 days.';
+  function bloquearNivel(hasta, actual) {
+    const fecha = hasta ? fmt.largo(hasta) : '';
+    document.querySelectorAll('input[name="ed-level"]').forEach((r) => { r.disabled = !!fecha && r.value !== actual; });
+    const nota = $('ed-level-note');
+    nota.textContent = fecha ? `You changed your level recently. You can change it again on ${fecha}.` : NOTA_NIVEL;
+    nota.classList.toggle('is-locked', !!fecha);
+  }
+
   let original = null;
   P.alEntrar('edit', async () => {
     error('');
+    bloquearNivel(null);
+    /* Desde cuándo puede volver a cambiar el nivel; si esto falla, se deja
+       libre (la base no deja guardarlo antes de tiempo de todas formas). */
+    const estadoNivel = sb.rpc('portal_nivel_estado').then((r) => (r.error ? null : r.data), () => null);
     let d;
     try { d = await P.datos(); } catch (err) { error(P.errorTexto(err)); return; }
     const p = d.player || {};
@@ -61,6 +81,8 @@
     [telefono, $('ed-city'), $('ed-state')].forEach((el) => marcar(el, false));
     elegir('ed-gender', p.gender);
     elegir('ed-level', p.skill_level);
+    const en = await estadoNivel;
+    bloquearNivel(en && en.next_change, p.skill_level);
     $('ed-name').textContent = fmt.nombre([p.first_name, p.last_name].filter(Boolean).join(' '));
     $('ed-dob').textContent = fmt.largo(p.date_of_birth) || 'Date of birth not on file';
   });
@@ -87,11 +109,13 @@
     if (digitos.length !== 10) { error('Enter a 10-digit US phone number.'); telefono.focus(); return; }
     if (lugar.malCiudad) { error(P.errorLugar.invalid_city); $('ed-city').focus(); return; }
     if (lugar.malEstado) { error(P.errorLugar.invalid_state); $('ed-state').focus(); return; }
-    if (!genero || !nivel) { error('Choose your gender and playing level.'); return; }
+    /* El nivel sólo es obligatorio si la ficha no tiene ninguno. */
+    if (!genero || (!nivel && !(original && original.level))) { error('Choose your gender and playing level.'); return; }
+    const nivelNuevo = nivel && (!original || nivel !== original.level) ? nivel : null;
     /* Si no tocó ciudad ni estado, no se mandan: la ficha conserva lo que
        ya tenía tal cual (aunque esté escrito a la antigua, "Boca Raton, FL"). */
     const mismoLugar = !!original && original.city === lugar.ciudad && original.state === lugar.estado;
-    if (original && original.phone === digitos && original.gender === genero && original.level === nivel && mismoLugar) {
+    if (original && original.phone === digitos && original.gender === genero && !nivelNuevo && mismoLugar) {
       P.aviso('Nothing to save — your details are the same.');
       P.ir('profile');
       return;
@@ -102,7 +126,7 @@
     b.setAttribute('aria-busy', 'true');
     try {
       const { error: err } = await sb.rpc('portal_guardar_perfil', {
-        p_phone: digitos, p_gender: genero, p_skill_level: nivel,
+        p_phone: digitos, p_gender: genero, p_skill_level: nivelNuevo,
         p_city: mismoLugar ? null : lugar.ciudad, p_state: mismoLugar ? null : lugar.estado,
       });
       if (err) throw err;
@@ -111,6 +135,18 @@
       P.ir('profile');
     } catch (err) {
       console.warn('[portal] guardar perfil:', err);
+      if (/level_too_soon/.test((err && err.message) || '')) {
+        const hasta = /^\d{4}-\d{2}-\d{2}$/.test((err && err.details) || '') ? err.details : null;
+        if (original) elegir('ed-level', original.level);
+        bloquearNivel(hasta, original && original.level);
+        P.olvidarDatos();
+        /* Lo demás que cambió (teléfono, ciudad…) no se guardó: se le dice. */
+        const otros = !!original && !(original.phone === digitos && original.gender === genero && mismoLugar);
+        error((hasta ? `You changed your level recently. You can change it again on ${fmt.largo(hasta)}.`
+          : 'You changed your level recently. You can change it once every 30 days.')
+          + (otros ? ' Your other changes aren\'t saved yet — press Save changes again to keep them.' : ''));
+        return;
+      }
       error(P.errorTexto(err, Object.assign({ invalid_phone: 'Enter a 10-digit US phone number.' }, P.errorLugar)));
     } finally {
       guardando = false;
