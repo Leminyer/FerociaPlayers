@@ -19,6 +19,7 @@
 <link rel="stylesheet" href="pj-play.css?v=20261015g">
 <link rel="stylesheet" href="pj-games.css?v=20261015c">
 <link rel="stylesheet" href="pj-results.css?v=20261016a">
+<link rel="stylesheet" href="pj-home.css?v=20261016a">
 </head>
 <body>
 
@@ -344,46 +345,157 @@
 </section>
 
 <!-- ── 6 · HOME ───────────────────────────────────────────── -->
-<section class="pj-screen" data-screen="home" data-chrome="app" aria-labelledby="hm-name">
-  <section class="pj-hero">
-    <div class="pj-hero-in">
-      <div class="pj-hero-who">
-        <div class="pj-hero-eyebrow" id="hm-greeting"></div>
-        <h1 class="pj-hero-name" id="hm-name" tabindex="-1" data-focus-title></h1>
-        <div class="pj-chips" id="hm-chips"></div>
+<section class="pj-screen" data-screen="home" data-chrome="app" aria-labelledby="hm-q">
+  <!-- 1 · "What brings you in today?" (SQL 105, §85): 6 opciones, siempre en el mismo sitio -->
+  <section class="hm-ask" id="hm-ask" aria-busy="true">
+    <div class="hm-ask-in">
+      <div class="hm-ask-top">
+        <div class="hm-ask-who">
+          <p class="hm-hello" id="hm-greeting"></p>
+          <h1 class="hm-q" id="hm-q" tabindex="-1" data-focus-title>What brings you in today?</h1>
+          <p class="hm-ask-sub">Pick one and we'll take you straight there.</p>
+        </div>
+        <a class="hm-task" id="hm-task" href="#/play" hidden><span class="hm-task-n" id="hm-task-n"></span><span id="hm-task-t"></span></a>
       </div>
-      <div class="pj-hero-side" id="hm-rank"></div>
+      <div class="hm-opts" role="group" aria-label="What brings you in today?">
+        <button type="button" class="hm-opt" id="hm-o-now" aria-pressed="false">
+          <span class="hm-opt-top"><svg class="hm-opt-i" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span class="hm-opt-tag" id="hm-ot-now" hidden></span></span>
+          <span class="hm-opt-n">Play right now</span>
+          <span class="hm-opt-h" id="hm-oh-now"></span>
+        </button>
+        <button type="button" class="hm-opt" id="hm-o-plan" aria-pressed="false">
+          <span class="hm-opt-top"><svg class="hm-opt-i" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="hm-opt-tag" id="hm-ot-plan" hidden></span></span>
+          <span class="hm-opt-n">Plan a game</span>
+          <span class="hm-opt-h" id="hm-oh-plan"></span>
+        </button>
+        <button type="button" class="hm-opt" id="hm-o-open" aria-pressed="false">
+          <span class="hm-opt-top"><svg class="hm-opt-i" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="hm-opt-tag" id="hm-ot-open" hidden></span></span>
+          <span class="hm-opt-n">Join an open game</span>
+          <span class="hm-opt-h" id="hm-oh-open"></span>
+        </button>
+        <button type="button" class="hm-opt" id="hm-o-matches" aria-pressed="false">
+          <span class="hm-opt-top"><svg class="hm-opt-i" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.4 5.6L20 11l-5.6 2.4L12 19l-2.4-5.6L4 11l5.6-2.4z"/></svg><span class="hm-opt-tag" id="hm-ot-matches" hidden></span></span>
+          <span class="hm-opt-n">Meet your best matches</span>
+          <span class="hm-opt-h" id="hm-oh-matches"></span>
+        </button>
+        <button type="button" class="hm-opt" id="hm-o-log" aria-pressed="false">
+          <span class="hm-opt-top"><svg class="hm-opt-i" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span class="hm-opt-tag" id="hm-ot-log" hidden></span></span>
+          <span class="hm-opt-n">Log a game you played</span>
+          <span class="hm-opt-h" id="hm-oh-log"></span>
+        </button>
+        <button type="button" class="hm-opt" id="hm-o-stats" aria-pressed="false">
+          <span class="hm-opt-top"><svg class="hm-opt-i" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg><span class="hm-opt-tag" id="hm-ot-stats" hidden></span></span>
+          <span class="hm-opt-n">See how I'm doing</span>
+          <span class="hm-opt-h" id="hm-oh-stats"></span>
+        </button>
+      </div>
+      <div class="hm-step" id="hm-step" aria-live="polite"></div>
     </div>
   </section>
-  <main class="pj-wrap" id="hm-main" aria-busy="true">
+
+  <main class="pj-wrap hm-main" id="hm-main" aria-busy="true">
     <div class="pj-alert pj-alert-error" id="hm-error" role="alert" hidden></div>
-    <div class="pj-stats" id="hm-stats"></div>
-    <div class="hm-play" id="hm-play" aria-label="Play games" hidden></div>
-    <div class="pj-cols">
-      <section class="pj-panel pj-col-main" aria-labelledby="hm-results-t">
-        <div class="pj-panel-head"><h2 class="pj-panel-title" id="hm-results-t">Recent results</h2></div>
-        <div id="hm-results"></div>
-      </section>
-      <div class="pj-col-side">
-        <section class="pj-panel" aria-labelledby="hm-ladders-t">
-          <h2 class="pj-panel-title" id="hm-ladders-t">My ladders</h2>
-          <div id="hm-ladders"></div>
-        </section>
-        <section class="pj-panel" aria-labelledby="hm-tourn-t">
-          <h2 class="pj-panel-title" id="hm-tourn-t">Tournaments</h2>
-          <div id="hm-tournaments"></div>
+
+    <!-- 2 · "Your game, in numbers" -->
+    <section class="hm-numbers" id="hm-numbers" aria-labelledby="hm-num-t" hidden>
+      <div class="hm-num-head">
+        <div>
+          <h2 class="hm-num-t" id="hm-num-t" tabindex="-1">Your game, in numbers</h2>
+          <p class="hm-num-s" id="hm-num-s"></p>
+        </div>
+        <div class="hm-filters" id="hm-filters">
+          <div class="hm-seg" role="group" aria-label="Time range">
+            <button type="button" data-rango="4w" aria-pressed="false">4 weeks</button>
+            <button type="button" data-rango="6m" aria-pressed="true">6 months</button>
+            <button type="button" data-rango="all" aria-pressed="false">All time</button>
+          </div>
+          <div class="hm-seg" role="group" aria-label="Which games">
+            <button type="button" data-fuente="all" aria-pressed="true">All games</button>
+            <button type="button" data-fuente="official" aria-pressed="false">Ladders &amp; tournaments</button>
+            <button type="button" data-fuente="play" aria-pressed="false">Play</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="hm-banner" id="hm-banner" hidden>
+        <span class="hm-banner-i" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></span>
+        <span class="hm-banner-txt"><span class="hm-banner-t" id="hm-banner-t"></span><span class="hm-banner-s" id="hm-banner-s"></span></span>
+        <button type="button" class="hm-share" id="hm-share" hidden>Share my month</button>
+      </div>
+
+      <div class="hm-kpis" id="hm-kpis"></div>
+
+      <div class="hm-charts" id="hm-charts">
+        <div class="hm-row hm-row-2">
+          <figure class="hm-card">
+            <figcaption class="hm-card-h"><span class="hm-card-t" id="hm-c-rate-t">Win rate by month</span><span class="hm-card-s" id="hm-c-rate-s"></span></figcaption>
+            <div class="hm-chart" id="hm-c-rate"></div>
+          </figure>
+          <figure class="hm-card" id="hm-c-ladder-sec">
+            <figcaption class="hm-card-h"><span class="hm-card-t" id="hm-c-ladder-t">Your ladder journey</span><span class="hm-card-s" id="hm-c-ladder-s"></span></figcaption>
+            <div class="hm-chart" id="hm-c-ladder"></div>
+          </figure>
+        </div>
+        <div class="hm-row hm-row-3">
+          <figure class="hm-card">
+            <figcaption class="hm-card-h"><span class="hm-card-t">Your form</span><span class="hm-card-s" id="hm-c-form-s"></span></figcaption>
+            <div id="hm-c-form"></div>
+          </figure>
+          <figure class="hm-card">
+            <figcaption class="hm-card-h"><span class="hm-card-t">Days on court</span><span class="hm-card-s" id="hm-c-days-s"></span></figcaption>
+            <div id="hm-c-days"></div>
+          </figure>
+          <figure class="hm-card">
+            <figcaption class="hm-card-h"><span class="hm-card-t">Your winning partners</span><span class="hm-card-s" id="hm-c-partners-s"></span></figcaption>
+            <div class="hm-meters" id="hm-c-partners"></div>
+          </figure>
+        </div>
+        <div class="hm-row hm-row-hl">
+          <section class="hm-card hm-hl-sec" id="hm-hl-sec" aria-labelledby="hm-hl-t">
+            <div class="hm-card-h"><h3 class="hm-card-t" id="hm-hl-t">The games that moved you up</h3><span class="hm-card-s">Your biggest jumps and best wins</span></div>
+            <div class="hm-hl" id="hm-hl"></div>
+          </section>
+          <section class="hm-card hm-ms" aria-labelledby="hm-ms-k">
+            <span class="hm-ms-ring" id="hm-ms-ring"></span>
+            <span class="hm-ms-txt"><h3 class="hm-ms-k" id="hm-ms-k">Next milestone</h3><span class="hm-ms-t" id="hm-ms-t"></span><span class="hm-ms-s" id="hm-ms-s"></span></span>
+          </section>
+        </div>
+        <div class="hm-tip" id="hm-tip" hidden></div>
+      </div>
+
+      <!-- Sin juegos todavía -->
+      <div class="hm-empty" id="hm-empty" hidden>
+        <div class="hm-card hm-ghost">
+          <span class="hm-ghost-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></span>
+          <span class="hm-ghost-t">Your story starts with your first game.</span>
+          <span class="hm-ghost-s">After each game this fills up: your wins, your form, the partners you click with and how you improve.</span>
+        </div>
+        <section class="hm-card" aria-labelledby="hm-first-t">
+          <h3 class="hm-card-t" id="hm-first-t">Your first milestones</h3>
+          <ul class="hm-steps">
+            <li class="is-done">Your Player DNA</li>
+            <li>Your first game</li>
+            <li>Your first win</li>
+            <li>10 games — your charts unlock</li>
+          </ul>
         </section>
       </div>
-    </div>
-    <div class="pj-cols pj-cols-stretch">
-      <section class="pj-col-main pj-upcoming" aria-labelledby="hm-events-t">
+    </section>
+
+    <!-- 3 · Lo de antes, más compacto -->
+    <div class="hm-bottom">
+      <section class="pj-panel hm-recent" aria-labelledby="hm-results-t">
+        <div class="pj-panel-head"><h2 class="pj-panel-title" id="hm-results-t">Recent results</h2></div>
+        <ul class="hm-rr-list" id="hm-results"></ul>
+      </section>
+      <section class="pj-panel hm-whats" aria-labelledby="hm-events-t">
         <div class="pj-panel-head">
-          <h2 class="pj-panel-title" id="hm-events-t">Coming up at FEROCIA</h2>
+          <h2 class="pj-panel-title" id="hm-events-t">What's on at FEROCIA</h2>
           <a class="pj-panel-link" href="https://ferociasports.com/#events" target="_blank" rel="noopener">All events ↗</a>
         </div>
-        <div class="pj-events" id="hm-events"></div>
+        <div class="pj-events hm-events" id="hm-events"></div>
+        <div id="hm-video"></div>
       </section>
-      <div class="pj-col-side" id="hm-video"></div>
     </div>
   </main>
 </section>
@@ -1010,13 +1122,15 @@
 <!-- FEROCIA Identity: ciudad y estado (el mismo archivo que el formulario de suscripción). -->
 <script src="location-fields.js?v=20261015a"></script>
 <script src="pj-onboarding.js?v=20261015d"></script>
-<script src="pj-home.js?v=20261016a"></script>
+<script src="pj-charts.js?v=20261016a"></script>
+<script src="pj-share.js?v=20261016a"></script>
+<script src="pj-home.js?v=20261016c"></script>
 <script src="pj-profile.js?v=20261015b"></script>
 <script src="pj-identity.js?v=20261016a"></script>
 <script src="pj-dna.js?v=20261015h"></script>
 <script src="pj-play.js?v=20261015i"></script>
 <!-- Matchmaking M-2a: los juegos, la campanita y Player Safety. -->
-<script src="pj-games.js?v=20261016a"></script>
+<script src="pj-games.js?v=20261016b"></script>
 <!-- Matchmaking M-2b: el chat del juego (después de pj-games.js). -->
 <script src="pj-chat.js?v=20261015a"></script>
 <!-- Matchmaking M-3a: el resultado de cada juego (después de pj-games.js). -->

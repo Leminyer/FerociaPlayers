@@ -555,6 +555,9 @@
     if (!editando) {
       marcar('gf-kind', 'doubles'); marcar('gf-needed', '3'); marcar('gf-vis', 'open');
       $('gf-reminder').checked = true;
+      /* SQL 105: desde el Home ("Plan a game") llega el día: #/game-form/d-AAAA-MM-DD. */
+      const dia = /^d-(\d{4}-\d{2}-\d{2})$/.exec(crudo);
+      if (dia && dia[1] >= $('gf-day').min && dia[1] <= $('gf-day').max) $('gf-day').value = dia[1];
       repasarForm();
       return;
     }
