@@ -488,14 +488,17 @@
     caja.replaceChildren(P.graficas.barras(datosB, etiqueta));
   }
 
-  function pintarCamino() {
+  /* Filtros, opción A (16 oct, 22:14): el camino, la forma y los días
+     también siguen el rango de tiempo. */
+  function pintarCamino(per) {
     const sec = $('hm-c-ladder-sec');
     const l = rend && rend.ladder;
     if (!l || !l.sessions || !l.sessions.length || filtro.fuente === 'play') { sec.hidden = true; return; }
     sec.hidden = false;
-    const ses = l.sessions;
-    const puntos = ses.map((x, i) => ({ rank: x.rank, of: x.of, played: x.played, label: i === ses.length - 1 && x.d === hoy ? 'Today' : fmt.corto(x.d) }));
+    const ses = l.sessions.filter((x) => x.d >= per[0].from);
     $('hm-c-ladder-t').textContent = l.status === 'active' ? `Your ${l.name} journey` : `Your ${l.name} season`;
+    if (!ses.length) { $('hm-c-ladder-s').textContent = ''; $('hm-c-ladder').replaceChildren(pista('No ladder sessions in this period.')); return; }
+    const puntos = ses.map((x, i) => ({ rank: x.rank, of: x.of, played: x.played, label: i === ses.length - 1 && x.d === hoy ? 'Today' : fmt.corto(x.d) }));
     const a = ses[0].rank, b = ses[ses.length - 1].rank, mejor = Math.min(...ses.map((x) => x.rank));
     $('hm-c-ladder-s').textContent = ses.length === 1 ? `#${b} after your first session`
       : a > b ? `From #${a} to #${b} in ${plural(ses.length, 'session', 'sessions')}`
@@ -504,10 +507,10 @@
     $('hm-c-ladder').replaceChildren(P.graficas.camino(puntos, etiqueta));
   }
 
-  function pintarForma() {
-    const ult = deFuente(juegos()).slice(-10);
+  function pintarForma(per) {
+    const ult = enRango(deFuente(juegos()), per).slice(-10);
     const caja = $('hm-c-form');
-    if (ult.length < 3) { $('hm-c-form-s').textContent = ''; caja.replaceChildren(pista('Your last 10 games show up here.')); return; }
+    if (ult.length < 3) { $('hm-c-form-s').textContent = ''; caja.replaceChildren(pista(ult.length ? 'Play 3 games in this period to see your form.' : 'No games in this period yet.')); return; }
     const w = ult.filter((g) => g.r === 'w').length;
     $('hm-c-form-s').textContent = `Last ${ult.length} games · ${plural(w, 'win', 'wins')}`;
     const fichasF = ult.map((g) => h('span', { class: `hm-form-c ${g.r === 'w' ? 'is-w' : 'is-l'}`, title: `${fmt.corto(g.d)}: ${g.r === 'w' ? 'win' : 'loss'}${g.sf != null && g.sa != null ? ` ${g.sf}–${g.sa}` : ''}`, text: g.r === 'w' ? 'W' : 'L' }));
@@ -515,16 +518,22 @@
       h('span', { class: 'hm-fine', text: 'Oldest → newest' }));
   }
 
-  function pintarDias() {
+  const NIVEL_DIA = (n) => (n >= 3 ? ' is-2' : n ? ' is-1' : '');
+  const NIVEL_MES = (n) => (n >= 8 ? ' is-2' : n ? ' is-1' : '');
+  const leyenda = () => h('span', { class: 'hm-legend', 'aria-hidden': 'true' }, 'Less', h('span', { class: 'hm-day' }), h('span', { class: 'hm-day is-1' }), h('span', { class: 'hm-day is-2' }), 'More');
+  function pintarDias(per) {
     const lista = deFuente(juegos());
-    const inicio = sumar(hoy, -(diaSemana(hoy) + 7 * 11));   // el domingo de hace 11 semanas
+    if (filtro.rango === 'all') { pintarMeses(lista, per); return; }
+    const semanas = filtro.rango === '4w' ? 4 : 26;
+    const texto = filtro.rango === '4w' ? 'last 4 weeks' : 'last 6 months';
+    const inicio = sumar(hoy, -(diaSemana(hoy) + 7 * (semanas - 1)));   // un domingo
     const cuenta = {};
     lista.forEach((g) => { if (g.d >= inicio && g.d <= hoy) cuenta[g.d] = (cuenta[g.d] || 0) + 1; });
     const celdas = [];
-    for (let i = 0; i < 84; i++) {
+    for (let i = 0; i < semanas * 7; i++) {
       const d = sumar(inicio, i);
       const n = cuenta[d] || 0;
-      const c = h('span', { class: `hm-day${d > hoy ? ' is-future' : n >= 3 ? ' is-2' : n ? ' is-1' : ''}` });
+      const c = h('span', { class: `hm-day${d > hoy ? ' is-future' : NIVEL_DIA(n)}` });
       if (d <= hoy) c.title = `${fmt.corto(d)}: ${n ? plural(n, 'game', 'games') : 'no games'}`;
       celdas.push(c);
     }
@@ -532,13 +541,38 @@
     // Semanas seguidas (si esta semana todavía no jugó, cuenta desde la anterior).
     let seguidas = 0;
     const semanaCon = (k) => { for (let j = 0; j < 7; j++) if (cuenta[sumar(inicio, k * 7 + j)]) return true; return false; };
-    let k = 11;
+    let k = semanas - 1;
     if (!semanaCon(k)) k--;
     for (; k >= 0 && semanaCon(k); k--) seguidas++;
-    $('hm-c-days-s').textContent = seguidas >= 2 ? `${seguidas} weeks in a row · last 12 weeks` : `${plural(dias, 'day', 'days')} on court · last 12 weeks`;
+    $('hm-c-days-s').textContent = seguidas >= 2 ? `${seguidas} weeks in a row · ${texto}` : `${plural(dias, 'day', 'days')} on court · ${texto}`;
     $('hm-c-days').replaceChildren(
-      h('div', { class: 'hm-days', role: 'img', 'aria-label': `${plural(dias, 'day', 'days')} on court in the last 12 weeks${seguidas >= 2 ? `, ${seguidas} weeks in a row` : ''}` }, celdas),
-      h('span', { class: 'hm-legend', 'aria-hidden': 'true' }, 'Less', h('span', { class: 'hm-day' }), h('span', { class: 'hm-day is-1' }), h('span', { class: 'hm-day is-2' }), 'More'));
+      h('div', { class: `hm-days${semanas > 12 ? ' is-long' : ''}`, role: 'img', 'aria-label': `${plural(dias, 'day', 'days')} on court in the ${texto}${seguidas >= 2 ? `, ${seguidas} weeks in a row` : ''}` }, celdas),
+      leyenda());
+  }
+  /* All time: un cuadro por mes (cuántos días jugó ese mes), un año por fila. */
+  function pintarMeses(lista, per) {
+    const dias = {};
+    lista.forEach((g) => { (dias[mesDe(g.d)] = dias[mesDe(g.d)] || new Set()).add(g.d); });
+    const anio0 = aFecha(per[0].from).getUTCFullYear(), anio1 = aFecha(hoy).getUTCFullYear();
+    const filas = [h('span'), ...MESES.map((m) => h('span', { class: 'hm-months-m', 'aria-hidden': 'true', text: m.charAt(0) }))];
+    let total = 0, meses = 0;
+    for (let a = anio0; a <= anio1; a++) {
+      const celdas = [];
+      for (let m = 1; m <= 12; m++) {
+        const k = `${a}-${String(m).padStart(2, '0')}`;
+        const n = dias[k] ? dias[k].size : 0;
+        const futuro = `${k}-01` > hoy;
+        total += n; if (n) meses++;
+        const c = h('span', { class: `hm-day${futuro ? ' is-future' : NIVEL_MES(n)}` });
+        if (!futuro) c.title = `${MESES[m - 1]} ${a}: ${n ? plural(n, 'day', 'days') : 'no games'}`;
+        celdas.push(c);
+      }
+      filas.push(h('span', { class: 'hm-months-y', text: String(a) }), ...celdas);
+    }
+    $('hm-c-days-s').textContent = `${plural(total, 'day', 'days')} on court · by month`;
+    $('hm-c-days').replaceChildren(
+      h('div', { class: 'hm-months', role: 'img', 'aria-label': `${plural(total, 'day', 'days')} on court in ${plural(meses, 'month', 'months')}, all time` }, filas),
+      leyenda());
   }
 
   function parejas(lista, minimo) {
@@ -707,9 +741,9 @@
     $('hm-num-s').textContent = filtro.fuente === 'official' ? 'Ladders and tournaments'
       : filtro.fuente === 'play' ? 'Play games (verified and self-reported)' : 'Ladders, tournaments and Play games';
     pintarBarras(per);
-    pintarCamino();
-    pintarForma();
-    pintarDias();
+    pintarCamino(per);
+    pintarForma(per);
+    pintarDias(per);
     pintarParejas(per);
     pintarMomentos();
     pintarHito();
