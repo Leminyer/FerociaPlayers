@@ -88,7 +88,9 @@
       return { tipo: 'codigo', texto: "That code didn't work. Check the numbers, or ask for a new email." };
     }
     if (window.FerociaCaptcha && window.FerociaCaptcha.esErrorDeCaptcha(error)) {
-      return { tipo: 'captcha', texto: "We couldn't check that you're a person. If you use an ad blocker, pause it for this page (or try another browser), then try again." };
+      /* El código corto ayuda al equipo a saber la causa si el jugador escribe. */
+      const cod = /^[\w-]{1,20}$/.test(String((error && error.captchaCodigo) || '')) ? ` (code ${error.captchaCodigo})` : '';
+      return { tipo: 'captcha', texto: `We couldn't check that you're a person. If you use an ad blocker, pause it for this page (or try another browser), then try again.${cod}` };
     }
     if (error instanceof TypeError || /fetch|network|failed to/i.test(msg)) {
       return { tipo: 'red', texto: "We couldn't connect. Check your internet connection and try again." };
@@ -98,20 +100,45 @@
 
   /* Hito 5: antes de pedir el correo, la verificación de Cloudflare
      (ferocia-captcha.js). "caja" es dónde aparece la casilla, si hace
-     falta marcarla. Cada verificación vale una sola vez. */
+     falta marcarla. Cada verificación vale una sola vez.
+     17 oct: si Supabase rechaza la verificación, se pide otra a Cloudflare
+     y se intenta UNA vez más, sin que el jugador haga nada (no si
+     Cloudflare no cargó o no contestó: eso no se arregla al momento). Si
+     vuelve a fallar, el error lleva un código corto (captchaCodigo):
+     el de Cloudflare, o 'rejected' si Supabase no aceptó una verificación. */
   async function pedirCorreo(email, modo, datos, caja) {
-    const opciones = { emailRedirectTo: P.vuelta(), shouldCreateUser: modo === 'create' };
-    if (modo === 'create' && datos) opciones.data = datos;
     const C = window.FerociaCaptcha;
     const cajaEl = caja ? $(caja) : null;
-    const token = C && cajaEl ? await C.token(cajaEl) : null;
-    if (token) opciones.captchaToken = token;
-    try {
-      const { error } = await sb.auth.signInWithOtp({ email, options: opciones });
-      return error || null;
-    } finally {
-      if (C && cajaEl) C.usado(cajaEl);
+    const intento = async () => {
+      const opciones = { emailRedirectTo: P.vuelta(), shouldCreateUser: modo === 'create' };
+      if (modo === 'create' && datos) opciones.data = datos;
+      const token = C && cajaEl ? await C.token(cajaEl) : null;
+      if (token) opciones.captchaToken = token;
+      try {
+        const { error } = await sb.auth.signInWithOtp({ email, options: opciones });
+        return { error: error || null, conToken: !!token };
+      } finally {
+        if (C && cajaEl) C.usado(cajaEl);
+      }
+    };
+    let r = await intento();
+    const deCaptcha = (x) => !!(x.error && C && C.esErrorDeCaptcha(x.error));
+    const sinArreglo = (cod) => ['no-script', 'timeout', 'unsupported', 'render'].includes(cod);
+    if (deCaptcha(r) && cajaEl && !r.conToken && sinArreglo(C.codigo(cajaEl))) {
+      /* no se reintenta: Cloudflare no puede contestar ahora */
+    } else if (deCaptcha(r) && cajaEl) {
+      const primero = r;
+      r = await intento();
+      /* Si el reintento choca con "espera un minuto", no salió ningún correo:
+         se enseña el problema de la verificación, no "revisa tu correo". */
+      if (r.error && Number(r.error.status) === 429) r = primero;
     }
+    if (deCaptcha(r)) {
+      const cod = r.conToken ? 'rejected' : ((cajaEl && C.codigo(cajaEl)) || 'no-token');
+      try { r.error.captchaCodigo = cod; } catch (_) { /* nada */ }
+      console.warn('[portal] captcha:', cod);
+    }
+    return r.error;
   }
 
   function ocupado(boton, si) {
