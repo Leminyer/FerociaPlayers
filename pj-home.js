@@ -80,6 +80,10 @@
   const intenciones = () => ((P.dnaTextos && P.dnaTextos.INTENCIONES) || []);
   const textoIntencion = (code) => ((intenciones().find((x) => x[0] === code) || [])[1] || '');
 
+  /* SQL 108: "You're hosting Tue 6:30 PM" o "You're hosting 3 games · next Tue 6:30 PM". */
+  const textoOrganiza = (r) => ((r.hosting_count || 1) > 1
+    ? `You're hosting ${r.hosting_count} games · next ${cuandoCorto(r.hosting.plays_at)}`
+    : `You're hosting ${cuandoCorto(r.hosting.plays_at)}`);
   function cuandoCorto(iso) {
     const d = new Date(iso);
     const dia = new Intl.DateTimeFormat('en-US', { timeZone: ZONA, weekday: 'short', month: 'short', day: 'numeric' }).format(d);
@@ -119,7 +123,7 @@
       if (r.now > 0) pintarPista('now', `${plural(r.now, 'compatible player is', 'compatible players are')} up for a game`, 'Live', true);
       else if (r.intent) pintarPista('now', `You're showing: ${textoIntencion(r.intent) || 'Right now'}`, usual('now'));
       else pintarPista('now', 'Let compatible players know you’re up for it', usual('now'));
-      pintarPista('plan', r.hosting ? `You're hosting ${cuandoCorto(r.hosting.plays_at)}` : 'Pick a day — compatible players see it', usual('plan'));
+      pintarPista('plan', r.hosting ? textoOrganiza(r) : 'Pick a day — compatible players see it', usual('plan'));
       pintarPista('open', r.open_week >= 9 ? '9+ open games at your level this week'
         : r.open_week > 0 ? `${plural(r.open_week, 'open game', 'open games')} at your level this week` : 'None yet this week — post one', usual('open'));
       let m;
@@ -149,7 +153,9 @@
     } else if (r.invited > 0) {
       texto = r.invited === 1 ? "You're invited to a game" : `You're invited to ${r.invited} games`; ruta = '#/play'; seccion = 'gm-mine-sec'; total = r.invited;
     } else if (r.requests > 0 && r.hosting) {
-      texto = `${plural(r.requests, 'player wants', 'players want')} to join your game`; ruta = `#/game/${r.hosting.id}`; total = r.requests;
+      /* SQL 108: puede organizar varios; lleva al juego que tiene solicitudes. */
+      texto = `${plural(r.requests, 'player wants', 'players want')} to join your ${(r.hosting_count || 1) > 1 ? 'games' : 'game'}`;
+      ruta = `#/game/${r.request_game || r.hosting.id}`; total = r.requests;
     } else if (r.unread > 0) {
       texto = `${plural(r.unread, 'new message', 'new messages')} in your games`; ruta = '#/play'; seccion = 'gm-mine-sec'; total = r.unread;
     }
@@ -238,18 +244,16 @@
         enlace('Just see who’s on', 'hm-ghost', '#/play', 'pl-now-sec'), go));
       fila.push(h('span', { class: 'hm-step-note', text: 'Compatible players see it in Play. It clears on its own.' }));
     } else if (elegida === 'plan') {
-      if (r.hosting) {
-        fila.push(h('span', { class: 'hm-step-t', text: `You're already hosting a game: ${cuandoCorto(r.hosting.plays_at)}.` }),
-          accion('Open your game →', `#/game/${r.hosting.id}`));
-      } else {
-        fila.push(h('span', { class: 'hm-step-t', text: 'When do you want to play?' }));
-        fila.push(fichas([['today', 'Today'], ['tomorrow', 'Tomorrow'], ['weekend', 'This weekend'], ['pick', 'Pick a date']],
-          planDia, (c) => { planDia = c; pintarPaso(); }, 'When do you want to play?'));
-        const dia = fechaPlan(planDia);
-        const ir = enlace('Create the game →', 'hm-go', dia ? `#/game-form/d-${dia}` : '#/game-form');
-        if (!planDia) { ir.setAttribute('aria-disabled', 'true'); ir.setAttribute('tabindex', '-1'); ir.classList.add('is-off'); ir.addEventListener('click', (ev) => ev.preventDefault()); }
-        fila.push(ir);
-      }
+      /* SQL 108: se pueden organizar varios juegos; si ya tiene, se le recuerda. */
+      if (r.hosting) fila.push(h('span', { class: 'hm-step-note', text: `${textoOrganiza(r)}.` }));
+      fila.push(h('span', { class: 'hm-step-t', text: 'When do you want to play?' }));
+      fila.push(fichas([['today', 'Today'], ['tomorrow', 'Tomorrow'], ['weekend', 'This weekend'], ['pick', 'Pick a date']],
+        planDia, (c) => { planDia = c; pintarPaso(); }, 'When do you want to play?'));
+      const dia = fechaPlan(planDia);
+      const ir = enlace('Create the game →', 'hm-go', dia ? `#/game-form/d-${dia}` : '#/game-form');
+      if (!planDia) { ir.setAttribute('aria-disabled', 'true'); ir.setAttribute('tabindex', '-1'); ir.classList.add('is-off'); ir.addEventListener('click', (ev) => ev.preventDefault()); }
+      fila.push(ir);
+      if (r.hosting) fila.push(enlace('See your games', 'hm-ghost', '#/play', 'gm-mine-sec'));
     } else if (elegida === 'open') {
       if (r.open_week > 0) fila.push(h('span', { class: 'hm-step-t', text: r.open_week >= 9 ? '9+ open games at your level this week.' : `${plural(r.open_week, 'open game', 'open games')} at your level this week.` }), accion('See open games →', '#/play', 'gm-open-sec'));
       else fila.push(h('span', { class: 'hm-step-t', text: 'No open games at your level this week yet. Post one and compatible players will see it.' }), accion('Create a game →', '#/game-form'));

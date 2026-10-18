@@ -64,6 +64,8 @@
 
   const ERRORES = {
     already_hosting: 'You already have an active game. Open it from Play — you can host one game at a time.',
+    /* SQL 108: varios juegos, con 1 hora entre ellos. */
+    too_close: 'You already host a game less than 1 hour from that time. Pick a time at least 1 hour apart.',
     invalid_time: 'Choose a time at least 30 minutes from now.',
     too_far: 'Games can be up to 14 days ahead.',
     invalid_kind: 'Choose the type of game.',
@@ -380,11 +382,11 @@
       h('span', { class: 'gm-who' }, h('b', { text: `${TIPO[j.kind] || 'Game'} · ${c.largo} · ${c.hora}` }), h('span', { text: sub })),
       h('span', { class: `gm-pill ${t[1]}`, text: t[0] }));
   }
-  function tarjetaAnfitrion(j) {
+  function tarjetaAnfitrion(j, proximo) {
     const c = cuando(j.plays_at);
     const pend = j.pending || 0;
     return h('article', { class: 'gm-host' },
-      h('div', { class: 'gm-k', text: "You're hosting" }),
+      h('div', { class: 'gm-k', text: proximo ? "You're hosting · next" : "You're hosting" }),
       h('div', { class: 'gm-host-t', text: `${TIPO[j.kind] || 'Game'} · ${c.dia} · ${c.hora}` }),
       h('div', { class: 'gm-host-s' },
         conIcono('lugar', j.place),
@@ -447,7 +449,7 @@
       }
       return;
     }
-    $('gm-create').hidden = !!d.hosting;
+    $('gm-create').hidden = false;   // SQL 108: se pueden organizar varios juegos
     $('gm-log').hidden = false;   // M-3b: registrar un juego que no se planificó aquí
 
     const jugando = d.playing || [];
@@ -457,9 +459,11 @@
     if (tareas.length) {
       mias.push(h('div', { class: 'gm-joined rs-todo' }, h('div', { class: 'gm-k gm-k-blue', text: 'Results' }), ...tareas.map(filaResultado)));
     }
-    if (d.hosting) mias.push(tarjetaAnfitrion(d.hosting));
+    /* SQL 108: todos los que organiza, por fecha (con la base de antes, sólo "hosting"). */
+    const organiza = Array.isArray(d.hosting_all) ? d.hosting_all : d.hosting ? [d.hosting] : [];
+    if (organiza.length) mias.push(h('div', { class: 'gm-hosting' }, ...organiza.map((j, i) => tarjetaAnfitrion(j, i === 0 && organiza.length > 1))));
     if (jugando.length) {
-      const otros = h('div', { class: 'gm-joined' }, h('div', { class: 'gm-k gm-k-blue', text: d.hosting ? 'Your other games' : "You're playing" }), ...jugando.map(filaMia));
+      const otros = h('div', { class: 'gm-joined' }, h('div', { class: 'gm-k gm-k-blue', text: organiza.length ? 'Your other games' : "You're playing" }), ...jugando.map(filaMia));
       mias.push(otros);
     }
     $('gm-mine').replaceChildren(...mias);
@@ -538,6 +542,54 @@
   let editando = null;
   let antes = null;   // el tipo y los jugadores que tenía el juego que se edita
   let enviandoForm = false;
+
+  /* SQL 108: "Invite friends (optional)" al crear. Se eligen aquí y las
+     invitaciones salen al crear el juego (hasta 8). Desde la tarjeta de un
+     jugador ("Create a new game with …") llega ya elegido (P.invitarDespues). */
+  const MAX_INVITAR = 8;
+  const elegidos = new Map();   // player_id → nombre
+  let buscadorForm = null;
+  function textoEnviar() {
+    if (editando) return 'Save changes';
+    return elegidos.size ? `Create game & send ${plural(elegidos.size, 'invite', 'invites')}` : 'Create game';
+  }
+  function pintarElegidos() {
+    const caja = $('gf-chosen');
+    caja.replaceChildren(...[...elegidos].map(([pid, nombre]) => {
+      const quitar = h('button', { type: 'button', class: 'bj-chip-x', 'aria-label': `Remove ${nombre}`, text: '×' });
+      quitar.addEventListener('click', () => { elegidos.delete(pid); pintarElegidos(); if (buscadorForm) buscadorForm.repintar(); $('gf-invite-in').querySelector('input').focus(); });
+      return h('span', { class: 'bj-chip' }, nombre, quitar);
+    }));
+    caja.hidden = !elegidos.size;
+    $('gf-invite-n').textContent = `${elegidos.size} of ${MAX_INVITAR} invites`;
+    $('gf-send').textContent = textoEnviar();
+  }
+  function accionElegir(p) {
+    const ya = elegidos.has(p.player_id);
+    const b = h('button', { type: 'button', class: ya ? 'pl-btn pl-btn-dark' : 'pl-btn', 'aria-pressed': String(ya),
+      text: ya ? 'Added ✓' : 'Invite', 'aria-label': ya ? `Remove ${p.name}` : `Invite ${p.name}`,
+      disabled: !ya && elegidos.size >= MAX_INVITAR });
+    b.addEventListener('click', () => {
+      if (elegidos.has(p.player_id)) elegidos.delete(p.player_id);
+      else if (elegidos.size < MAX_INVITAR) elegidos.set(p.player_id, p.code ? `${p.name} · ${p.code}` : p.name);
+      pintarElegidos();
+      buscadorForm.repintar();
+      const otra = [...$('gf-invite-in').querySelectorAll('.bj-row')].find((f) => f.querySelector('b').textContent === p.name && f.querySelector('.bj-code')?.textContent === p.code);
+      const boton = otra && otra.querySelector('button');
+      if (boton) boton.focus();
+    });
+    return b;
+  }
+  function montarInvitar() {
+    elegidos.clear();
+    buscadorForm = P.buscadorJugadores ? P.buscadorJugadores({ para: 'invite', etiqueta: 'Name', accion: accionElegir }) : null;
+    $('gf-invite-in').replaceChildren(...(buscadorForm ? [buscadorForm.el] : []));
+    const llega = P.invitarDespues;
+    P.invitarDespues = null;
+    if (buscadorForm && llega && llega.player_id) elegidos.set(llega.player_id, llega.name);
+    $('gf-invite').hidden = !buscadorForm;
+    pintarElegidos();
+  }
   P.alEntrar('game-form', async () => {
     const crudo = P.rutaParam();
     editando = /^\d{1,18}$/.test(crudo) ? Number(crudo) : null;
@@ -549,7 +601,8 @@
     $('gf-day').min = hoy;
     $('gf-day').max = sumarDias(hoy, 14);
     $('gf-title').textContent = editando ? 'Edit your game' : 'Create a game';
-    $('gf-send').textContent = editando ? 'Save changes' : 'Create game';
+    if (editando) { $('gf-invite').hidden = true; elegidos.clear(); } else montarInvitar();
+    $('gf-send').textContent = textoEnviar();
     $('gf-back').setAttribute('href', editando ? `#/game/${editando}` : '#/play');
     $('gf-back').textContent = editando ? '← Back to the game' : '← Play';
     if (!editando) {
@@ -615,11 +668,24 @@
       const args = { p_kind: v.kind, p_day: v.day, p_time: v.time, p_place: v.place, p_needed: v.needed, p_levels: v.levels,
         p_visibility: v.vis, p_notes: v.notes || null, p_reminder: v.reminder };
       const r = editando ? await rpc('portal_juego_editar', { p_game: editando, ...args }) : await rpc('portal_juego_crear', args);
+      /* SQL 108: las invitaciones elegidas salen ahora, una a una. */
+      let enviadas = 0, fallidas = 0;
+      if (!editando) {
+        for (const pid of elegidos.keys()) {
+          try { await rpc('portal_juego_invitar', { p_game: r.id, p_player: pid }); enviadas++; } catch (e) { fallidas++; console.warn('[portal] invitar al crear:', e); }
+        }
+        elegidos.clear();
+      }
+      const extra = enviadas ? ` ${plural(enviadas, 'invitation', 'invitations')} sent.` : '';
+      const mal = fallidas ? ` ${plural(fallidas, "invitation couldn't", "invitations couldn't")} be sent — try again from this page.` : '';
       P.aviso(editando ? 'Saved. Players already in the game get the update.'
-        : v.vis === 'invite' ? 'Your game is ready. Invite players from this page.' : 'Your game is live. Compatible players can see it in Play.');
+        : (v.vis === 'invite' && !enviadas ? 'Your game is ready. Invite players from this page.' : 'Your game is live.') + extra + mal, !!fallidas);
       location.hash = `#/game/${r.id}`;
     } catch (e) {
-      err.textContent = textoError(e);
+      /* SQL 108: si choca con otro juego suyo, se dice con cuál. */
+      const hora = /too_close/.test((e && e.message) || '') && /^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d{1,2} · \d{1,2}:\d{2} [AP]M$/.test((e && e.details) || '') ? e.details : null;
+      if (/too_close/.test((e && e.message) || '')) $('gf-time').setAttribute('aria-invalid', 'true');
+      err.textContent = hora ? `You're already hosting a game on ${hora}. Pick a time at least 1 hour apart.` : textoError(e);
       err.hidden = false;
       err.focus();
     } finally {
@@ -722,6 +788,41 @@
     const nota = h('p', { class: 'gm-small gm-m0', text: 'Loading players…' });
     const caja = panel([tituloPanel('Invite players'), usadas], nota, lista);
     if ((j.taken || 0) >= j.needed) { nota.textContent = 'Your game is full.'; return caja; }
+    const sugeridos = new Map();   // player_id → su botón "Invite" en la lista de abajo
+    /* SQL 108: buscar a tus amigos por nombre (la base dice si ya están). */
+    if (P.buscadorJugadores) {
+      let usadasN = j.invites_used || 0;
+      const buscador = P.buscadorJugadores({ para: 'invite', juego: j.id, etiqueta: 'Search FEROCIA players by name', accion: (p) => {
+        const pill = (t, c) => h('span', { class: `gm-pill ${c}`, text: t });
+        switch (p.state) {
+          case 'invited': return pill('Invited', 'gm-pill-wait');
+          case 'in_game': return pill('In the game', 'gm-pill-ok');
+          case 'full': return pill('Game full', 'gm-pill-wait');
+          case 'limit': return pill('8 invites used', 'gm-pill-wait');
+          case 'invite': {
+            const b = h('button', { type: 'button', class: 'pl-btn', text: 'Invite', 'aria-label': `Invite ${p.name}` });
+            b.addEventListener('click', async () => {
+              b.disabled = true;
+              try {
+                await rpc('portal_juego_invitar', { p_game: j.id, p_player: p.player_id });
+                p.state = 'invited';
+                buscador.repintar();
+                const sug = sugeridos.get(p.player_id);
+                if (sug) sug.replaceWith(h('span', { class: 'gm-pill gm-pill-wait', text: 'Invited' }));
+                usadasN += 1;
+                usadas.textContent = `${usadasN} of 8 invites used`;
+                P.aviso(`Invitation sent to ${p.name}.`);
+              } catch (e) { b.disabled = false; P.aviso(textoError(e), true); }
+            });
+            return b;
+          }
+          default: return h('span', { class: 'gm-small', text: "Can't invite" });
+        }
+      } });
+      caja.insertBefore(h('div', { class: 'bj-panel' }, buscador.el,
+        h('p', { class: 'gm-small gm-m0', text: 'They get an email and a notification, and choose whether to join.' })), nota);
+      nota.classList.add('bj-sug');
+    }
     rpc('portal_juego_invitables', { p_game: j.id }).then((d) => {
       const gente = (d && d.players) || [];
       usadas.textContent = `${d.used || 0} of 8 invites used`;
@@ -734,6 +835,7 @@
         if (p.invited) fin = h('span', { class: 'gm-pill gm-pill-wait', text: 'Invited' });
         else {
           fin = h('button', { type: 'button', class: 'pl-btn', text: 'Invite', disabled: (d.used || 0) >= 8, 'aria-label': `Invite ${nombre}` });
+          sugeridos.set(p.player_id, fin);
           fin.addEventListener('click', async () => {
             fin.disabled = true;
             try {
@@ -936,6 +1038,12 @@
     const quien = [tarjeta.first_name, tarjeta.last_name].filter(Boolean).join(' ');
     const inv = tarjeta.invite || { state: 'no_game' };
     const nota = (t) => h('span', { class: 'pl-soon', text: t });
+    /* SQL 108: con su juego lleno (o sin poder invitarlo a ese), otro juego nuevo con él. */
+    const crearCon = () => {
+      const a = h('a', { class: 'gm-link', href: '#/game-form', text: `Create a new game with ${fmtNombre(tarjeta.first_name)}` });
+      a.addEventListener('click', () => { P.invitarDespues = { player_id: tarjeta.player_id, name: nombreCorto(tarjeta) }; });
+      return a;
+    };
     switch (inv.state) {
       case 'invite': {
         const b = h('button', { type: 'button', class: 'pl-btn pl-btn-dark', text: 'Invite to play' });
@@ -949,18 +1057,74 @@
         caja.append(b, nota('to the game you are hosting'));
         break;
       }
+      case 'choose': {
+        /* SQL 108: organiza varios juegos → "¿a cuál?". */
+        const b = h('button', { type: 'button', class: 'pl-btn pl-btn-dark', text: 'Invite to play' });
+        b.addEventListener('click', () => elegirJuego(tarjeta, caja));
+        caja.append(b, nota(`to one of your ${inv.games} games`));
+        break;
+      }
       case 'invited': caja.append(h('span', { class: 'gm-pill gm-pill-wait', text: 'Invited' }), nota('to your game')); break;
       case 'in_game': caja.append(h('span', { class: 'gm-pill gm-pill-ok', text: 'In your game' })); break;
-      case 'full': caja.append(h('button', { type: 'button', class: 'pl-btn', text: 'Invite to play', disabled: true }), nota('Your game is full.')); break;
-      case 'limit': caja.append(h('button', { type: 'button', class: 'pl-btn', text: 'Invite to play', disabled: true }), nota('You used your 8 invitations.')); break;
-      case 'unavailable': break;
-      default:
-        caja.append(h('a', { class: 'pl-btn', href: '#/game-form', text: 'Invite to play' }), nota(`Create a game, then invite ${fmtNombre(tarjeta.first_name)}.`));
+      case 'full': caja.append(h('button', { type: 'button', class: 'pl-btn', text: 'Invite to play', disabled: true }), nota('Your game is full.'), crearCon()); break;
+      case 'limit': caja.append(h('button', { type: 'button', class: 'pl-btn', text: 'Invite to play', disabled: true }), nota('You used your 8 invitations.'), crearCon()); break;
+      case 'unavailable': caja.append(crearCon()); break;
+      default: {
+        const a = h('a', { class: 'pl-btn', href: '#/game-form', text: 'Invite to play' });
+        a.addEventListener('click', () => { P.invitarDespues = { player_id: tarjeta.player_id, name: nombreCorto(tarjeta) }; });
+        caja.append(a, nota(`Create a game with ${fmtNombre(tarjeta.first_name)}.`));
+      }
     }
     $('pc-report').setAttribute('aria-label', `Report ${quien}`);
     $('pc-block').setAttribute('aria-label', `Block ${quien}`);
   });
   const fmtNombre = (t) => P.fmt.nombre(t || '');
+  /* El nombre como lo ve en Play ("Ana R." en Limited). */
+  const nombreCorto = (t) => P.fmt.nombre([t.first_name, t.last_name].filter(Boolean).join(' '));
+
+  /* SQL 108: "Invite Jamie C. to…": sus juegos que vienen; el lleno, apagado. */
+  async function elegirJuego(t, cajaTarjeta) {
+    const quien = nombreCorto(t);
+    let d;
+    try { d = await rpc('portal_invitar_opciones', { p_player: t.player_id }); } catch (e) { P.aviso(textoError(e), true); return; }
+    const juegosLista = (d && d.games) || [];
+    const NOTA = { invited: 'Already invited', in_game: 'Already in this game', full: 'Full — no open spots', limit: '8 invites used', unavailable: "Can't invite to this game" };
+    const elegido = await ventana((caja, cerrar, idT) => {
+      let sel = (juegosLista.find((g) => g.state === 'invite') || {}).id || null;
+      const enviar = h('button', { type: 'button', class: 'pj-btn pj-btn-primary pj-btn-block' });
+      const filas = juegosLista.map((g) => {
+        const c = cuando(g.plays_at);
+        const libre = g.state === 'invite';
+        const b = h('button', { type: 'button', class: 'bj-game', 'aria-pressed': String(g.id === sel), disabled: !libre },
+          h('b', { text: `${TIPO[g.kind] || 'Game'} · ${c.dia} · ${c.hora}` }),
+          h('span', { text: libre ? `${g.place} · ${(g.taken || 0) + 1} of ${g.needed + 1} players` : `${g.place} · ${NOTA[g.state] || NOTA.unavailable}` }));
+        b.addEventListener('click', () => { sel = g.id; pintar(); });
+        return { g, b, c };
+      });
+      function pintar() {
+        filas.forEach(({ g, b }) => b.setAttribute('aria-pressed', String(g.id === sel)));
+        const f = filas.find((x) => x.g.id === sel);
+        enviar.textContent = f ? `Invite to ${f.c.dia === 'Today' || f.c.dia === 'Tomorrow' ? f.c.dia.toLowerCase() : f.c.largo}'s game` : 'Choose a game';
+        enviar.disabled = !f;
+      }
+      enviar.addEventListener('click', () => cerrar(sel));
+      const nuevo = h('a', { class: 'pj-btn pj-btn-quiet pj-btn-block', href: '#/game-form', text: `+ Create a new game with ${quien.split(' ')[0]}` });
+      nuevo.addEventListener('click', () => { P.invitarDespues = { player_id: t.player_id, name: quien }; cerrar(null); });
+      const no = h('button', { type: 'button', class: 'gm-btn-quiet', text: 'Cancel' });
+      no.addEventListener('click', () => cerrar(null));
+      caja.append(h('h2', { id: idT, text: `Invite ${quien} to…` }),
+        h('p', { class: 'gm-small gm-m0', text: 'Your upcoming games' }),
+        h('div', { class: 'bj-games' }, ...filas.map((x) => x.b)), enviar, nuevo, no);
+      pintar();
+      return (filas.find((x) => x.g.id === sel) || {}).b || enviar;
+    });
+    if (!elegido) return;
+    try {
+      await rpc('portal_juego_invitar', { p_game: elegido, p_player: t.player_id });
+      cajaTarjeta.replaceChildren(h('span', { class: 'gm-pill gm-pill-wait', text: 'Invited' }), h('span', { class: 'pl-soon', text: 'We let them know.' }));
+      P.aviso(`Invitation sent to ${quien}.`);
+    } catch (e) { P.aviso(textoError(e), true); }
+  }
   const personaTarjeta = () => tarjeta && { player_id: tarjeta.player_id, name: P.fmt.nombre([tarjeta.first_name, tarjeta.last_name].filter(Boolean).join(' ')) };
   $('pc-report').addEventListener('click', async () => {
     if (!tarjeta) return;

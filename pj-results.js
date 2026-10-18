@@ -85,8 +85,9 @@
   const reloj = (texto) => { const p = h('p', { class: 'rs-clock' }); p.append(UI().icono('reloj', 16), h('span', null, ...[].concat(texto))); return p; };
 
   /* ============================================================
-     AÑADIR A ALGUIEN: con su código (FEROCIA) o como invitado
-     soloCodigo: sólo con código (cambiar un invitado por su código).
+     AÑADIR A ALGUIEN: por su nombre o su código (FEROCIA; SQL 108) o como invitado
+     soloCodigo: sólo con código, sin la pestaña Guest (cambiar un invitado
+       por un jugador: cuenta solo a las 48 horas, así que nada de nombres).
      Devuelve { player_id, name, role: 'added' } o { name, role: 'guest' }.
      ============================================================ */
   P.ventanaJugador = function ({ titulo: tituloV, soloCodigo, yaEstan, boton } = {}) {
@@ -106,7 +107,31 @@
       function pintar() {
         pestanas.replaceChildren(tab('code', 'FEROCIA player'), tab('guest', 'Guest'));
         pestanas.hidden = !!soloCodigo;
-        if (modo === 'code') {
+        if (modo === 'code' && P.buscadorJugadores && !soloCodigo) {
+          /* SQL 108: por su nombre o por su código, en el mismo campo. */
+          const anadir = h('button', { type: 'button', class: 'pj-btn pj-btn-primary pj-btn-block', text: boton || 'Add player', hidden: true });
+          const buscador = P.buscadorJugadores({ para: 'log', etiqueta: 'Name or player code', accion: (p) => {
+            if ((yaEstan || []).includes(p.player_id)) return h('span', { class: 'gm-small', text: 'Already in this result' });
+            const elegido = encontrado && encontrado.player_id === p.player_id;
+            const b = h('button', { type: 'button', class: elegido ? 'pl-btn pl-btn-dark' : 'pl-btn', 'aria-pressed': String(!!elegido),
+              text: elegido ? 'Selected ✓' : 'Select', 'aria-label': `Select ${p.name}` });
+            b.addEventListener('click', () => {
+              err.hidden = true;
+              encontrado = p;
+              buscador.repintar();
+              anadir.textContent = `${boton || 'Add'} ${p.name}`;
+              anadir.hidden = false;
+              anadir.focus();
+            });
+            return b;
+          } });
+          anadir.addEventListener('click', () => { if (encontrado) cerrar({ player_id: encontrado.player_id, name: encontrado.name, role: 'added' }); });
+          cuerpo.replaceChildren(
+            buscador.el,
+            h('p', { class: 'gm-small gm-m0', text: 'They get the result to accept or decline. Their name is only shown to the people in this game.' }),
+            anadir);
+          setTimeout(() => buscador.enfocar(), 0);
+        } else if (modo === 'code') {
           const campo = h('input', { class: 'gm-input lg-code-in', type: 'text', maxlength: '9', autocomplete: 'off', autocapitalize: 'characters',
             spellcheck: 'false', 'aria-label': 'Player code', placeholder: 'Player code' });
           const buscar = h('button', { type: 'button', class: 'lg-find', text: 'Find' });
@@ -216,7 +241,10 @@
         panel(null, titulo(!n ? 'Who came' : (r.entries || []).some((e) => [...(e.team_a || []), ...(e.team_b || [])].some((p) => p.player_id === yo)) ? 'Your results' : 'The results'),
           listaPartidos(r, yo, true), notasAsistencia(r, yo),
           h('div', { class: 'rs-btns' }, declinar, aceptar),
-          reloj(['If no one declines by ', h('b', { text: cuandoLargo(r.deadline_at) }), ', the result is verified automatically and added to everyone\'s profile.'])));
+          /* SQL 108: lo añadieron buscando su nombre → sólo cuenta para él si lo acepta. */
+          r.needs_accept
+            ? reloj(['You were added by name, so it only counts for you if you accept it by ', h('b', { text: cuandoLargo(r.deadline_at) }), '. If you don\'t answer, you\'re left out of this result.'])
+            : reloj(['If no one declines by ', h('b', { text: cuandoLargo(r.deadline_at) }), ', the result is verified automatically and added to everyone\'s profile.'])));
     }
 
     /* El anfitrión: lo declinaron y puede corregirlo una vez. */
