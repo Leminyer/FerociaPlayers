@@ -162,6 +162,13 @@
     const boton = $('ab-submit');
     boton.disabled = true;
     boton.setAttribute('aria-busy', 'true');
+    /* SQL 109: la ciudad tiene que estar en el estado elegido. */
+    if (!(await P.comprobarLugar('ab-city', 'ab-state', lugar))) {
+      enviando = false;
+      boton.disabled = false;
+      boton.setAttribute('aria-busy', 'false');
+      return;
+    }
     try {
       const { data, error } = await sb.rpc('portal_completar', {
         p_first_name: nombre, p_last_name: apellido, p_date_of_birth: fecha,
@@ -186,6 +193,7 @@
         email_not_confirmed: 'Please confirm your email first — open the link we sent you.',
         invalid_city: P.errorLugar.invalid_city,
         invalid_state: P.errorLugar.invalid_state,
+        "don't match": P.errorLugar["don't match"],
       }));
     } finally {
       enviando = false;

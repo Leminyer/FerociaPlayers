@@ -207,7 +207,17 @@
   const errorLugar = {
     invalid_city: 'Check your city — letters only, like "Boca Raton".',
     invalid_state: 'Choose your state.',
+    /* SQL 109: la base no guarda una ciudad que está en otro estado. */
+    "don't match": "Your city isn't in the state you chose. Check your city and state.",
   };
+  /* SQL 109 (§93): ¿la ciudad está en ese estado? Si no, el aviso queda
+     pintado bajo los campos (con el botón para arreglarlo) y no se guarda.
+     Sin location-fields.js, se guarda y la base decide. */
+  async function comprobarLugar(idCiudad, idEstado, lugar) {
+    const L = lugarL();
+    if (!L || typeof L.comprobarLugar !== 'function') return true;
+    return L.comprobarLugar(idCiudad, idEstado, lugar.ciudad, lugar.estado);
+  }
 
   /* Los errores de la base, en palabras. */
   function errorTexto(err, propios) {
@@ -421,6 +431,7 @@
     mascaraTelefono,
     camposLugar,
     leerLugar,
+    comprobarLugar,
     errorLugar,
     errorTexto,
     sesion: () => sesion,

@@ -124,6 +124,13 @@
     const b = $('ed-submit');
     b.disabled = true;
     b.setAttribute('aria-busy', 'true');
+    /* SQL 109: sólo si cambió la ciudad o el estado. */
+    if (!mismoLugar && !(await P.comprobarLugar('ed-city', 'ed-state', lugar))) {
+      guardando = false;
+      b.disabled = false;
+      b.setAttribute('aria-busy', 'false');
+      return;
+    }
     try {
       const { error: err } = await sb.rpc('portal_guardar_perfil', {
         p_phone: digitos, p_gender: genero, p_skill_level: nivelNuevo,

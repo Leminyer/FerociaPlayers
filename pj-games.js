@@ -172,6 +172,10 @@
     return formato({ month: 'short', day: 'numeric' }).format(d);
   }
 
+  /* SQL 110: invitar a encender los avisos, un momento después (para que
+     antes se vea la pantalla nueva). Sin pj-push.js, no hace nada. */
+  const ofrecerPush = (para) => setTimeout(() => { if (P.pushOfrecer) P.pushOfrecer(para); }, 700);
+
   /* ── Llamar a la base ── */
   async function rpc(fn, args) {
     const { data, error } = await sb.rpc(fn, args || {});
@@ -482,6 +486,7 @@
       await rpc('portal_juego_pedir', { p_game: j.id });
       P.aviso(`Request sent. ${nombreDe(j.host).split(' ')[0]} will accept or decline — we'll let you know.`);
       pintarJuegosPlay();
+      ofrecerPush('player');
     } catch (e) { boton.disabled = false; P.aviso(textoError(e), true); }
   }
   P.alEntrar('play', pintarJuegosPlay);
@@ -681,6 +686,8 @@
       P.aviso(editando ? 'Saved. Players already in the game get the update.'
         : (v.vis === 'invite' && !enviadas ? 'Your game is ready. Invite players from this page.' : 'Your game is live.') + extra + mal, !!fallidas);
       location.hash = `#/game/${r.id}`;
+      /* SQL 110: la primera vez, invitar a encender los avisos (pj-push.js). */
+      if (!editando) ofrecerPush('host');
     } catch (e) {
       /* SQL 108: si choca con otro juego suyo, se dice con cuál. */
       const hora = /too_close/.test((e && e.message) || '') && /^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d{1,2} · \d{1,2}:\d{2} [AP]M$/.test((e && e.details) || '') ? e.details : null;
@@ -950,13 +957,13 @@
       } else if (est === 'invited') {
         const si = h('button', { type: 'button', class: 'gm-btn-lime', text: 'Accept invitation' });
         const no = h('button', { type: 'button', class: 'gm-btn-quiet gm-on-dark', text: 'Decline' });
-        si.addEventListener('click', () => accion(si, () => rpc('portal_juego_pedir', { p_game: j.id }), "You're in! See you on the court."));
+        si.addEventListener('click', () => accion(si, () => rpc('portal_juego_pedir', { p_game: j.id }).then((x) => { ofrecerPush('player'); return x; }), "You're in! See you on the court."));
         no.addEventListener('click', () => accion(no, () => rpc('portal_juego_salir', { p_game: j.id, p_reason: null, p_detail: null }), 'Invitation declined. We let the host know.'));
         acts.push(si, no);
       } else if (!est || est === 'withdrawn' || est === 'left') {
         const lleno = (j.taken || 0) >= j.needed;
         const pedir = h('button', { type: 'button', class: 'gm-btn-lime', text: lleno ? 'Game is full' : 'Request to join', disabled: lleno });
-        pedir.addEventListener('click', () => accion(pedir, () => rpc('portal_juego_pedir', { p_game: j.id }), 'Request sent. The host will accept or decline — we\'ll let you know.'));
+        pedir.addEventListener('click', () => accion(pedir, () => rpc('portal_juego_pedir', { p_game: j.id }).then((x) => { ofrecerPush('player'); return x; }), 'Request sent. The host will accept or decline — we\'ll let you know.'));
         acts.push(pedir);
       }
     }

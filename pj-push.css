@@ -1,0 +1,39 @@
+/* ============================================================
+   FEROCIA PLAYER PORTAL — la app en el teléfono y los avisos
+   SQL 110 (§92). Diseño aprobado: la tarjeta azul noche del Home,
+   la fila de Account y la invitación después de crear un juego.
+   ============================================================ */
+
+/* ── Home: "Get FEROCIA on your phone" ── */
+.pu-card { background: #080f2e; color: #fff; border-radius: 20px; padding: 20px 18px; display: flex; flex-direction: column; gap: 14px; }
+.pu-head { display: flex; align-items: center; gap: 12px; }
+.pu-ico { width: 48px; height: 48px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .2); flex: none; }
+.pu-t { margin: 0; font-size: 18px; font-weight: 900; line-height: 1.25; }
+.pu-s { margin: 2px 0 0; font-size: 13px; line-height: 1.45; color: rgba(255, 255, 255, .85); }
+.pu-steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.pu-steps li { display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, .07); border-radius: 12px; padding: 10px 12px; font-size: 14px; line-height: 1.4; }
+.pu-n { width: 28px; height: 28px; flex: none; border-radius: 99px; background: var(--pj-lime, #C6F221); color: #080f2e; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; }
+.pu-share { vertical-align: -3px; color: var(--pj-lime, #C6F221); }
+.pu-main { min-height: 52px; border-radius: 99px; border: 0; background: var(--pj-lime, #C6F221); color: #080f2e; font: inherit; font-size: 15px; font-weight: 900; letter-spacing: .5px; cursor: pointer; }
+.pu-main:disabled { opacity: .6; cursor: default; }
+.pu-alt { border-top: 1px solid rgba(255, 255, 255, .15); padding-top: 12px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.pu-alt p { margin: 0; font-size: 13px; line-height: 1.45; color: rgba(255, 255, 255, .85); }
+.pu-sec { min-height: 44px; padding: 0 18px; border-radius: 99px; border: 1.5px solid rgba(255, 255, 255, .5); background: transparent; color: #fff; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+.pu-err { color: #FFD7D2; font-weight: 600; }
+.pu-foot { display: flex; justify-content: flex-end; }
+.pu-later { min-height: 44px; padding: 0 16px; border-radius: 99px; border: 1.5px solid rgba(255, 255, 255, .4); background: transparent; color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.pu-card button:focus-visible { outline: 3px solid var(--pj-lime, #C6F221); outline-offset: 2px; }
+
+/* ── Account: "Notifications on this device" ── */
+.pu-on-txt { color: var(--pj-green-tx, #0B6B53); font-weight: 700; }
+.pu-acc-sub { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--pj-line, #EEF0F3); display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.pu-acc-row { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pu-acc-row span { display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.pu-acc-row small { font-size: 12px; color: var(--pj-muted, #4B5563); }
+.pu-note { margin: 10px 0 0; font-size: 12px; line-height: 1.5; color: var(--pj-muted, #4B5563); }
+.pu-warn { margin: 10px 0 0; padding: 10px 12px; border-radius: 12px; background: #FFF4EC; color: #7C2D12; font-size: 13px; line-height: 1.45; }
+
+/* ── La invitación después de crear un juego ── */
+.pu-ask-ico { background: #EEF3FF; color: var(--pj-blue, #174CCC); }
+.pu-ask-eye { font-size: 12px; font-weight: 800; letter-spacing: 1.5px; color: var(--pj-green-tx, #0B6B53); }
+.pu-ask-next { margin: 0; font-size: 12px; line-height: 1.5; color: var(--pj-muted, #6B7280); text-align: center; }

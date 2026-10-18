@@ -120,6 +120,8 @@
   async function salir(alcance, boton) {
     if (boton) boton.disabled = true;
     try {
+      /* SQL 110: este aparato deja de recibir los avisos de esta persona. */
+      if (P.pushAlSalir) await P.pushAlSalir(alcance === 'global');
       const { error } = await sb.auth.signOut({ scope: alcance });
       if (error) throw error;
       P.aviso(alcance === 'global' ? 'You are signed out on all your devices.' : 'You are signed out.');
