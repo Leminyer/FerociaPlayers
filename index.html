@@ -1194,7 +1194,9 @@
 <div class="pj-toast" id="pj-toast" role="status" aria-live="polite"></div>
 
 <script src="config.js?v=20261014e"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<!-- SRI (§97): el navegador sólo ejecuta supabase-js si es EXACTAMENTE el archivo 2.45.4 revisado.
+     Si alguna vez se cambia la versión, hay que poner el hash nuevo (o el portal no arranca). -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o" crossorigin="anonymous"></script>
 <!-- Hito 5: el captcha de Cloudflare para pedir el correo de entrada. -->
 <script src="ferocia-captcha.js?v=20261017a"></script>
 <script src="pj-app.js?v=20261018a"></script>
