@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200" role="img" aria-label="Safari with the Share button at the bottom">
+  <rect x="70" y="8" width="180" height="184" rx="22" fill="#F1F4F9" stroke="#0d1f4a" stroke-width="3"/>
+  <rect x="84" y="26" width="152" height="18" rx="9" fill="#fff"/>
+  <text x="160" y="39" font-family="Inter, Arial, sans-serif" font-size="9" fill="#4B5563" text-anchor="middle">players.ferociasports.com</text>
+  <rect x="84" y="52" width="152" height="90" rx="8" fill="#080f2e"/>
+  <rect x="96" y="66" width="60" height="8" rx="4" fill="#C6F221"/>
+  <rect x="96" y="82" width="110" height="6" rx="3" fill="#ffffff" opacity=".6"/>
+  <rect x="96" y="94" width="90" height="6" rx="3" fill="#ffffff" opacity=".6"/>
+  <rect x="84" y="152" width="152" height="28" rx="8" fill="#fff"/>
+  <g fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M100 166l-5 0M100 166l3-3M100 166l3 3"/>
+    <path d="M124 166l5 0M129 166l-3-3M129 166l-3 3"/>
+    <path d="M190 160h12v12h-12z"/>
+    <path d="M214 166h10"/>
+  </g>
+  <circle cx="160" cy="166" r="17" fill="none" stroke="#174CCC" stroke-width="3"/>
+  <g fill="none" stroke="#174CCC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M160 157v11"/><path d="M156 161l4-4 4 4"/><path d="M154 165v8h12v-8"/>
+  </g>
+  <path d="M265 150 C 250 150, 236 156, 182 163" fill="none" stroke="#174CCC" stroke-width="2.5" stroke-dasharray="4 4"/>
+  <text x="268" y="146" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800" fill="#174CCC">Share</text>
+</svg>

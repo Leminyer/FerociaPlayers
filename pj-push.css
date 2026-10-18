@@ -37,3 +37,9 @@
 .pu-ask-ico { background: #EEF3FF; color: var(--pj-blue, #174CCC); }
 .pu-ask-eye { font-size: 12px; font-weight: 800; letter-spacing: 1.5px; color: var(--pj-green-tx, #0B6B53); }
 .pu-ask-next { margin: 0; font-size: 12px; line-height: 1.5; color: var(--pj-muted, #6B7280); text-align: center; }
+
+/* ── "Show me with pictures" (los 3 pasos del iPhone) ── */
+.pu-pics { align-self: flex-start; min-height: 44px; padding: 0; border: 0; background: none; color: var(--pj-lime, #C6F221); font: inherit; font-size: 13px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.pu-pic { display: block; width: 100%; max-width: 320px; height: auto; margin: 0 auto; }
+.pu-pic-n { font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--pj-blue, #174CCC); }
+.pu-pic-acts { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }

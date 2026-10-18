@@ -196,6 +196,7 @@
         : 'Know right away when someone invites you or joins your game.';
     $('pu-t').textContent = modo === 'on' ? 'Know right away' : 'Get FEROCIA on your phone';
     mostrar('pu-ios', modo === 'ios');
+    mostrar('pu-pics', modo === 'ios');
     mostrar('pu-safari', modo === 'safari');
     mostrar('pu-install', modo === 'android');
     mostrar('pu-alt', modo === 'android' && !!lista && permiso() === 'default');
@@ -230,7 +231,44 @@
     const alTerminar = (ok, t) => { if (ok) pintarTarjeta(); else errorTarjeta(t || ''); };
     $('pu-on').addEventListener('click', (ev) => botonEncender(ev.currentTarget, alTerminar));
     $('pu-on-alt').addEventListener('click', (ev) => botonEncender(ev.currentTarget, alTerminar));
+    $('pu-pics').addEventListener('click', verDibujos);
     P.alEntrar('home', () => { pintarTarjeta(); });
+  }
+
+  /* "Show me with pictures" (aprobado 18 oct): los 3 pasos del iPhone con un
+     dibujo cada uno, uno a la vez. Los dibujos son archivos fijos (assets/). */
+  const PASOS = [
+    ['assets/ios-paso-1.svg', 'Tap Share', 'In Safari, tap Share — the square with an arrow. It is at the bottom of the screen, or inside the ••• menu.'],
+    ['assets/ios-paso-2.svg', 'Tap Add to Home Screen', 'Scroll down the list until you see Add to Home Screen, tap it, then tap Add.'],
+    ['assets/ios-paso-3.svg', 'Open FEROCIA from the icon', 'Open FEROCIA from the new icon on your Home Screen, then turn on notifications.'],
+  ];
+  function verDibujos() {
+    const UI = P.juegosUI;
+    if (!UI || !UI.ventana) return;
+    const { h } = P;
+    UI.ventana((caja, cerrar, idT) => {
+      let i = 0;
+      const img = h('img', { class: 'pu-pic', width: '320', height: '200', alt: '' });
+      const num = h('span', { class: 'pu-pic-n' });
+      const tit = h('h2', { id: idT });
+      const txt = h('p', { class: 'pj-small gm-m0' });
+      const atras = h('button', { type: 'button', class: 'gm-btn-quiet', text: 'Back' });
+      const sig = h('button', { type: 'button', class: 'pj-btn pj-btn-primary' });
+      const pintar = () => {
+        const [src, t, d] = PASOS[i];
+        img.src = src; img.alt = `Step ${i + 1}: ${t}`;
+        num.textContent = `Step ${i + 1} of ${PASOS.length}`;
+        tit.textContent = t; txt.textContent = d;
+        atras.hidden = i === 0;
+        sig.textContent = i === PASOS.length - 1 ? 'Got it' : 'Next';
+      };
+      atras.addEventListener('click', () => { if (i > 0) { i--; pintar(); sig.focus(); } });
+      sig.addEventListener('click', () => { if (i < PASOS.length - 1) { i++; pintar(); } else cerrar(true); });
+      caja.classList.add('pu-pics-box');
+      caja.append(num, tit, img, txt, h('div', { class: 'pu-pic-acts' }, atras, sig));
+      pintar();
+      return sig;
+    });
   }
 
   /* ── 3. Account: "Notifications on this device" ── */
