@@ -1,0 +1,29 @@
+/* ============================================================
+   FEROCIA PLAYER PORTAL — el cartel del aviso que se tocó (§103)
+   Arriba de todo, al abrir el portal desde un push.
+   Rojo: malas noticias · Verde: buenas · Azul: el resto.
+   ============================================================ */
+.pa-wrap { max-width: 1200px; margin: 16px auto 0; padding: 0 24px; }
+.pa-card { display: flex; gap: 14px; align-items: flex-start; border-radius: 18px; padding: 16px 18px; border: 2px solid; border-left-width: 8px;
+  box-shadow: 0 10px 28px rgba(8, 15, 46, .12); animation: pa-entra .25s ease-out; }
+.pa-card:focus { outline: 3px solid var(--pj-blue, #174CCC); outline-offset: 3px; }
+.pa-rojo { background: var(--pj-red-bg, #FEF3F2); border-color: var(--pj-red, #B42318); color: #7A1A12; }
+.pa-verde { background: var(--pj-green-bg, #D4F5ED); border-color: var(--pj-green-tx, #0B6B53); color: #0A4A3A; }
+.pa-azul { background: #EEF3FF; border-color: var(--pj-blue, #174CCC); color: #1E3A8A; }
+.pa-ico { flex: none; width: 38px; height: 38px; border-radius: 99px; display: inline-flex; align-items: center; justify-content: center; color: #fff; }
+.pa-rojo .pa-ico { background: var(--pj-red, #B42318); }
+.pa-verde .pa-ico { background: var(--pj-green-tx, #0B6B53); }
+.pa-azul .pa-ico { background: var(--pj-blue, #174CCC); }
+.pa-cuerpo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.pa-t { margin: 0; font-size: 19px; font-weight: 900; line-height: 1.25; }
+.pa-x { margin: 0; font-size: 15px; line-height: 1.5; }
+.pa-x b { font-weight: 800; }
+.pa-acts { display: flex; justify-content: flex-end; margin-top: 6px; }
+.pa-ok { min-height: 44px; padding: 0 22px; border-radius: 99px; border: 0; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; color: #fff; }
+.pa-rojo .pa-ok { background: var(--pj-red, #B42318); }
+.pa-verde .pa-ok { background: var(--pj-green-tx, #0B6B53); }
+.pa-azul .pa-ok { background: var(--pj-blue, #174CCC); }
+.pa-ok:focus-visible { outline: 3px solid #080f2e; outline-offset: 2px; }
+@keyframes pa-entra { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pa-card { animation: none; } }
+@media (max-width: 600px) { .pa-wrap { margin-top: 12px; padding: 0 16px; } .pa-t { font-size: 18px; } }

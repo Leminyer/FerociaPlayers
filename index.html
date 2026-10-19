@@ -24,10 +24,12 @@
 <link rel="stylesheet" href="pj-identity.css?v=20261015a">
 <link rel="stylesheet" href="pj-dna.css?v=20261015e">
 <link rel="stylesheet" href="pj-play.css?v=20261015g">
-<link rel="stylesheet" href="pj-games.css?v=20261017a">
+<link rel="stylesheet" href="pj-games.css?v=20261019a">
 <link rel="stylesheet" href="pj-results.css?v=20261016a">
 <link rel="stylesheet" href="pj-home.css?v=20261016b">
 <link rel="stylesheet" href="pj-push.css?v=20261018b">
+<!-- §103: el cartel del aviso que se tocó. -->
+<link rel="stylesheet" href="pj-aviso.css?v=20261019a">
 </head>
 <body>
 
@@ -220,6 +222,9 @@
     </span>
   </div>
 </header>
+
+<!-- §103: el cartel grande del push que se tocó (lo pinta pj-aviso.js). -->
+<div class="pa-wrap" id="pj-aviso" hidden></div>
 
 <!-- La cabecera sencilla (todavía sin ficha unida): logo y salir. -->
 <header class="pj-simplebar" id="pj-simplebar" hidden>
@@ -1214,13 +1219,15 @@
 <!-- Matchmaking M-2a: los juegos, la campanita y Player Safety. -->
 <!-- SQL 108: buscar jugadores por nombre (antes de pj-games.js y pj-results.js). -->
 <script src="pj-buscar.js?v=20261017a"></script>
-<script src="pj-games.js?v=20261018a"></script>
+<script src="pj-games.js?v=20261019a"></script>
 <!-- Matchmaking M-2b: el chat del juego (después de pj-games.js). -->
-<script src="pj-chat.js?v=20261015a"></script>
+<script src="pj-chat.js?v=20261019a"></script>
 <!-- Matchmaking M-3a: el resultado de cada juego (después de pj-games.js). -->
 <script src="pj-results.js?v=20261017a"></script>
 <script src="pj-log.js?v=20261016a"></script>
-<script src="pj-push.js?v=20261018b"></script>
+<script src="pj-push.js?v=20261019a"></script>
+<!-- §103: el cartel del aviso que se tocó (después de pj-games.js y pj-push.js). -->
+<script src="pj-aviso.js?v=20261019a"></script>
 <script src="pj-account.js?v=20261018a"></script>
 <script src="pj-help.js?v=20261014e"></script>
 </body>

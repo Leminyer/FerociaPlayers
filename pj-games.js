@@ -886,6 +886,16 @@
   }
 
   let vezJuego = 0;
+  let cargadoJuego = 0;
+  const enJuego = () => /^#\/game\/\d{1,18}$/.test(location.hash || '');
+  /* §103: la pantalla del juego vuelve a pedir los datos cuando el chat
+     anuncia que el juego cambió o se canceló (pj-chat.js), y al volver al
+     portal después de un rato en otra app. Así nunca queda vieja. */
+  /* (Lo que la persona estaba escribiendo en el chat lo guarda pj-chat.js.) */
+  P.recargarJuego = () => { if (enJuego()) pintarJuego(); };
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && enJuego() && cargadoJuego && Date.now() - cargadoJuego > 30000) pintarJuego();
+  });
   async function pintarJuego() {
     const mia = ++vezJuego;
     const crudo = P.rutaParam();
@@ -916,7 +926,9 @@
     /* M-3b: un juego registrado ("Log a game") sólo tiene su resultado. */
     const reg = !!j.logged;
     $('gp-k').textContent = reg ? (host ? 'Logged by you' : `Logged by ${nombreDe(j.host)}`) : host ? "You're hosting" : `Hosted by ${nombreDe(j.host)}`;
-    $('gp-title').textContent = c.dia ? `${TIPO[j.kind] || 'Game'} · ${c.dia}` : (TIPO[j.kind] || 'Game');
+    const cancelado = j.status === 'cancelled';
+    /* §103: un juego cancelado lo dice también en el título. */
+    $('gp-title').textContent = (c.dia ? `${TIPO[j.kind] || 'Game'} · ${c.dia}` : (TIPO[j.kind] || 'Game')) + (cancelado ? ' · Cancelled' : '');
     /* j.minimal: ya no está en el juego (ni lo puede ver como abierto): sin cuándo ni dónde,
        salvo que esté en el resultado sin haberse apuntado (M-3b: lo trae la base). */
     const chips = [];
@@ -971,15 +983,20 @@
 
     /* El estado, en palabras. */
     let txt = '';
-    if (j.status === 'cancelled') txt = `This game was cancelled by the host${j.cancel_reason ? ` — ${MOTIVO[j.cancel_reason]}` : ''}.`;
+    /* §103: cancelado → un bloque rojo bien visible, no el aviso azul de siempre. */
+    estadoCaja.className = cancelado ? 'pj-alert gp-cancel' : 'pj-alert pj-alert-info';
+    if (cancelado) txt = `This game was cancelled by the host${j.cancel_reason && MOTIVO[j.cancel_reason] ? ` — ${MOTIVO[j.cancel_reason]}` : ''}.`;
     else if (j.status === 'past' && !j.result && !j.report) txt = 'This game has already been played.';
     else if (reg) txt = '';
     else if (['declined', 'removed'].includes(est) || (est === 'withdrawn' && j.minimal)) txt = "You're not in this game. There are more games waiting for you in Play.";
     else if (est === 'left') txt = 'You left this game.';
     else if (est === 'requested') txt = `Your request is waiting. ${nombreDe(j.host).split(' ')[0]} will accept or decline — we'll let you know.`;
     else if (est === 'invited') txt = `${nombreDe(j.host).split(' ')[0]} invited you. Accept to take your spot.`;
-    estadoCaja.textContent = txt;
+    if (cancelado) {
+      estadoCaja.replaceChildren(h('span', { class: 'gp-cancel-k', text: 'Cancelled' }), h('span', { class: 'gp-cancel-t', text: txt }));
+    } else estadoCaja.textContent = txt;
     estadoCaja.hidden = !txt;
+    cargadoJuego = Date.now();
 
     /* Las dos columnas. */
     const izq = [], der = [];
@@ -1185,6 +1202,10 @@
       default: return ['You have an update about a game.'];
     }
   }
+  /* §103: para el cartel del push (pj-aviso.js). */
+  P.textoAviso = textoAviso;
+  P.avisosDatos = () => rpc('portal_avisos');
+  P.recargarAvisos = () => cargarAvisos(true);
   function pintarAvisos(d) {
     const n = d.unread || 0;
     $('gm-bell-n').textContent = n > 9 ? '9+' : String(n);
@@ -1202,7 +1223,9 @@
   }
   let avisosEnCamino = null;
   function cargarAvisos(forzar) {
-    if (avisosEnCamino) return avisosEnCamino;
+    /* §103: si se pide "de nuevo" (forzar) con una lectura en camino, se espera
+       a que termine y se lee otra vez (la de antes puede ser vieja). */
+    if (avisosEnCamino) return forzar ? avisosEnCamino.then(() => cargarAvisos(true)) : avisosEnCamino;
     avisosEnCamino = cargarAvisosYa(forzar).finally(() => { avisosEnCamino = null; });
     return avisosEnCamino;
   }

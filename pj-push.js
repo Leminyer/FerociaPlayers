@@ -62,6 +62,8 @@
     /* Si el navegador no pudo cambiar de pantalla al tocar un aviso. */
     navigator.serviceWorker.addEventListener('message', (ev) => {
       const u = ev.data && ev.data.ferocia === 'abrir' && typeof ev.data.url === 'string' ? ev.data.url : '';
+      /* §103: con aviso, se vuelve a cargar el portal (datos de ahora + el cartel). */
+      try { if (/[?&]aviso=/.test(u) && new URL(u).origin === location.origin) { location.href = u; return; } } catch (e) { /* abajo */ }
       const i = u.indexOf('#/');
       if (i >= 0) location.hash = u.slice(i);
     });

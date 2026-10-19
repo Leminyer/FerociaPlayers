@@ -116,10 +116,15 @@
     if (yo !== actual || vez !== yo.vez) return;
     const abajo = yo.lista.scrollHeight - yo.lista.scrollTop - yo.lista.clientHeight < 60;
     if (todo) yo.lista.replaceChildren();
+    let cambioJuego = false;
     (d.messages || []).forEach((m) => {
       const viejo = yo.lista.querySelector(`[data-id="${m.id}"]`);
       if (viejo) viejo.replaceWith(pintarMensaje(m)); else yo.lista.append(pintarMensaje(m));
+      /* §103: llegó ahora la línea "se canceló" o "cambió la hora": la parte de
+         arriba del juego (título, botones, el bloque rojo) se vuelve a pintar. */
+      if (!todo && !viejo && m.kind === 'system' && (m.code === 'cancelled' || m.code === 'changed')) cambioJuego = true;
     });
+    if (cambioJuego && P.recargarJuego) setTimeout(() => P.recargarJuego(), 0);
     /* Los que alguien borró después: sólo se cambia ese mensaje. */
     (d.deleted_ids || []).forEach((id) => {
       const el = yo.lista.querySelector(`.ch-m[data-id="${Number(id)}"]`);
@@ -165,6 +170,7 @@
     try {
       await UI().rpc('portal_chat_enviar', { p_game: yo.juego.id, p_body: t });
       yo.texto.value = '';
+      borradores.delete(yo.juego.id);
       contar(yo);
       await recargar(false);
     } catch (e) {
@@ -182,6 +188,12 @@
     const n = 500 - yo.texto.value.length;
     yo.cuenta.textContent = n < 100 ? `${n} characters left` : '';
   }
+
+  /* §103: lo que alguien está escribiendo, por juego. Si la pantalla del juego
+     se vuelve a pintar (el juego cambió, o se volvió al portal), el chat nuevo
+     lo recupera, y también el cursor si estaba escribiendo. */
+  const borradores = new Map();
+  let focoEn = null;
 
   /* El panel del chat para la página del juego. */
   P.chatPanel = function (juego) {
@@ -208,7 +220,12 @@
     texto.addEventListener('keydown', (ev) => {
       if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); enviar(yo); }
     });
-    texto.addEventListener('input', () => { contar(yo); yo.error.hidden = true; texto.removeAttribute('aria-invalid'); });
+    texto.addEventListener('input', () => { contar(yo); yo.error.hidden = true; texto.removeAttribute('aria-invalid'); borradores.set(juego.id, texto.value); });
+    texto.addEventListener('focus', () => { focoEn = juego.id; });
+    /* Si se quita porque la pantalla se vuelve a pintar, no cuenta como "dejó de escribir". */
+    texto.addEventListener('blur', () => { setTimeout(() => { if (texto.isConnected) focoEn = null; }, 0); });
+    if (borradores.get(juego.id)) { texto.value = borradores.get(juego.id); contar(yo); }
+    if (focoEn === juego.id) setTimeout(() => { if (texto.isConnected && !texto.disabled) texto.focus(); }, 0);
     pintarCierre(yo, juego.status === 'active' || juego.status === 'past');
     recargar(true);
     yo.reloj = setInterval(() => { if (actual === yo) recargar(false); }, CADA);

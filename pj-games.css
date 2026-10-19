@@ -263,3 +263,9 @@ body.gm-con-ventana { overflow: hidden; }
   .bj-row { flex-wrap: wrap; }
   .bj-who { flex-basis: calc(100% - 140px); }
 }
+
+/* ── §103: un juego cancelado se nota (bloque rojo arriba) ── */
+.pj-alert.gp-cancel { display: flex; flex-direction: column; gap: 4px; background: var(--pj-red-bg, #FEF3F2); color: var(--pj-red, #B42318);
+  border: 2px solid var(--pj-red, #B42318); border-left-width: 8px; border-radius: 14px; padding: 14px 16px; }
+.gp-cancel-k { font-size: 18px; font-weight: 900; letter-spacing: .5px; text-transform: uppercase; }
+.gp-cancel-t { font-size: 15px; font-weight: 600; line-height: 1.45; color: #7A1A12; }
