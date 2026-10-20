@@ -816,14 +816,47 @@
   }
   const TIPOS = { tournament: 'Tournament', ladder: 'Ladder', clinic: 'Clinic', private_session: 'Private session', other: 'Event' };
   const COLOR_TIPO = (t) => /tourn/i.test(t || '') ? 'pj-orange' : /clinic|camp|lesson/i.test(t || '') ? 'pj-green' : 'pj-blue';
+  /* §105 (SQL 117): una clínica se repite cada semana. En vez de su fecha de
+     inicio (parecía vencida) se enseña el día: "Tuesday · 7:00 PM – 8:30 PM",
+     o "Tue & Thu · …"; y "Starts Nov 4" sólo si todavía no empezó.
+     1 = lunes … 7 = domingo (como en la base). */
+  const DIA_LARGO = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const DIA_CORTO = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const MES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function diasDe(e) {
+    const propios = [...new Set((Array.isArray(e.weekdays) ? e.weekdays : []).map(Number).filter((d) => Number.isInteger(d) && d >= 1 && d <= 7))].sort((a, b) => a - b);
+    if (propios.length) return propios;
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(e.event_date || ''));
+    if (!m) return [];
+    const js = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay();
+    return [js === 0 ? 7 : js];
+  }
+  function nombreDias(d) {
+    if (d.length === 7) return 'Daily';
+    if (d.length === 1) return DIA_LARGO[d[0]];
+    const c = d.map((x) => DIA_CORTO[x]);
+    return `${c.slice(0, -1).join(', ')} & ${c[c.length - 1]}`;
+  }
+  function empieza(e) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(e.event_date || ''));
+    return m && String(e.event_date).slice(0, 10) > hoyClub() ? `Starts ${MES[+m[2] - 1]} ${+m[3]}` : '';
+  }
   function eventos(lista) {
     if (!lista || !lista.length) return [h('p', { class: 'pj-empty', text: 'Nothing scheduled yet — check back soon.' })];
     return lista.map((e, i) => {
       const href = e.registration_url && httpsOk(e.registration_url) ? e.registration_url : 'https://ferociasports.com/#events';
-      const cuando = e.event_time ? `${fmt.hora(e.event_time)}${e.end_time ? ` – ${fmt.hora(e.end_time)}` : ''}`
-        : e.registration_url ? 'Registration open' : fmt.largo(e.event_date);
+      const hora = e.event_time ? `${fmt.hora(e.event_time)}${e.end_time ? ` – ${fmt.hora(e.end_time)}` : ''}` : '';
+      const dias = e.event_type === 'clinic' ? diasDe(e) : [];
+      const cuando = dias.length ? [nombreDias(dias), hora, empieza(e)].filter(Boolean).join(' · ')
+        : hora || (e.registration_url ? 'Registration open' : fmt.largo(e.event_date));
+      /* El cuadrito: la fecha, o (clínicas) los días de la semana. */
+      const cuadro = dias.length
+        ? h('span', { class: `pj-event-date is-dias ${i % 2 ? 'is-navy' : ''}`, 'aria-hidden': 'true' },
+          ...(dias.length > 2 ? [h('span', { class: 'pj-event-dow', text: DIA_CORTO[dias[0]].toUpperCase() }), h('span', { class: 'pj-event-mas', text: `+${dias.length - 1}` })]
+            : dias.map((x) => h('span', { class: `pj-event-dow${dias.length > 1 ? ' is-dos' : ''}`, text: DIA_CORTO[x].toUpperCase() }))))
+        : h('span', { class: `pj-event-date ${i % 2 ? 'is-navy' : ''}` }, h('span', { class: 'pj-event-mon', text: fmt.mes3(e.event_date) }), h('span', { class: 'pj-event-day', text: fmt.dia(e.event_date) }));
       return h('a', { class: 'pj-event', href, target: '_blank', rel: 'noopener' },
-        h('span', { class: `pj-event-date ${i % 2 ? 'is-navy' : ''}` }, h('span', { class: 'pj-event-mon', text: fmt.mes3(e.event_date) }), h('span', { class: 'pj-event-day', text: fmt.dia(e.event_date) })),
+        cuadro,
         h('span', { class: 'pj-event-txt' },
           h('span', { class: `pj-event-kind ${COLOR_TIPO(e.event_type)}`, text: TIPOS[e.event_type] || 'Event' }),
           h('span', { class: 'pj-event-title', text: e.title }),
