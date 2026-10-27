@@ -770,6 +770,12 @@
   });
 
   /* ════════════════ 3. LO DE ANTES, MÁS COMPACTO ════════════════ */
+  /* §109 (SQL 121): un video puede tener varios tópicos (v.topics); si no
+     los trae, vale v.topic. En el orden de la lista, unidos con " · ". */
+  const temasDelVideo = (v) => {
+    const lista = Array.isArray(v && v.topics) && v.topics.length ? v.topics : (v && v.topic ? [v.topic] : []);
+    return Object.keys(TEMAS).filter((k) => lista.includes(k)).map((k) => TEMAS[k]).join(' \u00b7 ');
+  };
   const TEMAS = {
     dinking: 'Dinking', serve_return: 'Serve & Return', third_shot: 'Third Shot', strategy: 'Strategy',
     drills: 'Drills', kitchen_rules: 'Kitchen Rules', mistakes: 'Mistakes', ratings: 'Ratings & Levels',
@@ -868,7 +874,7 @@
     const play = h('span', { class: 'hm-vid-play' });
     play.innerHTML = ICONO_PLAY;   // icono fijo escrito aquí (nunca datos)
     return h('a', { class: 'hm-vid', href: `https://www.youtube.com/watch?v=${v.youtube_id}`, target: '_blank', rel: 'noopener' }, play,
-      h('span', { class: 'hm-vid-t' }, h('span', { class: 'hm-vid-k', text: `Video of the Month · ${TEMAS[v.topic] || 'FEROCIA Academy'}` }),
+      h('span', { class: 'hm-vid-t' }, h('span', { class: 'hm-vid-k', text: `Video of the Month · ${temasDelVideo(v) || 'FEROCIA Academy'}` }),
         h('span', { class: 'hm-vid-n', text: v.title })));
   }
 
