@@ -28,9 +28,11 @@
     link_accepted: 'Result confirmed', link_declined: 'Result update', result_declined: 'Result declined',
     result_disputed: 'Result in review', result_verified: 'Result verified', result_discarded: 'Result discarded',
     chat: 'New messages', test: 'Notifications are on',
+    /* §118: las clases. */
+    lesson_booked: 'Lesson booked', lesson_changed: 'Lesson time changed', lesson_cancelled: 'Lesson cancelled', lesson_reminder: 'Lesson reminder',
   };
-  const ROJO = ['game_cancelled', 'removed', 'request_declined', 'result_declined', 'result_discarded', 'link_declined'];
-  const VERDE = ['request_accepted', 'invite_accepted', 'result_verified', 'link_accepted'];
+  const ROJO = ['game_cancelled', 'removed', 'request_declined', 'result_declined', 'result_discarded', 'link_declined', 'lesson_cancelled'];
+  const VERDE = ['request_accepted', 'invite_accepted', 'result_verified', 'link_accepted', 'lesson_booked'];
   /* Si el aviso ya no está en la campanita (o falla la red): un texto corto. */
   const SIN_DATOS = {
     test: 'This device will get FEROCIA notifications.',
@@ -80,7 +82,7 @@
     if (location.hash !== aqui) return;     // se fue a otra pantalla mientras cargaba
     const col = color(p.kind);
     const texto = item && P.textoAviso ? P.textoAviso(item)
-      : [SIN_DATOS[p.kind] || 'You have an update about a game.'];
+      : [SIN_DATOS[p.kind] || (String(p.kind).startsWith('lesson_') ? 'You have an update about your lesson.' : 'You have an update about a game.')];
     const ok = h('button', { type: 'button', class: 'pa-ok', text: 'Got it' });
     ok.addEventListener('click', quitar);
     const ico = h('span', { class: 'pa-ico' });
@@ -105,7 +107,7 @@
   }
 
   /* ── 2. En la primera pantalla de la app que se abre ── */
-  const PANTALLAS = ['home', 'profile', 'dna', 'play', 'player', 'game', 'game-form', 'log-game', 'settings', 'help', 'edit', 'dna-edit', 'welcome'];
+  const PANTALLAS = ['home', 'profile', 'dna', 'play', 'player', 'game', 'game-form', 'log-game', 'settings', 'help', 'edit', 'dna-edit', 'welcome', 'lessons', 'lesson-book'];
   PANTALLAS.forEach((n) => P.alEntrar(n, () => {
     if (!pendiente) return;
     const p = pendiente;

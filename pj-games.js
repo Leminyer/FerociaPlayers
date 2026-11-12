@@ -1168,6 +1168,8 @@
   let avisosCache = null;
   /* "today", "tomorrow" o "on Sat, Oct 18". */
   const enDia = (c) => (c.dia === 'Today' || c.dia === 'Tomorrow' ? c.dia.toLowerCase() : `on ${c.largo}`);
+  /* §118: "Private lesson · Tomorrow · 9:00 AM". */
+  const clase = (d) => { const c = cuando(d.starts_at); return `${d.type_name || 'Lesson'} · ${c.dia} · ${c.hora}`; };
   function textoAviso(n) {
     const d = n.data || {};
     const c = cuando(d.plays_at);
@@ -1199,6 +1201,11 @@
       case 'result_verified': return [`The result of the ${tipo} game ${cuandoTxt} is verified and added to your profile.`];
       case 'result_discarded': return [`The result of the ${tipo} game ${cuandoTxt} was discarded by the FEROCIA team.`];
       case 'chat': return [b(plural(Number(d.count) || 1, 'new message', 'new messages')), ` in ${d.host_view ? 'your' : `${d.host || 'the host'}'s`} ${tipo} game ${cuandoTxt}.`];
+      /* §118: las clases. */
+      case 'lesson_booked': return d.by === 'admin' ? [b(d.coach || 'FEROCIA'), ' booked a lesson for you: ', b(clase(d)), '.'] : ['Your lesson is booked: ', b(clase(d)), '.'];
+      case 'lesson_changed': return ['New time for your lesson: ', b(clase(d)), '.'];
+      case 'lesson_cancelled': return d.by === 'admin' ? [b(d.coach || 'FEROCIA'), ' cancelled your lesson ', b(clase(d)), '.'] : ['You cancelled your lesson ', b(clase(d)), '.'];
+      case 'lesson_reminder': return ['Reminder: your lesson ', b(clase(d)), '.'];
       default: return ['You have an update about a game.'];
     }
   }
@@ -1214,7 +1221,9 @@
     const items = d.items || [];
     $('gm-notes-read').hidden = !n;
     $('gm-notes-list').replaceChildren(...(items.length ? items.map((it) => {
-      const fila = h(it.game_id ? 'a' : 'div', { class: `gm-n${it.read ? '' : ' is-new'}`, href: it.game_id ? `#/game/${it.game_id}` : null },
+      /* §118: los avisos de clases llevan a "My lessons". */
+      const destino = String(it.kind).startsWith('lesson_') ? '#/lessons' : it.game_id ? `#/game/${it.game_id}` : null;
+      const fila = h(destino ? 'a' : 'div', { class: `gm-n${it.read ? '' : ' is-new'}`, href: destino },
         it.read ? h('span', { class: 'gm-n-sp', 'aria-hidden': 'true' }) : h('span', { class: 'gm-n-dot', 'aria-label': 'New' }),
         h('span', null, h('span', { class: 'gm-n-t' }, ...textoAviso(it)), h('span', { class: 'gm-n-s', text: haceCuanto(it.created_at) })));
       fila.addEventListener('click', () => { cerrarAvisos(); if (!it.read) leerTodo(); });

@@ -6,6 +6,7 @@
    Player DNA, etapa DNA-1 (15 de octubre): My DNA y su paso (§62, §63)
    Matchmaking M-1 (15 de octubre): Play y la tarjeta del jugador (§70, §71)
    Matchmaking M-2a (15 de octubre): los juegos, la campanita y Player Safety (§74)
+   Clases (11 de noviembre): Lessons y reservar (§118)
 
    · Crea la conexión con Supabase (la misma base que el panel; la
      clave es la PÚBLICA, como en el sitio: lo que protege los datos
@@ -71,7 +72,8 @@
     sin_ficha:   { inicio: 'about',  rutas: ['about', 'help'] },
     en_revision: { inicio: 'review', rutas: ['review', 'help'] },
     rechazado:   { inicio: 'review', rutas: ['review', 'help'] },
-    vinculado:   { inicio: 'home',   rutas: ['home', 'profile', 'dna', 'dna-edit', 'play', 'player', 'game', 'game-form', 'log-game', 'edit', 'settings', 'help', 'welcome'] },
+    vinculado:   { inicio: 'home',   rutas: ['home', 'profile', 'dna', 'dna-edit', 'play', 'player', 'game', 'game-form', 'log-game', 'edit', 'settings', 'help', 'welcome',
+                                         'lessons', 'lesson-book'] },   // §118: clases
   };
   /* Unido pero sin su Player DNA: primero el DNA. (Sólo si la base lo
      dice claramente: si el SQL 92 todavía no está, no se pide.) */
@@ -305,7 +307,8 @@
     document.querySelectorAll('[data-nav]').forEach((a) => {
       const activo = a.dataset.nav === nombre || (nombre === 'edit' && a.dataset.nav === 'profile')
         || (nombre === 'dna-edit' && a.dataset.nav === 'dna')
-        || (['player', 'game', 'game-form', 'log-game'].includes(nombre) && a.dataset.nav === 'play');
+        || (['player', 'game', 'game-form', 'log-game'].includes(nombre) && a.dataset.nav === 'play')
+        || (nombre === 'lesson-book' && a.dataset.nav === 'lessons');
       if (activo) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });

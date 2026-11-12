@@ -1,0 +1,85 @@
+/* ============================================================
+   FEROCIA PLAYER PORTAL — LESSONS (§118) · estilos de pj-lessons.js (ls-)
+   La cabecera usa la de los juegos (gm-hero).
+   ============================================================ */
+
+/* La tarjeta del Home */
+.ls-card { display: flex; justify-content: space-between; align-items: center; gap: 14px;
+  background: linear-gradient(135deg, var(--pj-blue), #2d63e6); color: #fff; border-radius: 18px; padding: 18px 20px;
+  box-shadow: 0 14px 30px rgba(23, 76, 204, .22); }
+.ls-card[hidden] { display: none; }
+.ls-card-t { margin: 0; font-size: 17px; font-weight: 900; letter-spacing: -.2px; }
+.ls-card-s { margin: 4px 0 0; font-size: 13px; opacity: .88; font-weight: 600; }
+.ls-card-btn { flex: none; background: var(--pj-lime); color: var(--pj-navy); font-weight: 900; font-size: 13px; border-radius: 12px;
+  padding: 11px 16px; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
+.ls-card-btn:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+/* My lessons */
+.ls-hero-acts { display: flex; gap: 10px; }
+.ls-hero-acts .pj-btn[hidden] { display: none; }
+.ls-sub { margin: 8px 0 0; color: rgba(255, 255, 255, .78); font-size: 14px; font-weight: 600; }
+.ls-vacio { margin: 0; color: var(--pj-muted); font-size: 14px; }
+.ls-gris { color: var(--pj-muted); font-size: 13px; line-height: 1.45; }
+.ls-fila { display: flex; flex-direction: column; gap: 4px; padding: 14px 0; border-top: 1px solid #F1F2F4; }
+.ls-fila:first-of-type { border-top: 0; padding-top: 4px; }
+.ls-fila-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.ls-fila-h b { font-size: 15px; color: var(--pj-navy); }
+.ls-tag { flex: none; font-size: 11px; font-weight: 800; border-radius: 99px; padding: 3px 10px; }
+.ls-tag-verde { background: var(--pj-green-bg); color: var(--pj-green-tx); }
+.ls-tag-ambar { background: #FFF1C2; color: #7a5a00; }
+.ls-tag-lima { background: var(--pj-lime); color: var(--pj-navy); }
+.ls-tag-gris { background: #EEF1F6; color: var(--pj-soft); }
+.ls-tag-rojo { background: var(--pj-red-bg); color: var(--pj-red); }
+.ls-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.ls-nota { margin: 6px 0 0; font-size: 12.5px; color: var(--pj-muted); }
+.ls-confirmar { margin-top: 10px; background: var(--pj-red-bg); border-radius: 12px; padding: 12px 14px; }
+.ls-confirmar p { margin: 0; font-weight: 700; color: var(--pj-red); font-size: 14px; }
+.pj-btn.ls-btn-rojo { background: var(--pj-red); box-shadow: none; }
+.pj-btn.ls-btn-rojo:hover:not([disabled]) { background: #8f1c13; }
+
+/* Reservar */
+.ls-pasos { display: flex; gap: 5px; margin-top: 14px; max-width: 260px; }
+.ls-pasos[hidden] { display: none; }
+.ls-pasos i { flex: 1; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .2); }
+.ls-pasos i.is-on { background: var(--pj-lime); }
+.ls-tipos { display: flex; flex-direction: column; gap: 10px; }
+.ls-tipo { display: flex; justify-content: space-between; gap: 12px; text-align: left; width: 100%; font: inherit; cursor: pointer;
+  background: #fff; border: 1.5px solid var(--pj-line); border-radius: 16px; padding: 14px 16px; color: var(--pj-ink); }
+.ls-tipo:hover { border-color: #9db4ea; }
+.ls-tipo[aria-checked="true"] { border-color: var(--pj-blue); background: rgba(23, 76, 204, .06); box-shadow: 0 0 0 1px var(--pj-blue); }
+.ls-tipo:focus-visible, .ls-dia:focus-visible, .ls-hora:focus-visible { outline: 3px solid rgba(23, 76, 204, .35); outline-offset: 2px; }
+.ls-tipo-txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ls-tipo-txt b { font-size: 15px; color: var(--pj-navy); }
+.ls-tipo-txt > span { font-size: 13px; color: var(--pj-muted); }
+.ls-tipo-precio { display: flex; flex-direction: column; align-items: flex-end; text-align: right; flex: none; }
+.ls-tipo-precio b { color: var(--pj-blue); font-size: 16px; font-weight: 900; }
+.ls-tipo-precio span { font-size: 11px; color: var(--pj-muted); font-weight: 600; }
+.ls-sub2 { margin: 0; font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: var(--pj-muted); }
+.ls-dias { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+.ls-dia { flex: 0 0 58px; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; gap: 2px; font: inherit;
+  background: #fff; border: 1.5px solid var(--pj-line); border-radius: 14px; padding: 8px 0; color: var(--pj-muted); font-size: 11px; cursor: pointer; }
+.ls-dia b { font-size: 18px; color: var(--pj-navy); }
+.ls-dia[aria-checked="true"] { background: var(--pj-blue); border-color: var(--pj-blue); color: #fff; }
+.ls-dia[aria-checked="true"] b { color: #fff; }
+.ls-dia[disabled] { opacity: .38; cursor: default; }
+.ls-mas { flex: 0 0 auto; font: inherit; font-size: 13px; font-weight: 800; color: var(--pj-blue); background: none; border: 0; padding: 0 10px; cursor: pointer; }
+.ls-horas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ls-hora { font: inherit; font-size: 14px; font-weight: 800; color: var(--pj-blue); background: #fff; border: 1.5px solid var(--pj-blue);
+  border-radius: 12px; min-height: 44px; cursor: pointer; }
+.ls-hora[aria-checked="true"] { background: var(--pj-blue); color: #fff; }
+.ls-resumen { display: flex; flex-direction: column; gap: 4px; background: #F1F4FA; border-radius: 16px; padding: 14px 16px; font-size: 14px; line-height: 1.5; }
+.ls-resumen b { font-size: 16px; color: var(--pj-navy); }
+.ls-precio { color: var(--pj-blue); font-weight: 800; }
+.ls-politica { margin: 0; font-size: 13px; line-height: 1.5; color: var(--pj-soft); background: #F4FBF8; border: 1px solid #CBEFE3; border-radius: 12px; padding: 10px 12px; }
+.ls-listo { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 10px 0 6px; font-size: 14px; }
+.ls-listo b { font-size: 20px; color: var(--pj-navy); }
+.ls-ok { width: 56px; height: 56px; border-radius: 50%; background: #24BC96; color: #fff; font-size: 28px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+#lb-main .pj-btn-block + .pj-btn-block { margin-top: -12px; }
+
+/* El menú del teléfono: 6 botones */
+@media (max-width: 720px) {
+  .pj-tabbar:not([hidden]) { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .pj-tabbar a { font-size: 10.5px; }
+  .ls-card { padding: 16px; }
+}
