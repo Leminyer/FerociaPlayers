@@ -32,6 +32,7 @@
 <link rel="stylesheet" href="pj-aviso.css?v=20261019a">
 <!-- §118: clases con Leminyer -->
 <link rel="stylesheet" href="pj-lessons.css?v=20261111a">
+<link rel="stylesheet" href="pj-torneo.css?v=20261123a">
 </head>
 <body>
 
@@ -378,6 +379,8 @@
 
 <!-- ── 6 · HOME ───────────────────────────────────────────── -->
 <section class="pj-screen" data-screen="home" data-chrome="app" aria-labelledby="hm-q">
+  <!-- §121: el torneo de hoy (check-in y tu próximo partido). pj-torneo.js decide qué se ve. -->
+  <div class="tn-hoy" id="tn-hoy" hidden></div>
   <!-- 1 · "What brings you in today?" (SQL 105, §85): 6 opciones, siempre en el mismo sitio -->
   <section class="hm-ask" id="hm-ask" aria-busy="true">
     <div class="hm-ask-in">
@@ -1284,6 +1287,7 @@
 <script src="pj-push.js?v=20261019a"></script>
 <!-- §118: clases con Leminyer -->
 <script src="pj-lessons.js?v=20261111a"></script>
+<script src="pj-torneo.js?v=20261123a"></script>
 <!-- §103: el cartel del aviso que se tocó (después de pj-games.js y pj-push.js). -->
 <script src="pj-aviso.js?v=20261111a"></script>
 <script src="pj-account.js?v=20261018a"></script>

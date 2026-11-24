@@ -1,0 +1,26 @@
+/* FEROCIA Player Portal — el torneo de hoy (§121). */
+.tn-hoy { display:grid; gap:12px; background:var(--pj-night, #080f2e); padding:22px 24px 0; }
+.tn-card { width:100%; max-width:1152px; margin:0 auto; box-sizing:border-box; }
+.tn-hoy[hidden] { display:none; }
+.tn-card { background:#fff; border:1px solid #e4e8f2; border-radius:16px; padding:16px 18px; box-shadow:0 2px 10px rgba(13,31,74,.05); }
+.tn-k { margin:0; font-size:10px; font-weight:800; letter-spacing:1.5px; color:#F26024; }
+.tn-t { margin:6px 0 4px; font-size:18px; font-weight:800; color:#0d1f4a; letter-spacing:-.2px; }
+.tn-s { margin:0 0 12px; font-size:13px; color:#4a5677; line-height:1.45; }
+.tn-btn { display:block; width:100%; max-width:420px; min-height:48px; padding:13px; border:none; border-radius:99px; background:#174CCC; color:#fff; font:800 15px Inter, sans-serif; cursor:pointer; }
+.tn-btn:disabled { opacity:.7; cursor:default; }
+.tn-btn:focus-visible, .tn-link:focus-visible { outline:3px solid #c6f221; outline-offset:2px; }
+.tn-nota { margin:10px 0 0; font-size:12px; color:#5f6c8c; max-width:420px; text-align:center; }
+.tn-espera { margin:0; padding:12px; border-radius:12px; background:#f4f6fb; color:#4a5677; font-size:13px; font-weight:700; text-align:center; }
+.tn-err { margin:10px 0 0; color:#c62828; font-size:13px; font-weight:600; }
+.tn-err[hidden] { display:none; }
+.tn-ok { max-width:420px; margin:0 0 6px; padding:12px; border-radius:99px; background:#e5f7f1; color:#14805f; font-size:14px; font-weight:800; text-align:center; }
+.tn-fila { display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:9px 0; border-top:1px solid #f0f2f8; color:#0d1f4a; }
+.tn-fila b { font-weight:700; }
+.tn-falta { color:#9a6b00; }
+.tn-link { color:#174CCC; font-weight:700; text-decoration:none; }
+.tn-big { background:#080f2e; color:#fff; border-radius:14px; padding:14px 16px; margin-bottom:8px; }
+.tn-big small { display:block; color:#c6f221; font-weight:800; font-size:10px; letter-spacing:1.5px; }
+.tn-big-n { font-size:24px; font-weight:800; margin-top:3px; }
+.tn-big span { font-size:12px; color:#b9c3dd; }
+.tn-big-lima { box-shadow:inset 0 0 0 2px #c6f221; }
+@media (max-width:640px) { .tn-hoy { padding:16px 16px 0; } .tn-btn, .tn-nota, .tn-ok { max-width:none; } }
