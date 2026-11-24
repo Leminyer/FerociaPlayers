@@ -33,6 +33,7 @@
 <!-- §118: clases con Leminyer -->
 <link rel="stylesheet" href="pj-lessons.css?v=20261111a">
 <link rel="stylesheet" href="pj-torneo.css?v=20261123a">
+<link rel="stylesheet" href="pj-recap.css?v=20261124a">
 </head>
 <body>
 
@@ -381,6 +382,8 @@
 <section class="pj-screen" data-screen="home" data-chrome="app" aria-labelledby="hm-q">
   <!-- §121: el torneo de hoy (check-in y tu próximo partido). pj-torneo.js decide qué se ve. -->
   <div class="tn-hoy" id="tn-hoy" hidden></div>
+  <!-- §123: "Your recap is ready" (7 días) y fotos nuevas de un evento en curso. pj-recap.js. -->
+  <div class="rc-hoy" id="rc-hoy" hidden></div>
   <!-- 1 · "What brings you in today?" (SQL 105, §85): 6 opciones, siempre en el mismo sitio -->
   <section class="hm-ask" id="hm-ask" aria-busy="true">
     <div class="hm-ask-in">
@@ -610,6 +613,11 @@
           <div class="pj-panel-head"><h2 class="pj-panel-title" id="id-story-t">Your FEROCIA story</h2></div>
           <div class="id-next" id="id-next"></div>
           <ol class="id-timeline" id="id-timeline"></ol>
+          <!-- §123 (6A): los recaps de sus torneos y escaleras terminados. pj-recap.js. -->
+          <div class="rc-id" id="rc-id" hidden>
+            <h3 class="rc-id-h">Your recaps</h3>
+            <ul class="rc-id-lista" id="rc-id-lista"></ul>
+          </div>
         </section>
       </div>
       <div class="id-col">
@@ -1080,6 +1088,23 @@
   </main>
 </section>
 
+<!-- §123 (SQL 143): el recap de un torneo o una escalera, con sus fotos. pj-recap.js. -->
+<section class="pj-screen" data-screen="recap" data-chrome="app" aria-labelledby="rc-title">
+  <section class="gm-hero">
+    <div class="gm-hero-in">
+      <div>
+        <a class="gm-hero-back" id="rc-back" href="#/home">← Home</a>
+        <div class="gm-k" id="rc-k">Recap</div>
+        <h1 class="gm-title" id="rc-title" tabindex="-1" data-focus-title>Your recap</h1>
+      </div>
+    </div>
+  </section>
+  <main class="pj-wrap pj-wrap-sm" id="rc-main" aria-busy="true">
+    <div class="pj-alert pj-alert-error" id="rc-error" role="alert" hidden></div>
+    <div class="rc-cuerpo" id="rc-body"></div>
+  </main>
+</section>
+
 <!-- ── 9 · ACCOUNT SETTINGS ───────────────────────────────── -->
 <section class="pj-screen" data-screen="settings" data-chrome="app" aria-labelledby="st-title">
   <main class="pj-wrap pj-wrap-sm">
@@ -1257,13 +1282,34 @@
 
 <div class="pj-toast" id="pj-toast" role="status" aria-live="polite"></div>
 
+<!-- §123: el visor de fotos del recap (pj-recap.js). -->
+<dialog class="rc-visor" id="rc-visor" aria-label="Event photos">
+  <div class="rc-v-top">
+    <button type="button" class="rc-v-btn" id="rc-v-close" aria-label="Close photos">✕</button>
+    <span class="rc-v-n" id="rc-v-n" aria-live="polite"></span>
+    <button type="button" class="rc-v-btn" id="rc-v-down" aria-label="Download this photo">⤓</button>
+  </div>
+  <div class="rc-v-img-caja">
+    <img class="rc-v-img" id="rc-v-img" alt="">
+    <button type="button" class="rc-v-btn rc-v-prev" id="rc-v-prev" aria-label="Previous photo">‹</button>
+    <button type="button" class="rc-v-btn rc-v-next" id="rc-v-next" aria-label="Next photo">›</button>
+  </div>
+  <div class="rc-v-acc"><button type="button" class="rc-v-remove" id="rc-v-remove">Remove me from this photo</button></div>
+  <div class="rc-v-hoja" id="rc-v-hoja" role="group" aria-labelledby="rc-v-hoja-t" hidden>
+    <h2 id="rc-v-hoja-t">Remove you from this photo?</h2>
+    <p>We'll hide it right away and let the FEROCIA team know. They'll delete it or edit it out.</p>
+    <button type="button" class="rc-v-si" id="rc-v-yes">Yes, remove me</button>
+    <button type="button" class="rc-v-no" id="rc-v-cancel">Cancel</button>
+  </div>
+</dialog>
+
 <script src="config.js?v=20261014e"></script>
 <!-- SRI (§97): el navegador sólo ejecuta supabase-js si es EXACTAMENTE el archivo 2.45.4 revisado.
      Si alguna vez se cambia la versión, hay que poner el hash nuevo (o el portal no arranca). -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o" crossorigin="anonymous"></script>
 <!-- Hito 5: el captcha de Cloudflare para pedir el correo de entrada. -->
 <script src="ferocia-captcha.js?v=20261017a"></script>
-<script src="pj-app.js?v=20261111a"></script>
+<script src="pj-app.js?v=20261124a"></script>
 <script src="pj-auth.js?v=20261017a"></script>
 <!-- FEROCIA Identity: ciudad y estado (el mismo archivo que el formulario de suscripción). -->
 <script src="location-fields.js?v=20261018a"></script>
@@ -1288,6 +1334,7 @@
 <!-- §118: clases con Leminyer -->
 <script src="pj-lessons.js?v=20261111a"></script>
 <script src="pj-torneo.js?v=20261124a"></script>
+<script src="pj-recap.js?v=20261124a"></script>
 <!-- §103: el cartel del aviso que se tocó (después de pj-games.js y pj-push.js). -->
 <script src="pj-aviso.js?v=20261124a"></script>
 <script src="pj-account.js?v=20261018a"></script>
