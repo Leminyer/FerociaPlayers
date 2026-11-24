@@ -18,6 +18,9 @@
      Intermediate", no le impide cambiar el teléfono).
    · Ciudad y estado se escriben igual que en el formulario de
      suscripción (location-fields.js): "boca ratón" queda "Boca Raton".
+   · DUPR ID (§124, SQL 144): opcional; se guarda aparte
+     (portal_guardar_dupr, pj-dupr.js) y sólo si cambió. Sin el SQL 144
+     el campo no se enseña.
    ============================================================ */
 
 (function () {
@@ -61,9 +64,12 @@
   }
 
   let original = null;
+  const campoDupr = $('ed-dupr');
   P.alEntrar('edit', async () => {
     error('');
     bloquearNivel(null);
+    /* §124: su DUPR ID (aparte de lo demás; si falla, el campo se esconde). */
+    const duprPromesa = P.dupr ? P.dupr.leer().catch(() => undefined) : Promise.resolve(undefined);
     /* Desde cuándo puede volver a cambiar el nivel; si esto falla, se deja
        libre (la base no deja guardarlo antes de tiempo de todas formas). */
     const estadoNivel = sb.rpc('portal_nivel_estado').then((r) => (r.error ? null : r.data), () => null);
@@ -83,6 +89,11 @@
     elegir('ed-level', p.skill_level);
     const en = await estadoNivel;
     bloquearNivel(en && en.next_change, p.skill_level);
+    const dupr = await duprPromesa;
+    original.dupr = dupr === undefined ? undefined : (dupr || '');
+    campoDupr.closest('.pj-field').hidden = dupr === undefined;
+    campoDupr.value = dupr || '';
+    marcar(campoDupr, false);
     $('ed-name').textContent = fmt.nombre([p.first_name, p.last_name].filter(Boolean).join(' '));
     $('ed-dob').textContent = fmt.largo(p.date_of_birth) || 'Date of birth not on file';
   });
@@ -106,16 +117,24 @@
     marcar($('ed-state'), lugar.malEstado);
     marcar($('ed-gender'), !genero);
     marcar($('ed-level'), !nivel);
+    /* §124: DUPR ID (vacío = no tiene). */
+    const conDupr = !!original && original.dupr !== undefined;
+    const dupr = conDupr ? P.dupr.limpio(campoDupr.value) : '';
+    const duprMal = conDupr && !P.dupr.valido(dupr);
+    marcar(campoDupr, duprMal);
     if (digitos.length !== 10) { error('Enter a 10-digit US phone number.'); telefono.focus(); return; }
     if (lugar.malCiudad) { error(P.errorLugar.invalid_city); $('ed-city').focus(); return; }
     if (lugar.malEstado) { error(P.errorLugar.invalid_state); $('ed-state').focus(); return; }
     /* El nivel sólo es obligatorio si la ficha no tiene ninguno. */
     if (!genero || (!nivel && !(original && original.level))) { error('Choose your gender and playing level.'); return; }
+    if (duprMal) { error(P.dupr.ERRORES.invalid_dupr); campoDupr.focus(); return; }
+    const duprNuevo = conDupr && dupr !== original.dupr;
     const nivelNuevo = nivel && (!original || nivel !== original.level) ? nivel : null;
     /* Si no tocó ciudad ni estado, no se mandan: la ficha conserva lo que
        ya tenía tal cual (aunque esté escrito a la antigua, "Boca Raton, FL"). */
     const mismoLugar = !!original && original.city === lugar.ciudad && original.state === lugar.estado;
-    if (original && original.phone === digitos && original.gender === genero && !nivelNuevo && mismoLugar) {
+    const restoIgual = !!original && original.phone === digitos && original.gender === genero && !nivelNuevo && mismoLugar;
+    if (restoIgual && !duprNuevo) {
       P.aviso('Nothing to save — your details are the same.');
       P.ir('profile');
       return;
@@ -131,12 +150,31 @@
       b.setAttribute('aria-busy', 'false');
       return;
     }
+    /* §124: el DUPR ID primero (si está repetido, no se guarda nada y se
+       puede corregir sin perder lo demás). */
+    if (duprNuevo) {
+      try {
+        await P.dupr.guardar(dupr);
+        original.dupr = dupr;
+      } catch (err) {
+        console.warn('[portal] guardar DUPR ID:', err);
+        marcar(campoDupr, true);
+        error(P.dupr.textoError(err));
+        campoDupr.focus();
+        guardando = false;
+        b.disabled = false;
+        b.setAttribute('aria-busy', 'false');
+        return;
+      }
+    }
     try {
-      const { error: err } = await sb.rpc('portal_guardar_perfil', {
-        p_phone: digitos, p_gender: genero, p_skill_level: nivelNuevo,
-        p_city: mismoLugar ? null : lugar.ciudad, p_state: mismoLugar ? null : lugar.estado,
-      });
-      if (err) throw err;
+      if (!restoIgual) {
+        const { error: err } = await sb.rpc('portal_guardar_perfil', {
+          p_phone: digitos, p_gender: genero, p_skill_level: nivelNuevo,
+          p_city: mismoLugar ? null : lugar.ciudad, p_state: mismoLugar ? null : lugar.estado,
+        });
+        if (err) throw err;
+      }
       P.olvidarDatos();
       P.aviso('Your profile is updated.');
       P.ir('profile');

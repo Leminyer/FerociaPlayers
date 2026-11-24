@@ -235,3 +235,10 @@ a.pj-rank:hover { color: #fff; border-color: var(--pj-lime); }
   .pj-welcome-main { padding: 40px 20px 48px; }
   .pj-welcome-court, .pj-welcome-line { display: none; }
 }
+
+/* §124 (SQL 144): DUPR ID en "A little about you" y Edit profile (pj-dupr.js). */
+.pj-opcional { font-weight: 600; color: var(--pj-muted); text-transform: none; letter-spacing: 0; }
+.pj-dupr { text-transform: uppercase; letter-spacing: 1.5px; font-variant-numeric: tabular-nums; }
+.pj-dupr::placeholder { letter-spacing: 1.5px; text-transform: none; }
+.pj-field-help { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--pj-muted); }
+.pj-field[hidden] { display: none; }

@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="pj-base.css?v=20261014e">
 <link rel="stylesheet" href="pj-auth.css?v=20261015c">
 <link rel="stylesheet" href="pj-layout.css?v=20261017a">
-<link rel="stylesheet" href="pj-pages.css?v=20261017a">
+<link rel="stylesheet" href="pj-pages.css?v=20261124a">
 <link rel="stylesheet" href="pj-identity.css?v=20261015a">
 <link rel="stylesheet" href="pj-dna.css?v=20261015e">
 <link rel="stylesheet" href="pj-play.css?v=20261015g">
@@ -305,6 +305,12 @@
           <label class="pj-level"><input class="pj-sr" type="radio" name="ab-level" value="Advanced"><span class="pj-level-name">Advanced</span><span class="pj-level-desc">Competitive, tournament-level play.</span></label>
           </div>
         </fieldset>
+        <!-- §124 (SQL 144): DUPR ID, opcional. pj-dupr.js. -->
+        <div class="pj-field pj-field-narrow" hidden>
+          <label class="pj-label" for="ab-dupr">DUPR ID <span class="pj-opcional">(optional)</span></label>
+          <input class="pj-input pj-dupr" id="ab-dupr" type="text" maxlength="10" placeholder="8DPLX8" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="ab-dupr-help">
+          <p class="pj-field-help" id="ab-dupr-help">6 letters or numbers. Find it in the DUPR app, under your name. Only you and the FEROCIA team see it.</p>
+        </div>
         <button class="pj-btn pj-btn-primary pj-btn-block" type="submit" id="ab-submit">Finish <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
         <p class="pj-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#24BC96" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Your details are private. Other players never see them.</p>
         <p class="pj-small-center">Something not working? <a href="#/help">Send us a message</a></p>
@@ -700,6 +706,12 @@
           </div>
           <p class="pj-level-note" id="ed-level-note">You can change your level once every 30 days.</p>
         </fieldset>
+        <!-- §124 (SQL 144): DUPR ID, opcional. pj-dupr.js. -->
+        <div class="pj-field pj-field-narrow" hidden>
+          <label class="pj-label" for="ed-dupr">DUPR ID <span class="pj-opcional">(optional)</span></label>
+          <input class="pj-input pj-dupr" id="ed-dupr" type="text" maxlength="10" placeholder="8DPLX8" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="ed-dupr-help">
+          <p class="pj-field-help" id="ed-dupr-help">6 letters or numbers. Find it in the DUPR app, under your name. Only you and the FEROCIA team see it.</p>
+        </div>
         <div class="pj-form-actions">
           <button class="pj-btn pj-btn-primary pj-btn-md" type="submit" id="ed-submit">Save changes</button>
           <a class="pj-btn pj-btn-quiet pj-btn-md" href="#/profile">Cancel</a>
@@ -1313,12 +1325,13 @@
 <script src="pj-auth.js?v=20261017a"></script>
 <!-- FEROCIA Identity: ciudad y estado (el mismo archivo que el formulario de suscripción). -->
 <script src="location-fields.js?v=20261018a"></script>
-<script src="pj-onboarding.js?v=20261018a"></script>
+<script src="pj-onboarding.js?v=20261124a"></script>
 <script src="pj-charts.js?v=20261016a"></script>
 <script src="pj-share.js?v=20261016a"></script>
 <script src="pj-home.js?v=20261027a"></script>
-<script src="pj-profile.js?v=20261018a"></script>
-<script src="pj-identity.js?v=20261016a"></script>
+<script src="pj-dupr.js?v=20261124a"></script>
+<script src="pj-profile.js?v=20261124a"></script>
+<script src="pj-identity.js?v=20261124a"></script>
 <script src="pj-dna.js?v=20261015h"></script>
 <script src="pj-play.js?v=20261015i"></script>
 <!-- Matchmaking M-2a: los juegos, la campanita y Player Safety. -->

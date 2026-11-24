@@ -113,6 +113,10 @@
 
   P.alEntrar('about', () => {
     mostrarJunior(false);
+    /* §124: el DUPR ID sólo si la base ya tiene el SQL 144. */
+    const campoDupr = $('ab-dupr').closest('.pj-field');
+    if (P.dupr) P.dupr.leer().then((v) => { campoDupr.hidden = v === undefined; }, () => { campoDupr.hidden = true; });
+    else campoDupr.hidden = true;
     const e = P.estado() || {};
     const f = $('ab-first'), l = $('ab-last');
     if (!f.value) f.value = e.first_name || '';
@@ -144,10 +148,13 @@
     revisa($('ab-state'), lugar.malEstado);
     revisa($('ab-gender'), !genero);
     revisa($('ab-level'), !nivel);
+    /* §124: DUPR ID opcional (6 letras o números). */
+    const dupr = P.dupr && !$('ab-dupr').closest('.pj-field').hidden ? P.dupr.limpio($('ab-dupr').value) : '';
+    revisa($('ab-dupr'), !!P.dupr && !P.dupr.valido(dupr));
     if (fallos.length) {
       mostrarError('ab-error', !fecha && dob.value.trim()
         ? 'Enter your date of birth as MM / DD / YYYY.'
-        : 'Please complete the highlighted fields.');
+        : (fallos.length === 1 && fallos[0] === $('ab-dupr') ? P.dupr.ERRORES.invalid_dupr : 'Please complete the highlighted fields.'));
       const primero = fallos[0];
       (primero.tagName === 'FIELDSET' ? primero.querySelector('input') : primero).focus();
       return;
@@ -177,6 +184,15 @@
       });
       if (error) throw error;
       P.olvidarDatos();
+      /* §124: el DUPR ID, si lo escribió. La cuenta ya está hecha: si no se
+         puede guardar, se le dice y lo pone después en Edit profile. */
+      if (dupr && P.dupr && !(data && data.recien === false)) {
+        try { await P.dupr.guardar(dupr); }
+        catch (err) {
+          console.warn('[portal] DUPR ID al registrarse:', err);
+          P.aviso(`Your account is ready, but we couldn't save your DUPR ID: ${P.dupr.textoError(err)} You can add it later in My Identity → Edit profile.`, true);
+        }
+      }
       /* Recién unido: directo a la bienvenida (sin pasar por Home). */
       if (data && data.estado === 'vinculado' && data.recien) {
         guardarBienvenida({ nuevo: !!data.nuevo });

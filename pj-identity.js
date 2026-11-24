@@ -344,6 +344,7 @@
   });
 
   /* ── 7 · Personal details ── */
+  let vezDupr = 0;
   function pintarDatos(d) {
     const p = d.player || {};
     const par = (dt, dd) => h('div', null, h('dt', { text: dt }), h('dd', { text: dd || '—' }));
@@ -352,6 +353,14 @@
       par('Mobile', fmt.telefono(p.phone)),
       par('Date of birth', fmt.largo(p.date_of_birth)),
       par('Gender', p.gender));
+    /* §124: su DUPR ID (sólo lo ve él). Sin el SQL 144 no sale la fila. */
+    const mia = ++vezDupr;
+    if (P.dupr) {
+      P.dupr.leer().then((v) => {
+        if (v === undefined || mia !== vezDupr) return;
+        $('id-details').append(par('DUPR ID', v));
+      }).catch(() => { /* sin la fila */ });
+    }
   }
 
   /* ── Al entrar ── */
