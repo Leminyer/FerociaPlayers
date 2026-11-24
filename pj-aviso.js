@@ -30,9 +30,11 @@
     chat: 'New messages', test: 'Notifications are on',
     /* §118: las clases. */
     lesson_booked: 'Lesson booked', lesson_changed: 'Lesson time changed', lesson_cancelled: 'Lesson cancelled', lesson_reminder: 'Lesson reminder',
+    /* §122: el torneo de hoy. */
+    tourney_up_next: "You're up next — get ready", tourney_court: 'Go to your court now', tourney_court_changed: 'Court changed',
   };
   const ROJO = ['game_cancelled', 'removed', 'request_declined', 'result_declined', 'result_discarded', 'link_declined', 'lesson_cancelled'];
-  const VERDE = ['request_accepted', 'invite_accepted', 'result_verified', 'link_accepted', 'lesson_booked'];
+  const VERDE = ['request_accepted', 'invite_accepted', 'result_verified', 'link_accepted', 'lesson_booked', 'tourney_court'];
   /* Si el aviso ya no está en la campanita (o falla la red): un texto corto. */
   const SIN_DATOS = {
     test: 'This device will get FEROCIA notifications.',
@@ -82,7 +84,8 @@
     if (location.hash !== aqui) return;     // se fue a otra pantalla mientras cargaba
     const col = color(p.kind);
     const texto = item && P.textoAviso ? P.textoAviso(item)
-      : [SIN_DATOS[p.kind] || (String(p.kind).startsWith('lesson_') ? 'You have an update about your lesson.' : 'You have an update about a game.')];
+      : [SIN_DATOS[p.kind] || (String(p.kind).startsWith('lesson_') ? 'You have an update about your lesson.'
+        : String(p.kind).startsWith('tourney_') ? 'Check your tournament card below.' : 'You have an update about a game.')];
     const ok = h('button', { type: 'button', class: 'pa-ok', text: 'Got it' });
     ok.addEventListener('click', quitar);
     const ico = h('span', { class: 'pa-ico' });

@@ -1206,6 +1206,10 @@
       case 'lesson_changed': return ['New time for your lesson: ', b(clase(d)), '.'];
       case 'lesson_cancelled': return d.by === 'admin' ? [b(d.coach || 'FEROCIA'), ' cancelled your lesson ', b(clase(d)), '.'] : ['You cancelled your lesson ', b(clase(d)), '.'];
       case 'lesson_reminder': return ['Reminder: your lesson ', b(clase(d)), '.'];
+      /* §122: el torneo de hoy (canchas automáticas). */
+      case 'tourney_up_next': return ["You're up next", d.round ? ` (${d.round})` : '', ' in ', b(d.category || 'your category'), d.vs ? ` vs ${d.vs}` : '', ' — get ready.'];
+      case 'tourney_court': return ['Go to ', b(`Court ${Number(d.court) || '?'}`), ' now', d.round ? ` · ${d.round}` : '', d.vs ? ` — vs ${d.vs}` : ''];
+      case 'tourney_court_changed': return ['Your match moved to ', b(`Court ${Number(d.court) || '?'}`), d.vs ? ` (vs ${d.vs})` : '', '.'];
       default: return ['You have an update about a game.'];
     }
   }
@@ -1222,7 +1226,9 @@
     $('gm-notes-read').hidden = !n;
     $('gm-notes-list').replaceChildren(...(items.length ? items.map((it) => {
       /* §118: los avisos de clases llevan a "My lessons". */
-      const destino = String(it.kind).startsWith('lesson_') ? '#/lessons' : it.game_id ? `#/game/${it.game_id}` : null;
+      /* §122: los del torneo, a la tarjeta del torneo en Home. */
+      const destino = String(it.kind).startsWith('lesson_') ? '#/lessons' : String(it.kind).startsWith('tourney_') ? '#/home'
+        : it.game_id ? `#/game/${it.game_id}` : null;
       const fila = h(destino ? 'a' : 'div', { class: `gm-n${it.read ? '' : ' is-new'}`, href: destino },
         it.read ? h('span', { class: 'gm-n-sp', 'aria-hidden': 'true' }) : h('span', { class: 'gm-n-dot', 'aria-label': 'New' }),
         h('span', null, h('span', { class: 'gm-n-t' }, ...textoAviso(it)), h('span', { class: 'gm-n-s', text: haceCuanto(it.created_at) })));

@@ -38,8 +38,9 @@
     const n = t.next;
     if (!n) return null;
     if (n.state === 'on_court') {
+      /* §122: en el bracket, también la ronda ("SEMIFINAL"). */
       return h('div', { class: 'tn-big' },
-        h('small', { text: 'YOUR NEXT MATCH' }),
+        h('small', { text: n.round ? `YOUR ${String(n.round).toUpperCase()}` : 'YOUR NEXT MATCH' }),
         h('div', { class: 'tn-big-n', text: `Court ${n.court} · now` }),
         n.vs ? h('span', { text: `vs ${n.vs}` }) : null);
     }
@@ -52,7 +53,7 @@
     return h('div', { class: `tn-big${n.state === 'up_next' ? ' tn-big-lima' : ''}` },
       h('small', { text: textos[0] }),
       h('div', { class: 'tn-big-n', text: textos[1] }),
-      n.category ? h('span', { text: n.category }) : null);
+      n.category || n.round ? h('span', { text: [n.category, n.round].filter(Boolean).join(' · ') }) : null);
   }
 
   function tarjeta(t) {
