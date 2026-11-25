@@ -34,6 +34,7 @@
 <link rel="stylesheet" href="pj-lessons.css?v=20261111a">
 <link rel="stylesheet" href="pj-torneo.css?v=20261123a">
 <link rel="stylesheet" href="pj-recap.css?v=20261124a">
+<link rel="stylesheet" href="pj-eventos.css?v=20261124a">
 </head>
 <body>
 
@@ -209,6 +210,7 @@
       <a href="#/profile" data-nav="profile">My Identity</a>
       <a href="#/dna" data-nav="dna">My DNA</a>
       <a href="#/play" data-nav="play">Play</a>
+      <a href="#/events" data-nav="events">My Events</a>
       <a href="#/lessons" data-nav="lessons">Lessons</a>
       <a href="#/help" data-nav="help">Help</a>
     </nav>
@@ -475,6 +477,16 @@
       <a class="ls-card-btn" id="ls-card-btn" href="#/lesson-book">Book</a>
     </section>
 
+    <!-- §128: "Your events" → My Events (2B: en el teléfono se entra por aquí). pj-eventos.js. -->
+    <section class="ev-card" id="ev-home" aria-labelledby="ev-home-t" hidden>
+      <div>
+        <p class="ev-card-k" id="ev-home-t">Your events</p>
+        <p class="ev-card-n" id="ev-home-n"></p>
+        <p class="ev-card-s">Full standings, sessions, brackets and results.</p>
+      </div>
+      <a class="ev-card-btn" href="#/events">See My Events <span aria-hidden="true">→</span></a>
+    </section>
+
     <!-- 2 · "Your game, in numbers" -->
     <section class="hm-numbers" id="hm-numbers" aria-labelledby="hm-num-t" hidden>
       <div class="hm-num-head">
@@ -619,6 +631,11 @@
           <div class="pj-panel-head"><h2 class="pj-panel-title" id="id-story-t">Your FEROCIA story</h2></div>
           <div class="id-next" id="id-next"></div>
           <ol class="id-timeline" id="id-timeline"></ol>
+          <!-- §128: My Events (las tablas completas de sus escaleras y torneos). pj-eventos.js. -->
+          <a class="ev-ident" id="ev-ident" href="#/events" hidden>
+            <span class="ev-ident-t"><b>My Events</b><span>Every ladder and tournament you've played, with the full tables.</span></span>
+            <span class="ev-ident-go" aria-hidden="true">→</span>
+          </a>
           <!-- §123 (6A): los recaps de sus torneos y escaleras terminados. pj-recap.js. -->
           <div class="rc-id" id="rc-id" hidden>
             <h3 class="rc-id-h">Your recaps</h3>
@@ -1117,6 +1134,44 @@
   </main>
 </section>
 
+<!-- §128 (SQL 145): My Events — la lista y un evento con sus tablas completas. pj-eventos.js. -->
+<section class="pj-screen" data-screen="events" data-chrome="app" aria-labelledby="evl-title">
+  <section class="gm-hero">
+    <div class="gm-hero-in">
+      <div>
+        <a class="gm-hero-back" href="#/home">← Home</a>
+        <div class="gm-k">Ladders and tournaments you've played</div>
+        <h1 class="gm-title" id="evl-title" tabindex="-1" data-focus-title>My Events</h1>
+      </div>
+    </div>
+  </section>
+  <main class="pj-wrap pj-wrap-sm">
+    <div class="pj-alert pj-alert-error" id="ev-lista-error" role="alert" hidden></div>
+    <div class="ev-lista-caja" id="ev-lista-main" aria-busy="true"></div>
+  </main>
+</section>
+
+<section class="pj-screen" data-screen="event" data-chrome="app" aria-labelledby="ev-title">
+  <section class="gm-hero">
+    <div class="gm-hero-in">
+      <div>
+        <a class="gm-hero-back" href="#/events">← My Events</a>
+        <div class="gm-k"><span id="ev-k">My Events</span><span class="ev-live ev-live-hero" id="ev-live" hidden>LIVE</span></div>
+        <h1 class="gm-title" id="ev-title" tabindex="-1" data-focus-title>My Events</h1>
+      </div>
+      <div class="ev-enlaces" id="ev-enlaces"></div>
+    </div>
+  </section>
+  <main class="pj-wrap ev-wrap" id="ev-main" aria-busy="true">
+    <aside class="ev-aside" aria-label="My Events"><div class="ev-lista-caja" id="ev-aside"></div></aside>
+    <div class="ev-col">
+      <div class="pj-alert pj-alert-error" id="ev-error" role="alert" hidden></div>
+      <p class="pj-alert pj-alert-info" id="ev-nota" hidden></p>
+      <div class="ev-cuerpo" id="ev-body"></div>
+    </div>
+  </main>
+</section>
+
 <!-- ── 9 · ACCOUNT SETTINGS ───────────────────────────────── -->
 <section class="pj-screen" data-screen="settings" data-chrome="app" aria-labelledby="st-title">
   <main class="pj-wrap pj-wrap-sm">
@@ -1321,7 +1376,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o" crossorigin="anonymous"></script>
 <!-- Hito 5: el captcha de Cloudflare para pedir el correo de entrada. -->
 <script src="ferocia-captcha.js?v=20261017a"></script>
-<script src="pj-app.js?v=20261124a"></script>
+<script src="pj-app.js?v=20261124b"></script>
 <script src="pj-auth.js?v=20261017a"></script>
 <!-- FEROCIA Identity: ciudad y estado (el mismo archivo que el formulario de suscripción). -->
 <script src="location-fields.js?v=20261018a"></script>
@@ -1348,6 +1403,7 @@
 <script src="pj-lessons.js?v=20261111a"></script>
 <script src="pj-torneo.js?v=20261124a"></script>
 <script src="pj-recap.js?v=20261124a"></script>
+<script src="pj-eventos.js?v=20261124a"></script>
 <!-- §103: el cartel del aviso que se tocó (después de pj-games.js y pj-push.js). -->
 <script src="pj-aviso.js?v=20261124a"></script>
 <script src="pj-account.js?v=20261018a"></script>

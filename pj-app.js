@@ -73,7 +73,7 @@
     en_revision: { inicio: 'review', rutas: ['review', 'help'] },
     rechazado:   { inicio: 'review', rutas: ['review', 'help'] },
     vinculado:   { inicio: 'home',   rutas: ['home', 'profile', 'dna', 'dna-edit', 'play', 'player', 'game', 'game-form', 'log-game', 'edit', 'settings', 'help', 'welcome',
-                                         'lessons', 'lesson-book', 'recap'] },   // §118: clases · §123: recap
+                                         'lessons', 'lesson-book', 'recap', 'events', 'event'] },   // §118: clases · §123: recap · §128: My Events
   };
   /* Unido pero sin su Player DNA: primero el DNA. (Sólo si la base lo
      dice claramente: si el SQL 92 todavía no está, no se pide.) */
@@ -309,7 +309,8 @@
         || (nombre === 'dna-edit' && a.dataset.nav === 'dna')
         || (['player', 'game', 'game-form', 'log-game'].includes(nombre) && a.dataset.nav === 'play')
         || (nombre === 'lesson-book' && a.dataset.nav === 'lessons')
-        || (nombre === 'recap' && a.dataset.nav === 'home');
+        || (nombre === 'recap' && a.dataset.nav === 'home')
+        || (nombre === 'event' && a.dataset.nav === 'events');
       if (activo) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
