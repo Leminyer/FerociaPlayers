@@ -847,6 +847,26 @@
     const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(e.event_date || ''));
     return m && String(e.event_date).slice(0, 10) > hoyClub() ? `Starts ${MES[+m[2] - 1]} ${+m[3]}` : '';
   }
+  /* §131 (1A 2A 3A): la etiqueta de los eventos que todavía no empezaron,
+     igual que la cinta de ferociasports.com (event-days.js → comingLabel):
+     escaleras y clínicas "STARTS JANUARY", torneos y otros "COMING IN
+     DECEMBER", el mismo mes "… THIS MONTH", el mismo día "TODAY". El año
+     sólo si faltan 12 meses o más. Private sessions y lo ya empezado: "". */
+  const MES_LARGO = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY',
+    'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+  function proximamente(e) {
+    if (!e || e.event_type === 'private_session') return '';
+    const f = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(e.event_date || ''));
+    const h = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(hoyClub() || ''));
+    if (!f || !h) return '';
+    if (f[0] < h[0]) return '';
+    if (f[0] === h[0]) return e.event_type === 'clinic' ? '' : 'TODAY';
+    const empieza = e.event_type === 'ladder' || e.event_type === 'clinic';
+    const meses = (+f[1] - +h[1]) * 12 + (+f[2] - +h[2]);
+    if (meses === 0) return empieza ? 'STARTS THIS MONTH' : 'COMING THIS MONTH';
+    const mes = MES_LARGO[+f[2] - 1] + (meses >= 12 ? ` ${f[1]}` : '');
+    return empieza ? `STARTS ${mes}` : `COMING IN ${mes}`;
+  }
   function eventos(lista) {
     if (!lista || !lista.length) return [h('p', { class: 'pj-empty', text: 'Nothing scheduled yet — check back soon.' })];
     return lista.map((e, i) => {
@@ -861,10 +881,13 @@
           ...(dias.length > 2 ? [h('span', { class: 'pj-event-dow', text: DIA_CORTO[dias[0]].toUpperCase() }), h('span', { class: 'pj-event-mas', text: `+${dias.length - 1}` })]
             : dias.map((x) => h('span', { class: `pj-event-dow${dias.length > 1 ? ' is-dos' : ''}`, text: DIA_CORTO[x].toUpperCase() }))))
         : h('span', { class: `pj-event-date ${i % 2 ? 'is-navy' : ''}` }, h('span', { class: 'pj-event-mon', text: fmt.mes3(e.event_date) }), h('span', { class: 'pj-event-day', text: fmt.dia(e.event_date) }));
+      const pronto = proximamente(e);
       return h('a', { class: 'pj-event', href, target: '_blank', rel: 'noopener' },
         cuadro,
         h('span', { class: 'pj-event-txt' },
-          h('span', { class: `pj-event-kind ${COLOR_TIPO(e.event_type)}`, text: TIPOS[e.event_type] || 'Event' }),
+          h('span', { class: 'pj-event-top' },
+            h('span', { class: `pj-event-kind ${COLOR_TIPO(e.event_type)}`, text: TIPOS[e.event_type] || 'Event' }),
+            pronto ? h('span', { class: `pj-event-soon${pronto === 'TODAY' ? ' is-today' : ''}`, text: pronto }) : null),
           h('span', { class: 'pj-event-title', text: e.title }),
           h('span', { class: 'pj-event-sub', text: cuando })));
     });
