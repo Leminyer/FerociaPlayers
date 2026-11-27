@@ -6,7 +6,6 @@
      · #/event/t-<id> o #/event/l-<id>: la tabla completa, como la página
        pública, con su fila resaltada.
          - Escalera: Standings y Sessions (todas, la más reciente arriba).
-         - Escalera de equipos (FTC): Team standings y Schedule.
          - Torneo: su división primero; Round robin, Results y Bracket;
            en curso, "On court now / Up next" (se pone al día solo).
      · Se llega desde una tarjeta del Home y desde My Identity (2B); en la
@@ -75,7 +74,6 @@
       }
       return { t: e.live ? 'In progress' : 'Played', s: rec };
     }
-    if (e.team) return { t: e.team_name || 'Team ladder', s: 'Team ladder' };
     if (e.rank) return e.live ? { t: `#${e.rank}`, s: `of ${e.of}` } : { t: ordinal(e.rank), s: `of ${e.of}` };
     return { t: '—', s: '' };
   }
@@ -263,67 +261,6 @@
     return nodos;
   }
 
-  /* ── Escalera de equipos (FTC): la misma cuenta de players.html ── */
-  const TIPO_FTC = { mens: "Men's", womens: "Women's", mixed1: 'Mixed 1', mixed2: 'Mixed 2', mixed: 'Mixed' };
-  function pintarFtc(cuerpo) {
-    const d = actual.d;
-    const nm = nombres(d);
-    const mios = new Set((d.my_teams || []).map(Number));
-    const pestana = actual.pestana || 'standings';
-    const equipos = d.teams || [];
-    const tNombre = (id) => (equipos.find((t) => Number(t.id) === Number(id)) || {}).name || 'Team';
-    const sched = (d.schedule || []).filter((s) => s.is_playoff !== true);
-    const partidos = (d.matches || []).filter((m) => m.is_tiebreaker !== true);
-    const hechos = partidos.filter((m) => m.status === 'completed');
-    const nodos = [pestanas([['standings', 'Team standings'], ['schedule', 'Schedule']], pestana, (p) => { actual.pestana = p; pintarCuerpo(); })];
-    if (pestana === 'standings') {
-      const st = {};
-      equipos.forEach((t) => { st[t.id] = { team: t, pts: 0, wins: 0, losses: 0, pf: 0, pc: 0 }; });
-      hechos.forEach((m) => {
-        const aW = m.score_a > m.score_b;
-        if (st[m.team_a_id]) { const s = st[m.team_a_id]; s.pts += m.league_pts_a || 0; s.pf += m.score_a || 0; s.pc += m.score_b || 0; if (aW) s.wins++; else s.losses++; }
-        if (st[m.team_b_id]) { const s = st[m.team_b_id]; s.pts += m.league_pts_b || 0; s.pf += m.score_b || 0; s.pc += m.score_a || 0; if (!aW) s.wins++; else s.losses++; }
-      });
-      const filas = Object.values(st).sort((a, b) => (b.pts - a.pts) || (b.wins - a.wins) || ((b.pf - b.pc) - (a.pf - a.pc)));
-      if (!filas.length) nodos.push(h('p', { class: 'ev-vacio', text: 'No teams yet.' }));
-      else nodos.push(tabla([
-        { t: '#', cls: 'ev-pos', k: (s) => String(filas.indexOf(s) + 1) },
-        { t: 'Team', cls: 'ev-nom', th: true, k: (s) => [s.team.name || 'Team', mios.has(Number(s.team.id)) ? tuMarca() : null] },
-        { t: 'Pts', k: (s) => String(s.pts) },
-        { t: 'W–L', k: (s) => `${s.wins}–${s.losses}` },
-        { t: 'Pts for', extra: true, k: (s) => String(s.pf) },
-        { t: 'Pts against', extra: true, k: (s) => String(s.pc) },
-        { t: 'Diff', k: (s) => conSigno(s.pf - s.pc) },
-      ], filas, (s) => mios.has(Number(s.team.id)), `${d.ladder.name} team standings`));
-    } else {
-      const semanas = [...new Set(sched.map((s) => s.week_number))].sort((a, b) => a - b);
-      if (!semanas.length) nodos.push(h('p', { class: 'ev-vacio', text: 'No schedule yet.' }));
-      semanas.forEach((w) => {
-        const filas = sched.filter((s) => s.week_number === w);
-        const fecha = (filas.find((s) => s.match_date) || {}).match_date;
-        nodos.push(h('section', { class: 'ev-ses' },
-          h('h3', { class: 'ev-ses-h', text: [`Week ${w}`, fecha ? conDia(fecha) : ''].filter(Boolean).join(' · ') }),
-          filas.map((s) => {
-            if (s.is_bye) return h('div', { class: 'ev-cancha' }, h('p', { class: 'ev-juego-t', text: `${tNombre(s.team_a_id || s.team_b_id)} · Bye` }));
-            const ms = partidos.filter((m) => Number(m.schedule_id) === Number(s.id));
-            const wA = ms.filter((m) => m.status === 'completed' && Number(m.winner_team_id) === Number(s.team_a_id)).length;
-            const wB = ms.filter((m) => m.status === 'completed' && Number(m.winner_team_id) === Number(s.team_b_id)).length;
-            const mio = mios.has(Number(s.team_a_id)) || mios.has(Number(s.team_b_id));
-            const estado = s.status === 'completed' ? 'Completed' : ms.some((m) => m.status === 'completed') ? 'In progress' : 'Scheduled';
-            return h('div', { class: `ev-cancha${mio ? ' is-yo' : ''}` },
-              h('div', { class: 'ev-cruce' },
-                h('b', { text: `${tNombre(s.team_a_id)} vs ${tNombre(s.team_b_id)}` }),
-                h('span', { class: 'ev-cruce-s', text: ms.some((m) => m.status === 'completed') ? `${wA}–${wB} · ${estado}` : [estado, fmt.hora(s.match_time), s.court ? `Court ${s.court}` : ''].filter(Boolean).join(' · ') })),
-              ms.filter((m) => m.status === 'completed').map((m) => h('div', { class: 'ev-juego' },
-                h('span', { class: 'ev-juego-t' }, h('small', { class: 'ev-tipo', text: TIPO_FTC[m.match_type] || m.match_type || '' }),
-                  `${[nm.corto(m.team_a_p1_id), nm.corto(m.team_a_p2_id)].filter(Boolean).join(' & ')} vs ${[nm.corto(m.team_b_p1_id), nm.corto(m.team_b_p2_id)].filter(Boolean).join(' & ')}`),
-                h('b', { class: 'ev-juego-s', text: `${m.score_a ?? '—'}–${m.score_b ?? '—'}` }))));
-          })));
-      });
-    }
-    cuerpo.replaceChildren(...nodos);
-  }
-
   /* ── Torneo ── */
   /* La tabla del round robin: la misma cuenta de tournament-results.html
      (ganados, diferencia, puntos a favor, perdidos; retirados al final). */
@@ -479,7 +416,7 @@
     const info = esTorneo ? d.tournament : d.ladder;
     const k = esTorneo
       ? `Tournament · ${conDia(info.date)}`
-      : `${d.team ? 'Team ladder' : 'Ladder'} · ${info.status === 'completed' && info.end_date ? `${fmt.corto(info.start_date)} – ${fmt.corto(info.end_date)}` : `Since ${fmt.corto(info.start_date)}`}`;
+      : `Ladder · ${info.status === 'completed' && info.end_date ? `${fmt.corto(info.start_date)} – ${fmt.corto(info.end_date)}` : `Since ${fmt.corto(info.start_date)}`}`;
     $('ev-k').textContent = k;
     $('ev-title').textContent = info.name || 'Your event';
     const vivo = info.status === 'active';
@@ -498,7 +435,6 @@
     if (!actual || !actual.d || !cuerpo) return;
     const foco = document.activeElement && cuerpo.contains(document.activeElement) ? document.activeElement.getAttribute('data-k') : null;
     if (actual.d.kind === 'tournament') pintarTorneo(cuerpo);
-    else if (actual.d.team) pintarFtc(cuerpo);
     else pintarEscalera(cuerpo);
     if (foco) { const el = cuerpo.querySelector(`[data-k="${CSS.escape(foco)}"]`); if (el) el.focus(); }
     /* La primera vez, a la altura de su fila (escalera). */

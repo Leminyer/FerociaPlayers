@@ -75,10 +75,6 @@
         numeros: [plural(partidos, 'match', 'matches'), plural(ganados, 'win')],
       };
     }
-    if (r.type === 'ftc') {
-      const f = r.ftc || {};
-      return { medalla: null, titular: f.team || 'Team ladder', detalle: 'Team ladder', numeros: [`${f.wins || 0}–${f.losses || 0} record`] };
-    }
     return {
       medalla: medallaPuesto(r.rank),
       titular: r.rank ? `${ordinal(r.rank)} of ${r.of}` : 'Ladder complete',
@@ -183,16 +179,6 @@
     return partes;
   }
   function cuerpoEscalera(r) {
-    if (r.type === 'ftc') {
-      const f = r.ftc || {};
-      return [
-        hero({ medalla: null, titular: f.team || 'Team ladder', detalle: 'Team ladder', oscuro: true,
-          stats: [[`${f.wins || 0}–${f.losses || 0}`, 'Record'], [String((f.matches || []).length), 'Matches']] }),
-        (f.matches || []).length ? seccion('Your matches', h('div', { class: 'rc-caja' },
-          ...f.matches.map((m) => filaPartido(fmt.corto(m.date) || 'Match', `vs ${m.vs || 'TBD'}`,
-            `${m.won ? 'W' : 'L'} ${m.score_for}–${m.score_against}`, m.won ? 'rc-w' : 'rc-l')))) : null,
-      ];
-    }
     const filas = [];
     const b = r.best_session;
     if (b) filas.push(filaPartido('Best session', fmt.largo(b.date), `${b.wins}–${b.losses}`, 'rc-w'));
@@ -336,8 +322,6 @@
       const w = es.reduce((n, e) => n + (e.wins || 0), 0), l = es.reduce((n, e) => n + (e.losses || 0), 0);
       const pf = es.reduce((n, e) => n + (e.points_for || 0), 0);
       datos = [[`${w}–${l}`, 'record'], [String(pf), 'points won']];
-    } else if (r.type === 'ftc') {
-      datos = [[`${(r.ftc || {}).wins || 0}–${(r.ftc || {}).losses || 0}`, 'record']];
     } else {
       datos = [[String(r.sessions || 0), 'sessions'], [String(Number(r.points) || 0), 'points'], [`${r.wins || 0}–${r.losses || 0}`, 'games']];
     }
