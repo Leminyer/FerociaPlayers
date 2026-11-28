@@ -298,12 +298,22 @@
     if (!cat) { cuerpo.replaceChildren(h('p', { class: 'ev-vacio', text: 'No divisions yet.' })); return; }
     const equipos = (d.teams || []).filter((t) => Number(t.category_id) === Number(cat.id));
     const tMap = new Map(equipos.map((t) => [Number(t.id), t]));
-    const pareja = (id) => { const t = tMap.get(Number(id)); return t ? (integrantes(t).map(nm.largo).filter(Boolean).join(' & ') || t.name || 'Team') : 'TBD'; };
+    /* §132 Team Challenge: cada línea es "Equipo: jugadores". */
+    const esTC = cat.format === 'team_challenge';
+    const eqTC = new Map((d.tc_teams || []).map((e) => [Number(e.id), e]));
+    const pareja = (id) => {
+      const t = tMap.get(Number(id));
+      if (!t) return 'TBD';
+      const gente = integrantes(t).map(nm.largo).filter(Boolean).join(' & ');
+      const eq = t.tc_team_id != null ? eqTC.get(Number(t.tc_team_id)) : null;
+      if (eq) return gente ? `${eq.name}: ${gente}` : eq.name;
+      return gente || t.name || 'Team';
+    };
     const rr = (d.rr || []).filter((m) => Number(m.category_id) === Number(cat.id));
     const br = (d.bracket || []).filter((m) => Number(m.category_id) === Number(cat.id));
-    const opciones = [['rr', 'Round robin'], ['results', 'Results']];
-    if (br.length) opciones.push(['bracket', 'Bracket']);
-    let pestana = actual.pestana && opciones.some((o) => o[0] === actual.pestana) ? actual.pestana : 'rr';
+    const opciones = esTC ? [['tc', 'Standings'], ['tcmatches', 'Matches']] : [['rr', 'Round robin'], ['results', 'Results']];
+    if (br.length && !esTC) opciones.push(['bracket', 'Bracket']);
+    let pestana = actual.pestana && opciones.some((o) => o[0] === actual.pestana) ? actual.pestana : opciones[0][0];
     const nodos = [];
 
     if (cats.length > 1) {
@@ -315,6 +325,7 @@
     }
 
     /* 3A: en curso, "On court now / Up next" de esta división. */
+    const lineaDe = (id) => { const t = tMap.get(Number(id)); return (t && LINEA_TC[t.tc_line]) || ''; };
     const vivo = (d.live || []).filter((x) => Number(x.category_id) === Number(cat.id));
     if (d.tournament.status === 'active' && vivo.length) {
       const enCancha = vivo.flatMap((x) => (x.courts || []).filter((c) => c.team_a_id || c.team_b_id).map((c) => ({ ...c, fase: x.phase })));
@@ -326,16 +337,18 @@
         h('h3', { class: 'ev-vivo-h', text: 'On court now' }),
         enCancha.length ? h('ul', { class: 'ev-vivo-lista' }, enCancha.map((c) => h('li', { class: mio(c) ? 'is-yo' : null },
           h('b', { class: 'ev-vivo-c', text: `Court ${c.court}` }), h('span', { text: `${pareja(c.team_a_id)} vs ${pareja(c.team_b_id)}` }),
-          c.round ? h('small', { text: RONDA_TXT[c.round] || c.round }) : null)))
+          c.round ? h('small', { text: RONDA_TXT[c.round] || c.round }) : lineaDe(c.team_a_id) ? h('small', { text: lineaDe(c.team_a_id) }) : null)))
           : h('p', { class: 'ev-vivo-v', text: 'No matches on court right now.' }),
         siguen.length ? [h('h3', { class: 'ev-vivo-h', text: 'Up next' }),
           h('ol', { class: 'ev-vivo-lista' }, siguen.map((c) => h('li', { class: mio(c) ? 'is-yo' : null },
-            h('span', { text: `${pareja(c.team_a_id)} vs ${pareja(c.team_b_id)}` }), c.round ? h('small', { text: RONDA_TXT[c.round] || c.round }) : null)))] : null));
+            h('span', { text: `${pareja(c.team_a_id)} vs ${pareja(c.team_b_id)}` }), c.round ? h('small', { text: RONDA_TXT[c.round] || c.round }) : lineaDe(c.team_a_id) ? h('small', { text: lineaDe(c.team_a_id) }) : null)))] : null));
     }
 
     nodos.push(pestanas(opciones, pestana, (p) => { actual.pestana = p; pintarCuerpo(); }));
 
-    if (pestana === 'rr') {
+    if (esTC) {
+      pintarTC(nodos, { d, cat, equipos, tMap, eqTC, rr, mios, pestana, nm });
+    } else if (pestana === 'rr') {
       if (!equipos.length) nodos.push(h('p', { class: 'ev-vacio', text: 'No teams yet.' }));
       const grupos = (d.groups || []).filter((g) => Number(g.category_id) === Number(cat.id));
       const conGrupo = grupos.length && equipos.some((t) => t.group_id != null);
@@ -379,6 +392,90 @@
       })));
     }
     cuerpo.replaceChildren(...nodos);
+  }
+
+  /* ── §132 Team Challenge: tabla de equipos y cruces (4 partidos cada uno) ── */
+  const LINEA_TC = { md: "Men's doubles", wd: "Women's doubles", mx1: 'Mixed line 1', mx2: 'Mixed line 2' };
+  const ORDEN_TC = { md: 1, wd: 2, mx1: 3, mx2: 4 };
+  function pintarTC(nodos, { d, cat, equipos, tMap, eqTC, rr, mios, pestana, nm }) {
+    const tabla_ = (d.tc_tables || {})[String(cat.id)] || [];
+    /* Mi equipo: el de alguna de mis líneas en esta división. */
+    const miEquipo = new Set(equipos.filter((t) => mios.has(Number(t.id)) && t.tc_team_id != null).map((t) => Number(t.tc_team_id)));
+    const deEsta = [...eqTC.values()].filter((e) => Number(e.category_id) === Number(cat.id));
+    if (!deEsta.length) { nodos.push(h('p', { class: 'ev-vacio', text: 'No teams yet.' })); return; }
+    nodos.push(h('p', { class: 'ev-tc-regla', text: "Team Challenge · each team has 4 lines (Men's doubles, Women's doubles, Mixed line 1, Mixed line 2). Every match point counts for the team." }));
+
+    if (pestana === 'tc') {
+      if (!tabla_.length || !rr.some((m) => m.status === 'completed')) {
+        nodos.push(h('p', { class: 'ev-vacio', text: rr.length ? 'No matches played yet.' : 'The schedule is not out yet.' }));
+      }
+      if (tabla_.length) {
+        nodos.push(tabla([
+          { t: '#', cls: 'ev-pos', k: (s) => String(s.rank) },
+          { t: 'Team', cls: 'ev-nom', th: true, k: (s) => [s.name, s.withdrawn ? h('span', { class: 'ev-ff', text: ' (Withdrawn)' }) : null, miEquipo.has(Number(s.tc_team_id)) ? tuMarca() : null] },
+          { t: 'Pts', k: (s) => String(s.pts) },
+          { t: 'Diff', k: (s) => conSigno(Number(s.diff)) },
+          { t: 'W–L', k: (s) => `${s.won}–${s.lost}` },
+          { t: 'Ties', extra: true, k: (s) => `${s.ties_won}–${s.ties_lost}${s.ties_drawn ? `–${s.ties_drawn}` : ''}` },
+        ], tabla_, (s) => miEquipo.has(Number(s.tc_team_id)), `${cat.name} team standings`));
+        nodos.push(h('p', { class: 'ev-tc-nota', text: 'Pts = all points won by the team. Tie-break: point difference, matches won, then points between the tied teams. Ties (team matches won) is for information only.' }));
+      }
+      /* La alineación de mi equipo: mis dos líneas y con quién. */
+      deEsta.filter((e) => miEquipo.has(Number(e.id))).forEach((e) => {
+        const ls = equipos.filter((t) => Number(t.tc_team_id) === Number(e.id)).sort((a, b) => ORDEN_TC[a.tc_line] - ORDEN_TC[b.tc_line]);
+        nodos.push(h('section', { class: 'ev-ses' }, h('h3', { class: 'ev-ses-h', text: `Your team · ${e.name}` }),
+          h('ul', { class: 'ev-tc-lineas' }, ls.map((t) => h('li', { class: mios.has(Number(t.id)) ? 'is-yo' : null },
+            h('b', { text: LINEA_TC[t.tc_line] || '' }), h('span', { text: integrantes(t).map(nm.largo).filter(Boolean).join(' & ') }))))));
+      });
+      return;
+    }
+
+    /* Matches: por ronda, cada cruce con sus 4 partidos (los míos marcados). */
+    const reales = rr.filter((m) => m.status !== 'bye');
+    if (!reales.length) { nodos.push(h('p', { class: 'ev-vacio', text: 'The schedule is not out yet.' })); return; }
+    const gente = (t) => integrantes(t).map(nm.corto).filter(Boolean).join(' & ');
+    const grupos = new Map();
+    reales.forEach((m) => {
+      const a = tMap.get(Number(m.team_a_id)), b = tMap.get(Number(m.team_b_id));
+      if (!a || !b || a.tc_team_id == null || b.tc_team_id == null) return;
+      const x = Math.min(Number(a.tc_team_id), Number(b.tc_team_id)), y = Math.max(Number(a.tc_team_id), Number(b.tc_team_id));
+      const k = `${m.round}:${x}:${y}`;
+      if (!grupos.has(k)) grupos.set(k, { round: m.round, a: x, b: y, ms: [] });
+      grupos.get(k).ms.push(m);
+    });
+    const lista = [...grupos.values()];
+    [...new Set(lista.map((g) => g.round))].sort((p, q) => p - q).forEach((r) => {
+      const secc = h('section', { class: 'ev-ses' }, h('h3', { class: 'ev-ses-h', text: `Round ${r}` }));
+      lista.filter((g) => g.round === r).sort((p, q) => (miEquipo.has(q.a) || miEquipo.has(q.b)) - (miEquipo.has(p.a) || miEquipo.has(p.b))).forEach((g) => {
+        let pa = 0, pb = 0;
+        const filas = g.ms.sort((p, q) => ORDEN_TC[tMap.get(Number(p.team_a_id)).tc_line] - ORDEN_TC[tMap.get(Number(q.team_a_id)).tc_line]).map((m) => {
+          const la = tMap.get(Number(m.team_a_id)), lb = tMap.get(Number(m.team_b_id));
+          const aEsA = Number(la.tc_team_id) === g.a;
+          const [lx, ly] = aEsA ? [la, lb] : [lb, la];
+          const [sx, sy] = aEsA ? [m.score_a, m.score_b] : [m.score_b, m.score_a];
+          const listo = m.status === 'completed';
+          if (listo) { pa += Number(sx) || 0; pb += Number(sy) || 0; }
+          const gx = listo && Number(m.winner_id) === Number(lx.id), gy = listo && Number(m.winner_id) === Number(ly.id);
+          const mio = mios.has(Number(lx.id)) || mios.has(Number(ly.id));
+          return h('div', { class: `ev-juego${mio ? ' is-yo' : ''}` },
+            h('span', { class: 'ev-juego-t' },
+              h('small', { class: 'ev-tc-l', text: LINEA_TC[lx.tc_line] || '' }),
+              h('span', { class: gx ? 'ev-gana' : null, text: gente(lx) }), ' vs ',
+              h('span', { class: gy ? 'ev-gana' : null, text: gente(ly) }),
+              m.forfeit_team_id ? h('small', { class: 'ev-games', text: 'Forfeit' }) : (detalleGames(m) ? h('small', { class: 'ev-games', text: detalleGames(m) }) : null),
+              !listo && m.court ? h('small', { class: 'ev-games', text: `Court ${m.court}` }) : null),
+            h('b', { class: 'ev-juego-s', text: listo ? `${sx ?? '—'}–${sy ?? '—'}` : '—' }));
+        });
+        const nombreEq = (id) => (eqTC.get(id) || {}).name || 'Team';
+        secc.append(h('div', { class: `ev-tc-cruce${miEquipo.has(g.a) || miEquipo.has(g.b) ? ' is-yo' : ''}` },
+          h('div', { class: 'ev-tc-cruce-h' }, h('b', { text: nombreEq(g.a) }), h('span', { text: `${pa}–${pb}` }), h('b', { text: nombreEq(g.b) })),
+          h('div', { class: 'ev-cancha' }, filas)));
+      });
+      const juegan = new Set(lista.filter((g) => g.round === r).flatMap((g) => [g.a, g.b]));
+      const descansa = deEsta.filter((e) => !juegan.has(Number(e.id))).map((e) => e.name);
+      if (descansa.length) secc.append(h('p', { class: 'ev-tc-nota', text: `${descansa.join(', ')} rest${descansa.length === 1 ? 's' : ''} this round.` }));
+      nodos.push(secc);
+    });
   }
 
   function partido(m, pareja, mios) {

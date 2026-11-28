@@ -121,3 +121,18 @@
 .ev-vivo-c { color: var(--pj-lime); white-space: nowrap; }
 .ev-vivo-v { margin: 0; font-size: 13px; color: #c6d3ff; }
 .ev-vivo-pausa { margin: 0; padding: 8px 10px; border-radius: 8px; background: #FFF4D6; color: #6B4E00; font-size: 13px; font-weight: 700; }
+
+/* §132 Team Challenge (SQL 150): tabla de equipos, mi alineación y los cruces. */
+.ev-tc-regla { margin: 10px 0 4px; padding: 10px 12px; border-radius: 12px; background: var(--pj-navy); color: #DFE6F7; font-size: 12.5px; font-weight: 600; line-height: 1.45; border-bottom: 3px solid var(--pj-lime); }
+.ev-tc-nota { margin: 6px 0 0; color: var(--pj-muted); font-size: 12px; line-height: 1.45; }
+.ev-tc-lineas { list-style: none; margin: 0; padding: 10px 14px; background: #fff; border: 1px solid var(--pj-line); border-radius: 14px; }
+.ev-tc-lineas li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid #F4F5F8; font-size: 13px; }
+.ev-tc-lineas li:last-child { border-bottom: 0; }
+.ev-tc-lineas li.is-yo { background: #F3FBD6; margin: 0 -8px; padding: 7px 8px; border-radius: 8px; font-weight: 700; }
+.ev-tc-lineas b { color: var(--pj-navy); font-size: 12px; }
+.ev-tc-cruce { margin-top: 8px; }
+.ev-tc-cruce-h { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; padding: 6px 2px; font-size: 13px; color: var(--pj-navy); }
+.ev-tc-cruce-h b:last-child { text-align: right; }
+.ev-tc-cruce-h span { font-weight: 900; }
+.ev-tc-cruce.is-yo .ev-cancha { border-color: var(--pj-lime); box-shadow: inset 3px 0 0 var(--pj-lime); }
+.ev-tc-l { display: block; font-size: 10px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; color: var(--pj-muted); margin-bottom: 2px; }
